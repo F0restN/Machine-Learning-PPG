@@ -1,0 +1,25 @@
+"0","url_all <- ""https://raw.githubusercontent.com/jyurko/INFSCI_2595_Fall_2021/main/HW/midterm/midterm_all_data.csv"""
+"0",""
+"0","df_all <- readr::read_csv(url_all, col_names = TRUE)"
+"1","[1mRows: [22m[34m849[39m [1mColumns: [22m[34m3[39m
+"
+"1","[36m──[39m [1mColumn specification[22m [36m──────────────────────────────────────────────────────────────────────[39m
+[1mDelimiter:[22m "",""
+[32mdbl[39m (3): player_id, num_trials, num_events
+"
+"1","
+[36mℹ[39m Use [38;5;235m[48;5;253m[38;5;235m[48;5;253m`spec()`[48;5;253m[38;5;235m[49m[39m to retrieve the full column specification for this data.
+[36mℹ[39m Specify the column types or set [38;5;235m[48;5;253m[38;5;235m[48;5;253m`show_col_types = FALSE`[48;5;253m[38;5;235m[49m[39m to quiet this message.
+"
+"0","url_focus <- ""https://raw.githubusercontent.com/jyurko/INFSCI_2595_Fall_2021/main/HW/midterm/midterm_focus_data.csv"""
+"0","df_focus <- readr::read_csv(url_focus, col_names = TRUE)"
+"1","[1mRows: [22m[34m23[39m [1mColumns: [22m[34m3[39m
+"
+"1","[36m──[39m [1mColumn specification[22m [36m──────────────────────────────────────────────────────────────────────[39m
+[1mDelimiter:[22m "",""
+[32mdbl[39m (3): player_id, num_trials, num_events
+"
+"1","
+[36mℹ[39m Use [38;5;235m[48;5;253m[38;5;235m[48;5;253m`spec()`[48;5;253m[38;5;235m[49m[39m to retrieve the full column specification for this data.
+[36mℹ[39m Specify the column types or set [38;5;235m[48;5;253m[38;5;235m[48;5;253m`show_col_types = FALSE`[48;5;253m[38;5;235m[49m[39m to quiet this message.
+"

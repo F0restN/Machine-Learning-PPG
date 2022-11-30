@@ -1,0 +1,8 @@
+"0","set.seed(52133)"
+"0","all_spline_mae_results <- purrr::pmap_dfr(list(all_spline_models,"
+"0","                                               spline_matrices$design_matrix,"
+"0","                                               spline_matrices$test_matrix),"
+"0","                                          calc_mae_from_laplace,"
+"0","                                          y_train = train_02$y,"
+"0","                                          y_test = test_02$y,"
+"0","                                          num_samples = 2500)"

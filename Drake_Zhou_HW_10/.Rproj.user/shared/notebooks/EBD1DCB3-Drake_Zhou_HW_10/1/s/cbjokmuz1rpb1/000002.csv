@@ -1,0 +1,6 @@
+"0","### "
+"0","all.equal(check_optim_fit_3_c$par, optim_fit_3_c$par)"
+"1","[1]"
+"1"," TRUE"
+"1","
+"

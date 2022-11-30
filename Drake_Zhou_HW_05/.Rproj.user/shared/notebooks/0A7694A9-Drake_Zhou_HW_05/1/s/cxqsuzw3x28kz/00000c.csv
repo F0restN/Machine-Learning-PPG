@@ -1,0 +1,6 @@
+"0","tibble::tibble("
+"0","  varphi = seq(log(0.5), log(4.5), length.out = 101)"
+"0",") %>% "
+"0","  mutate(log_post = log_post_varphi_unnorm(varphi, N, v, 0.75)) %>% "
+"0","  ggplot(mapping = aes(x = varphi, y = log_post)) +"
+"0","  geom_line() "

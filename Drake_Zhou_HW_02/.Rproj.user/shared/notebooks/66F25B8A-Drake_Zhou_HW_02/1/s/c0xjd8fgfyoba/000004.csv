@@ -1,0 +1,2 @@
+"0","### dotplot for your specified primary performance metric"
+"0","dotplot(high_noise_results, metric = my_metric)"

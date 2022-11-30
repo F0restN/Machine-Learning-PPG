@@ -1,0 +1,6 @@
+"0","hw06_info <- list("
+"0","  xobs = hw06_df$x,### the meausrements"
+"0","  mu_0 = 11,### mu_0 value"
+"0","  tau_0 = 0.5,### tau_0 value"
+"0","  sigma_rate = 0.5### rate (lambda) on sigma"
+"0",")"

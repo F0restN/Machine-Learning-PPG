@@ -1,0 +1,6 @@
+"0","my_func <- function(x, constants)"
+"0","{"
+"0","  return(-exp((x - constants$a) ^ constants$m))"
+"0","}"
+"0",""
+"0","my_constants <- list(a = 0.7, m = 2)"

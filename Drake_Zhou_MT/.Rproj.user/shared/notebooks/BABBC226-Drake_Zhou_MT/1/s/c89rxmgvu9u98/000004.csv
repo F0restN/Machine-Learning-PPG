@@ -1,0 +1,4 @@
+"0","summary_post_df_focus_empbayes %>%"
+"0","  ggplot()+"
+"0","  geom_point(mapping = aes(x = (num_events / num_trials), y=post_avg, color = ""num_trials""))+"
+"0","  geom_abline(slope = 1, intercept = 0, color = ""black"", linetype = 'dashed')"

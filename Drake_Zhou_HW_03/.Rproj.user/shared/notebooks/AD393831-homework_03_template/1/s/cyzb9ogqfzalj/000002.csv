@@ -1,0 +1,7 @@
+"0","ctrl_acc <- trainControl("
+"0","  method = ""repeatedcv"","
+"0","  number = 10,"
+"0","  repeats = 5"
+"0",")"
+"0",""
+"0","metric_acc <- ""Accuracy"""

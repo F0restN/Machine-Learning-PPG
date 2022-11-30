@@ -1,0 +1,26 @@
+{
+    "id": "555A13A2",
+    "path": "~/Downloads/demo_fit_neuralnet_optim_sse.R",
+    "project_path": null,
+    "type": "r_source",
+    "hash": "3942025785",
+    "contents": "",
+    "dirty": false,
+    "created": 1649901030213.0,
+    "source_on_save": false,
+    "relative_order": 8,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "70,31",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1649901029,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1649901029,
+    "read_only": false,
+    "read_only_alternatives": []
+}

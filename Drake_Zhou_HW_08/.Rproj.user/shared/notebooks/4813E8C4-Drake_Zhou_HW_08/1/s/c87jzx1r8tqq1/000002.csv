@@ -1,0 +1,7 @@
+"0","pred_lm_03 %>%"
+"0","  ggplot(mapping = aes(x = x1))+"
+"0","  geom_ribbon(mapping = aes(ymin = pred_lwr, ymax = pred_upr), fill = 'orange')+"
+"0","  geom_ribbon(mapping = aes(ymin = ci_lwr, ymax = ci_upr), fill = 'grey')+"
+"0","  geom_line(mapping = aes(y = pred))+"
+"0","  coord_cartesian(ylim = c(-7,7))+"
+"0","  facet_wrap(~x2)"

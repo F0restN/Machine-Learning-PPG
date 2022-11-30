@@ -1,0 +1,8 @@
+"0","make_post_lm_pred <- function(Xnew, post)"
+"0","{"
+"0","  Bmat <- post %>% select(starts_with(""beta_"")) %>% as.matrix()"
+"0","  "
+"0","  sigma_vector <- post %>% pull(sigma)"
+"0","  "
+"0","  post_lm_pred_samples(Xnew, Bmat, sigma_vector)"
+"0","}"

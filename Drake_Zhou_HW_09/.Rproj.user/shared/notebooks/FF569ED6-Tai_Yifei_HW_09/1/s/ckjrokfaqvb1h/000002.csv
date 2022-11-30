@@ -1,0 +1,10 @@
+"0","### add more code chunks if you like"
+"0","df %>% "
+"0","  pivot_longer(!y, names_to=""x"", values_to=""value"") %>% "
+"0","  ggplot() +"
+"0","  geom_point(mapping = aes(x = value, y = y), color = 'blue') +"
+"0","  geom_smooth(mapping = aes(x = value, y = y), color = ""red"") +"
+"0","  facet_wrap(~x)"
+"2","Error in UseMethod(""pivot_longer"") : 
+  no applicable method for 'pivot_longer' applied to an object of class ""function""
+"

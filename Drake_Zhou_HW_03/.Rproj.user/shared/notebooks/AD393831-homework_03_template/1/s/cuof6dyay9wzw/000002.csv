@@ -1,0 +1,18 @@
+"0","library(yardstick)"
+"2","For binary classification, the first factor level is assumed to be the event.
+Use the argument `event_level = ""second""` to alter this as needed.
+"
+"2","
+Attaching package: ‘yardstick’
+
+"
+"2","The following objects are masked from ‘package:caret’:
+
+    precision, recall, sensitivity, specificity
+
+"
+"2","The following object is masked from ‘package:readr’:
+
+    spec
+
+"

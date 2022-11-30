@@ -1,0 +1,6 @@
+"0","###"
+"0","logistic_logpost(rep(-1, ncol(Xmat_linear)), info_linear)"
+"1","[1]"
+"1"," -164.6232"
+"1","
+"

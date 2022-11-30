@@ -1,0 +1,4 @@
+"0","eval_logpost <- function(unknown_1, unknown_2, logpost_func, logpost_info)"
+"0","{"
+"0","  return(logpost_func(c(unknown_1, unknown_2), logpost_info))"
+"0","}"

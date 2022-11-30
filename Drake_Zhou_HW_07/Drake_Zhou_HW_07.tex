@@ -1,0 +1,1809 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\title{INFSCI 2595 Spring 2022 Homework: 07}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{% add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{Assigned March 16, 2022; Due: March 23, 2022}
+\author{Drake Zhou}
+\date{Submission time: March 23, 2022 at 11:00PM EST}
+
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={INFSCI 2595 Spring 2022 Homework: 07},
+  pdfauthor={Drake Zhou},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\begin{document}
+\maketitle
+
+\hypertarget{collaborators}{%
+\paragraph{Collaborators}\label{collaborators}}
+
+Include the names of your collaborators here.
+
+\hypertarget{overview}{%
+\subsection{Overview}\label{overview}}
+
+This homework assignment is focused on working with linear models. You
+will fit, make predictions with, and assess linear model performance.
+You will calculate errors on training and test sets, as well as evaluate
+performance using the log-Evidence (log marginal likelihood).
+
+\textbf{IMPORTANT}: code chunks are created for you. Each code chunk has
+\texttt{eval=FALSE} set in the chunk options. You \textbf{MUST} change
+it to be \texttt{eval=TRUE} in order for the code chunks to be evaluated
+when rendering the document.
+
+You are allowed to add as many code chunks as you see fit to answer the
+questions.
+
+\hypertarget{load-packages}{%
+\subsection{Load packages}\label{load-packages}}
+
+This assignment will use packages from the \texttt{tidyverse} suite.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tidyverse)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## -- Attaching packages --------------------------------------- tidyverse 1.3.1 --
+\end{verbatim}
+
+\begin{verbatim}
+## v ggplot2 3.3.5     v purrr   0.3.4
+## v tibble  3.1.6     v dplyr   1.0.7
+## v tidyr   1.1.4     v stringr 1.4.0
+## v readr   2.1.1     v forcats 0.5.1
+\end{verbatim}
+
+\begin{verbatim}
+## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()
+\end{verbatim}
+
+This assignment also uses the \texttt{splines} and \texttt{MASS}
+packages. Both are installed with base \texttt{R} and so you do not need
+to download any additional packages to complete the assignment.
+
+\hypertarget{problem-01}{%
+\subsection{Problem 01}\label{problem-01}}
+
+This problem is focused on setting up the log-posterior function for a
+linear model. You will program the function using matrix math, such that
+you can easily scale your code from a linear relationship with a single
+input up to complex linear basis function models. You will assume
+independent Gaussian priors on all \(\boldsymbol{\beta}\)-parameters
+with a shared prior mean \(\mu_{\beta}\) and shared prior standard
+deviation, \(\tau_{\beta}\). An Exponential prior with rate parameter
+\(\lambda\) will be assumed for the likelihood noise, \(\sigma\). The
+complete probability model for the response, \(y_n\), is shown below
+using the linear basis notation. The \(n\)-th row of the basis design
+matrix, \(\boldsymbol{\Phi}\) is denoted as \(\boldsymbol{\phi}_{n,:}\).
+It is assumed that the basis is of degree-of-freedom \(J\).
+`1234567876543212
+
+\[ 
+y_n \mid \mu_n, \sigma \sim \mathrm{normal}\left(y_n \mid \mu_n, \sigma\right)
+\]
+
+\[ 
+\mu_n = \boldsymbol{\phi}_{n,:}\boldsymbol{\beta}
+\]
+
+\[ 
+\boldsymbol{\beta} \mid \mu_{\beta}, \tau_{\beta} \sim \prod_{j=0}^{J}\left( \mathrm{normal}\left( \beta_j \mid \mu_{\beta}, \tau_{\beta} \right) \right)
+\]
+
+\[ 
+\sigma \mid \lambda \sim \mathrm{Exp}\left(\sigma \mid \lambda \right)
+\]
+
+\hypertarget{a}{%
+\subsubsection{1a)}\label{a}}
+
+The code chunk below reads in a data set consisting of two variables, an
+input \texttt{x} and a response \texttt{y}. As shown by the
+\texttt{glimpse()} of the data set, there are 50 observations of the two
+continuous variables.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{url\_01 }\OtherTok{\textless{}{-}} \StringTok{"https://raw.githubusercontent.com/jyurko/INFSCI\_2595\_Spring\_2022/main/HW/07/train\_01.csv"}
+\NormalTok{train\_01 }\OtherTok{\textless{}{-}}\NormalTok{ readr}\SpecialCharTok{::}\FunctionTok{read\_csv}\NormalTok{(url\_01, }\AttributeTok{col\_names =} \ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Rows: 21 Columns: 2
+\end{verbatim}
+
+\begin{verbatim}
+## -- Column specification --------------------------------------------------------
+## Delimiter: ","
+## dbl (2): x, y
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## i Use `spec()` to retrieve the full column specification for this data.
+## i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+\end{verbatim}
+
+As shown by the glimpse in the code chunk below there are 21
+observations of the 2 continuous variables.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{train\_01 }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{glimpse}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Rows: 21
+## Columns: 2
+## $ x <dbl> -3.0, -2.7, -2.4, -2.1, -1.8, -1.5, -1.2, -0.9, -0.6, -0.3, 0.0, 0.3~
+## $ y <dbl> 3.30501327, 3.03876578, 2.53813946, 2.46437294, 1.72665889, 1.997619~
+\end{verbatim}
+
+\textbf{Create a scatter plot between the response and the input using
+\texttt{ggplot()}. In addition to using \texttt{geom\_point()}, include
+a \texttt{geom\_smooth()} layer to your graph. Set the \texttt{method}
+argument to \texttt{\textquotesingle{}lm\textquotesingle{}} in the call
+to \texttt{geom\_smooth()}.}
+
+\textbf{Based on the figure what type of relationship do you think
+exists between the response and the input?}
+
+\hypertarget{solution}{%
+\paragraph{SOLUTION}\label{solution}}
+
+According to the figure, there is a linear relationship between input
+and output.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\#}
+\NormalTok{train\_01 }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x, }\AttributeTok{y =}\NormalTok{ y))}\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{()}\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{method =} \StringTok{\textquotesingle{}lm\textquotesingle{}}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `geom_smooth()` using formula 'y ~ x'
+\end{verbatim}
+
+\includegraphics{Drake_Zhou_HW_07_files/figure-latex/solution_01a-1.pdf}
+
+\hypertarget{b}{%
+\subsubsection{1b)}\label{b}}
+
+In your response to Problem 1a), you should see a ``best fit line'' and
+it's associated confidence interval displayed with the scatter plot.
+Behind the scenes, \texttt{ggplot2()} fits a linear model between the
+response and the input with Maximum Likelihood Estimation, and plots the
+result on the figure. You will now work through a full Bayesian linear
+model. Before coding the log-posterior function, you will start out by
+creating the list of required information, \texttt{info\_01}, which
+defines the data and hyperparameters that you will ultimately pass into
+the log-posterior function.
+
+You will need to create a design matrix assuming a linear relationship
+between the input and the response. The mean trend function is written
+for you below:
+
+\[ 
+\mu_n = \beta_0 + \beta_1 x_{n}
+\]
+
+\textbf{Create the design matrix assuming a linear relationship between
+the input and the response, and assign the object to the
+\texttt{Xmat\_01} variable. Complete the \texttt{info\_01} list by
+assigning the response to \texttt{yobs} and the design matrix to
+\texttt{design\_matrix}. Specify the shared prior mean,
+\texttt{mu\_beta}, to be 0, the shared prior standard deviation,
+\texttt{tau\_beta}, as 5, and the rate parameter on the noise,
+\texttt{sigma\_rate}, to be 1.}
+
+\hypertarget{solution-1}{%
+\paragraph{SOLUTION}\label{solution-1}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Xmat\_01 }\OtherTok{\textless{}{-}} \FunctionTok{model.matrix}\NormalTok{(y}\SpecialCharTok{\textasciitilde{}}\NormalTok{x, }\AttributeTok{data =}\NormalTok{ train\_01)}
+
+\NormalTok{info\_01 }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{(}
+  \AttributeTok{yobs =}\NormalTok{ train\_01}\SpecialCharTok{$}\NormalTok{y,}
+  \AttributeTok{design\_matrix =}\NormalTok{ Xmat\_01,}
+  \AttributeTok{mu\_beta =} \DecValTok{0}\NormalTok{,}
+  \AttributeTok{tau\_beta =} \DecValTok{5}\NormalTok{,}
+  \AttributeTok{sigma\_rate =} \DecValTok{1}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{c}{%
+\subsubsection{1c)}\label{c}}
+
+You will now define the log-posterior function \texttt{lm\_logpost()}.
+You will continue to use the log-transformation on \(\sigma\), and so
+you will actually define the log-posterior in terms of the mean trend
+\(\boldsymbol{\beta}\)-parameters and the unbounded noise parameter,
+\(\varphi = \log\left[\sigma\right]\).
+
+The comments in the code chunk below tell you what you need to fill in.
+The unknown parameters to learn are contained within the first input
+argument, \texttt{unknowns}. You will assume that the unknown
+\(\boldsymbol{\beta}\)-parameters are listed before the unknown
+\(\varphi\) parameter in the \texttt{unknowns} vector. You must specify
+the number of \(\boldsymbol{\beta}\) parameters programmatically to
+allow scaling up your function to an arbitrary number of unknowns. You
+will assume that all variables contained in the \texttt{my\_info} list
+(the second argument to \texttt{lm\_logpost()}) are the same fields in
+the \texttt{info\_01} list you defined in Problem 1b).
+
+\textbf{Define the log-posterior function by completing the code chunk
+below. You must calculate the mean trend, \texttt{mu}, using matrix math
+between the design matrix and the unknown \(\boldsymbol{\beta}\) column
+vector. After you complete the function, test that it out by evaluating
+the log-posterior at two different sets of parameter values. Try out
+values of -1 for all parameters, and then try out values of 1 for all
+parameters.}
+
+\emph{HINT}: If you have successfully completed the log-posterior
+function, you should get a value of \texttt{-109.5809} for the -1 guess
+values, and a value of \texttt{-68.12651} for the +1 guess values.
+
+\emph{HINT}: Don't forget about useful data type conversion functions
+such as \texttt{as.matrix()} and \texttt{as.vector()} (or
+\texttt{as.numeric()}).
+
+\hypertarget{solution-2}{%
+\paragraph{SOLUTION}\label{solution-2}}
+
+\#Trans\_X = t(X{[}1:2, ,drop=FALSE{]}); \#mu \textless-
+as.vector(solve(Trans\_X \%\emph{\% X) \%}\% Trans\_X) * my\_info\$y
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lm\_logpost }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(unknowns, my\_info)}
+\NormalTok{\{}
+  \CommentTok{\# specify the number of unknown beta parameters}
+\NormalTok{  length\_beta }\OtherTok{\textless{}{-}} \FunctionTok{ncol}\NormalTok{(my\_info}\SpecialCharTok{$}\NormalTok{design\_matrix)}
+  
+  \CommentTok{\# extract the beta parameters from the \textasciigrave{}unknowns\textasciigrave{} vector}
+\NormalTok{  beta\_v }\OtherTok{\textless{}{-}}\NormalTok{ unknowns[}\DecValTok{1}\SpecialCharTok{:}\NormalTok{length\_beta]}
+  
+  \CommentTok{\# extract the unbounded noise parameter, varphi}
+\NormalTok{  lik\_varphi }\OtherTok{\textless{}{-}}\NormalTok{ unknowns[length\_beta}\SpecialCharTok{+}\DecValTok{1}\NormalTok{]}
+  
+  \CommentTok{\# back{-}transform from varphi to sigma}
+\NormalTok{  lik\_sigma }\OtherTok{\textless{}{-}} \FunctionTok{exp}\NormalTok{(lik\_varphi)}
+  
+  \CommentTok{\# extract design matrix}
+\NormalTok{  X }\OtherTok{\textless{}{-}}\NormalTok{ my\_info}\SpecialCharTok{$}\NormalTok{design\_matrix}
+  
+  \CommentTok{\# calculate the linear predictor}
+\NormalTok{  mu }\OtherTok{\textless{}{-}} \FunctionTok{as.vector}\NormalTok{(X }\SpecialCharTok{\%*\%} \FunctionTok{as.matrix}\NormalTok{(beta\_v))}
+  
+  \CommentTok{\# evaluate the log{-}likelihood}
+\NormalTok{  log\_lik }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{(}\FunctionTok{dnorm}\NormalTok{(}\AttributeTok{x =}\NormalTok{ my\_info}\SpecialCharTok{$}\NormalTok{yobs, }\AttributeTok{mean =}\NormalTok{ mu, }\AttributeTok{sd =}\NormalTok{ lik\_sigma, }\AttributeTok{log =} \ConstantTok{TRUE}\NormalTok{))}
+  
+  \CommentTok{\# evaluate the log{-}prior}
+\NormalTok{  log\_prior\_beta }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{(}\FunctionTok{dnorm}\NormalTok{(}\AttributeTok{x =}\NormalTok{ beta\_v, }\AttributeTok{mean =}\NormalTok{ my\_info}\SpecialCharTok{$}\NormalTok{mu\_beta, }\AttributeTok{sd =}\NormalTok{ my\_info}\SpecialCharTok{$}\NormalTok{tau\_beta, }\AttributeTok{log=}\ConstantTok{TRUE}\NormalTok{))}
+  
+\NormalTok{  log\_prior\_sigma }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{(}\FunctionTok{dexp}\NormalTok{(}\AttributeTok{x =}\NormalTok{ lik\_sigma, }\AttributeTok{rate =}\NormalTok{ my\_info}\SpecialCharTok{$}\NormalTok{sigma\_rate, }\AttributeTok{log =} \ConstantTok{TRUE}\NormalTok{))}
+  
+  \CommentTok{\# add the mean trend prior and noise prior together}
+\NormalTok{  log\_prior }\OtherTok{\textless{}{-}}\NormalTok{ log\_prior\_beta }\SpecialCharTok{+}\NormalTok{ log\_prior\_sigma}
+  
+  \CommentTok{\# account for the transformation}
+\NormalTok{  log\_derive\_adjust }\OtherTok{\textless{}{-}}\NormalTok{ lik\_varphi}
+  
+  \CommentTok{\# sum together}
+  \FunctionTok{return}\NormalTok{(log\_lik }\SpecialCharTok{+}\NormalTok{ log\_prior }\SpecialCharTok{+}\NormalTok{ log\_derive\_adjust)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+Test out \texttt{lm\_logpost()} with guess values of -1 for all
+parameters.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\#}
+\NormalTok{parameters }\OtherTok{\textless{}{-}} \FunctionTok{rep}\NormalTok{(}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{, }\FunctionTok{ncol}\NormalTok{(info\_01}\SpecialCharTok{$}\NormalTok{design\_matrix)}\SpecialCharTok{+}\DecValTok{1}\NormalTok{)}
+
+\FunctionTok{lm\_logpost}\NormalTok{(parameters, info\_01)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] -109.5809
+\end{verbatim}
+
+Test out \texttt{lm\_logpost()} with guess values of 1 for all
+parameters.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\#}
+\NormalTok{parameters }\OtherTok{\textless{}{-}} \FunctionTok{rep}\NormalTok{(}\DecValTok{1}\NormalTok{, }\FunctionTok{ncol}\NormalTok{(info\_01}\SpecialCharTok{$}\NormalTok{design\_matrix)}\SpecialCharTok{+}\DecValTok{1}\NormalTok{)}
+
+\FunctionTok{lm\_logpost}\NormalTok{(parameters, info\_01)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] -68.12651
+\end{verbatim}
+
+\hypertarget{d}{%
+\subsubsection{1d)}\label{d}}
+
+The \texttt{my\_laplace()} function is started for you in the code chunk
+below. You must fill in the portion after the optimization is executed.
+Although you have filled in these elements before it is good to review
+to make sure you remember how the posterior covariance matrix is
+calculated! Also, you must complete the calculation of the \texttt{int}
+variable which stands for ``integration'' and equals the Laplace
+Approximation's estimate to the Evidence.
+
+\textbf{Complete the \texttt{my\_laplace()} function below and then fit
+the Bayesian linear model using a starting guess of zero for all
+parameters. Assign your result to the \texttt{laplace\_01} object. Print
+the posterior mode and posterior standard deviations to the screen.
+Should you be concerned about the initial guess impacting the posterior
+results?}
+
+\hypertarget{solution-3}{%
+\paragraph{SOLUTION}\label{solution-3}}
+
+No, we don't need to worry about the affect of initial guess since the
+approximation of linear model only have one mode.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{my\_laplace }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(start\_guess, logpost\_func, ...)}
+\NormalTok{\{}
+  \CommentTok{\# code adapted from the \textasciigrave{}LearnBayes\textasciigrave{}\textasciigrave{} function \textasciigrave{}laplace()\textasciigrave{}}
+\NormalTok{  fit }\OtherTok{\textless{}{-}} \FunctionTok{optim}\NormalTok{(start\_guess,}
+\NormalTok{               logpost\_func,}
+               \AttributeTok{gr =} \ConstantTok{NULL}\NormalTok{,}
+\NormalTok{               ...,}
+               \AttributeTok{method =} \StringTok{"BFGS"}\NormalTok{,}
+               \AttributeTok{hessian =} \ConstantTok{TRUE}\NormalTok{,}
+               \AttributeTok{control =} \FunctionTok{list}\NormalTok{(}\AttributeTok{fnscale =} \SpecialCharTok{{-}}\DecValTok{1}\NormalTok{, }\AttributeTok{maxit =} \DecValTok{1001}\NormalTok{))}
+
+\NormalTok{  mode }\OtherTok{\textless{}{-}}\NormalTok{ fit}\SpecialCharTok{$}\NormalTok{par}
+\NormalTok{  post\_var\_matrix }\OtherTok{\textless{}{-}} \SpecialCharTok{{-}}\FunctionTok{solve}\NormalTok{(fit}\SpecialCharTok{$}\NormalTok{hessian)}
+\NormalTok{  p }\OtherTok{\textless{}{-}} \FunctionTok{length}\NormalTok{(mode) }\CommentTok{\# number of unknown parameters}
+\NormalTok{  int }\OtherTok{\textless{}{-}}\NormalTok{ p}\SpecialCharTok{/}\DecValTok{2} \SpecialCharTok{*} \FunctionTok{log}\NormalTok{(}\DecValTok{2} \SpecialCharTok{*}\NormalTok{ pi) }\SpecialCharTok{+} \FloatTok{0.5} \SpecialCharTok{*} \FunctionTok{log}\NormalTok{(}\FunctionTok{det}\NormalTok{(post\_var\_matrix)) }\SpecialCharTok{+} \FunctionTok{logpost\_func}\NormalTok{(mode, ...)}
+  \CommentTok{\# package all of the results into a list}
+  \FunctionTok{list}\NormalTok{(}\AttributeTok{mode =}\NormalTok{ mode,}
+       \AttributeTok{var\_matrix =}\NormalTok{ post\_var\_matrix,}
+       \AttributeTok{log\_evidence =}\NormalTok{ int,}
+       \AttributeTok{converge =} \FunctionTok{ifelse}\NormalTok{(fit}\SpecialCharTok{$}\NormalTok{convergence }\SpecialCharTok{==} \DecValTok{0}\NormalTok{,}
+                         \StringTok{"YES"}\NormalTok{, }
+                         \StringTok{"NO"}\NormalTok{),}
+       \AttributeTok{iter\_counts =} \FunctionTok{as.numeric}\NormalTok{(fit}\SpecialCharTok{$}\NormalTok{counts[}\DecValTok{1}\NormalTok{]))}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+Fit the Bayesian linear model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{init\_guess }\OtherTok{\textless{}{-}} \FunctionTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{, }\FunctionTok{ncol}\NormalTok{(info\_01}\SpecialCharTok{$}\NormalTok{design\_matrix)}\SpecialCharTok{+}\DecValTok{1}\NormalTok{)}
+\NormalTok{init\_guess}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0 0 0
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{laplace\_01 }\OtherTok{\textless{}{-}} \FunctionTok{my\_laplace}\NormalTok{(init\_guess, lm\_logpost, info\_01)}
+\end{Highlighting}
+\end{Shaded}
+
+Display the posterior mode and posterior standard deviations.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\#Posterior Mode}
+\NormalTok{laplace\_01}\SpecialCharTok{$}\NormalTok{mode}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1]  0.1118562 -1.0517750 -1.1065825
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\#Posterior Standard Deviations}
+\FunctionTok{sqrt}\NormalTok{(}\FunctionTok{diag}\NormalTok{(laplace\_01}\SpecialCharTok{$}\NormalTok{var\_matrix))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.07215434 0.03972254 0.15618881
+\end{verbatim}
+
+\hypertarget{e}{%
+\subsubsection{1e)}\label{e}}
+
+The \texttt{generate\_lm\_post\_samples()} function is started for you
+in the code chunk below. The first argument, \texttt{mvn\_result}, is
+the Laplace Approximation result object returned from the
+\texttt{my\_laplace()} function. The second argument,
+\texttt{length\_beta}, specifies the number of mean trend
+\(\boldsymbol{\beta}\)-parameters to the model. The naming of the
+variables is taken care of for you. This function should look quite
+similar to the previous assignment\ldots{}
+
+After completing the function, generate 2500 posterior samples of the
+parameters in your model and assign the result to the
+\texttt{laplace\_01} object. You will then use the posterior samples to
+study the posterior distribution on the slope \(\beta_1\).
+
+\textbf{Complete the generate\_lm\_post\_samples() function below. After
+completing the function, generate 2500 posterior samples from your
+\texttt{laplace\_01} model. Create a histogram with 55 bins using
+\texttt{ggplot2} for the slope \texttt{beta\_01}. Calculate the
+probability that the slope is positive.}
+
+\hypertarget{solution-4}{%
+\paragraph{SOLUTION}\label{solution-4}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{generate\_lm\_post\_samples }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(mvn\_result, length\_beta, num\_samples)}
+\NormalTok{\{}
+\NormalTok{  MASS}\SpecialCharTok{::}\FunctionTok{mvrnorm}\NormalTok{(}\AttributeTok{n =}\NormalTok{ num\_samples,}
+                \AttributeTok{mu =}\NormalTok{ mvn\_result}\SpecialCharTok{$}\NormalTok{mode,}
+                \AttributeTok{Sigma =}\NormalTok{ mvn\_result}\SpecialCharTok{$}\NormalTok{var\_matrix) }\SpecialCharTok{\%\textgreater{}\%} 
+    \FunctionTok{as.data.frame}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ tibble}\SpecialCharTok{::}\FunctionTok{as\_tibble}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} 
+\NormalTok{    purrr}\SpecialCharTok{::}\FunctionTok{set\_names}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\FunctionTok{sprintf}\NormalTok{(}\StringTok{"beta\_\%02d"}\NormalTok{, }\DecValTok{0}\SpecialCharTok{:}\NormalTok{(length\_beta}\DecValTok{{-}1}\NormalTok{)), }\StringTok{"varphi"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%} 
+    \FunctionTok{mutate}\NormalTok{(}\AttributeTok{sigma =}  \FunctionTok{exp}\NormalTok{(varphi))}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+Generate posterior samples.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{87123}\NormalTok{)}
+\NormalTok{post\_samples\_01 }\OtherTok{\textless{}{-}} \FunctionTok{generate\_lm\_post\_samples}\NormalTok{(laplace\_01, }\FunctionTok{ncol}\NormalTok{(info\_01}\SpecialCharTok{$}\NormalTok{design\_matrix), }\DecValTok{2500}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Create the posterior histogram on \(\beta_1\) and calculate the
+probability that \(\beta_1\) is greater than zero.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\# Ggplot}
+\NormalTok{post\_samples\_01 }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ beta\_01))}\SpecialCharTok{+}
+  \FunctionTok{geom\_histogram}\NormalTok{(}\AttributeTok{bins =} \DecValTok{55}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_07_files/figure-latex/solution_01e_c-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\# The prob that beta\_01 is greater than zero}
+\FunctionTok{mean}\NormalTok{(post\_samples\_01}\SpecialCharTok{$}\NormalTok{beta\_01 }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0
+\end{verbatim}
+
+\hypertarget{problem-02}{%
+\subsection{Problem 02}\label{problem-02}}
+
+Now that you can fit a Bayesian linear model, it's time to work with
+making posterior predictions from the model. You will use those
+predictions to calculate and summarize the errors of the model relative
+to observations. Since RMSE and R-squared have been discussed throughout
+lecture, you will work with the Mean Absolute Error (MAE) metric.
+
+\hypertarget{a-1}{%
+\subsubsection{2a)}\label{a-1}}
+
+The code chunk below starts the \texttt{post\_lm\_pred\_samples()}
+function. This function generates posterior mean trend predictions and
+posterior predictions of the response. The first argument,
+\texttt{Xnew}, is a potentially new or test design matrix that we wish
+to make predictions at. The second argument, \texttt{Bmat}, is a matrix
+of posterior samples of the \(\boldsymbol{\beta}\)-parameters, and the
+third argument, \texttt{sigma\_vector}, is a vector of posterior samples
+of the likelihood noise. The \texttt{Xnew} matrix has rows equal to the
+number of predictions points, \texttt{M}, and the \texttt{Bmat} matrix
+has rows equal to the number of posterior samples \texttt{S}.
+
+You must complete the function by performing the necessary matrix math
+to calculate the matrix of posterior mean trend predictions,
+\texttt{Umat}, and the matrix of posterior response predictions,
+\texttt{Ymat}. You must also complete missing arguments to the
+definition of the \texttt{Rmat} and \texttt{Zmat} matrices. The
+\texttt{Rmat} matrix replicates the posterior likelihood noise samples
+the correct number of times. The \texttt{Zmat} matrix is the matrix of
+randomly generated standard normal values. You must correctly specify
+the required number of rows to the \texttt{Rmat} and \texttt{Zmat}
+matrices.
+
+The \texttt{post\_lm\_pred\_samples()} returns the \texttt{Umat} and
+\texttt{Ymat} matrices contained within a list.
+
+\textbf{Perform the necessary matrix math to calculate the matrix of
+posterior predicted mean trends \texttt{Umat} and posterior predicted
+responses \texttt{Ymat}. You must specify the number of required rows to
+create the \texttt{Rmat} and \texttt{Zmat} matrices.}
+
+\hypertarget{solution-5}{%
+\paragraph{SOLUTION}\label{solution-5}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{post\_lm\_pred\_samples }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(Xnew, Bmat, sigma\_vector)}
+\NormalTok{\{}
+  \CommentTok{\# number of new prediction locations}
+\NormalTok{  M }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(Xnew)}
+  \CommentTok{\# number of posterior samples}
+\NormalTok{  S }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(Bmat)}
+  
+  \CommentTok{\# matrix of linear predictors}
+\NormalTok{  Umat }\OtherTok{\textless{}{-}}\NormalTok{ Xnew }\SpecialCharTok{\%*\%} \FunctionTok{t}\NormalTok{(Bmat)}
+  
+  \CommentTok{\# assmeble matrix of sigma samples, set the number of rows}
+\NormalTok{  Rmat }\OtherTok{\textless{}{-}} \FunctionTok{matrix}\NormalTok{(}\FunctionTok{rep}\NormalTok{(sigma\_vector, M), }\AttributeTok{nrow =}\NormalTok{ M, }\AttributeTok{byrow =} \ConstantTok{TRUE}\NormalTok{)}
+  
+  \CommentTok{\# generate standard normal and assemble into matrix}
+  \CommentTok{\# set the number of rows}
+\NormalTok{  Zmat }\OtherTok{\textless{}{-}} \FunctionTok{matrix}\NormalTok{(}\FunctionTok{rnorm}\NormalTok{(M}\SpecialCharTok{*}\NormalTok{S), }\AttributeTok{nrow =}\NormalTok{ M, }\AttributeTok{byrow =} \ConstantTok{TRUE}\NormalTok{)}
+  
+  \CommentTok{\# calculate the random observation predictions}
+\NormalTok{  Ymat }\OtherTok{\textless{}{-}}\NormalTok{ Umat }\SpecialCharTok{+}\NormalTok{ Zmat }\SpecialCharTok{*}\NormalTok{ Rmat}
+  
+  \CommentTok{\# package together}
+  \FunctionTok{list}\NormalTok{(}\AttributeTok{Umat =}\NormalTok{ Umat, }\AttributeTok{Ymat =}\NormalTok{ Ymat)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{b-1}{%
+\subsubsection{2b)}\label{b-1}}
+
+The code chunk below is completed for you. The function
+\texttt{make\_post\_lm\_pred()} is a wrapper which calls the
+\texttt{post\_lm\_pred\_samples()} function. It contains two arguments.
+The first, \texttt{Xnew}, is a test design matrix. The second,
+\texttt{post}, is a data.frame of posterior samples. The function
+extracts the \(\boldsymbol{\beta}\)-parameter posterior samples and
+converts the object to a matrix. It also extracts the posterior samples
+on \(\sigma\) and converts to a vector.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{make\_post\_lm\_pred }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(Xnew, post)}
+\NormalTok{\{}
+\NormalTok{  Bmat }\OtherTok{\textless{}{-}}\NormalTok{ post }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(}\FunctionTok{starts\_with}\NormalTok{(}\StringTok{"beta\_"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{as.matrix}\NormalTok{()}
+  
+\NormalTok{  sigma\_vector }\OtherTok{\textless{}{-}}\NormalTok{ post }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{pull}\NormalTok{(sigma)}
+  
+  \FunctionTok{post\_lm\_pred\_samples}\NormalTok{(Xnew, Bmat, sigma\_vector)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+You now have enough pieces in place to generate posterior predictions
+from your model.
+
+\textbf{Make posterior predictions on the training set. What are the
+dimensions of the returned \texttt{Umat} and \texttt{Ymat} matrices? Do
+the columns correspond to the number of prediction points?}
+
+\emph{HINT}: The \texttt{make\_post\_lm\_pred()} function returns a
+list. To access the variables or fields of a list use the \texttt{\$}
+operator.
+
+\hypertarget{solution-6}{%
+\paragraph{SOLUTION}\label{solution-6}}
+
+Both Umat and Ymat is 25 * 2500 matrix. Yes, they correspond to each
+other.
+
+Make posterior predictions on the training set.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{post\_pred\_samples\_01 }\OtherTok{\textless{}{-}} \FunctionTok{make\_post\_lm\_pred}\NormalTok{(Xmat\_01, post\_samples\_01)}
+\end{Highlighting}
+\end{Shaded}
+
+The dimensionality of the posterior predicted mean trend matrix is:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\# The dimensionality of the posterior predicted mean trend matrix}
+\FunctionTok{dim}\NormalTok{(post\_pred\_samples\_01}\SpecialCharTok{$}\NormalTok{Umat)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1]   21 2500
+\end{verbatim}
+
+The dimensionality of the posterior predicted response matrix is:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\# The dimensionality of the posterior predicted response matrix}
+\FunctionTok{dim}\NormalTok{(post\_pred\_samples\_01}\SpecialCharTok{$}\NormalTok{Ymat)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1]   21 2500
+\end{verbatim}
+
+\hypertarget{c-1}{%
+\subsubsection{2c)}\label{c-1}}
+
+You will now use the model predictions to calculate the error between
+the model and the training set observations. Since you generated 2500
+posterior samples, you have 2500 different sets of predictions! So, to
+get started you will focus on the first 3 posterior samples.
+
+\textbf{Calculate the error between the predicted mean trend and the
+training set observations for each of the first 3 posterior predicted
+samples. Assign the errors to separate vectors, as indicated in the code
+chunk below.}
+
+\textbf{Why are you considering the mean trend when calculating the
+error with the response, and not the predicted response values?}
+
+\hypertarget{solution-7}{%
+\paragraph{SOLUTION}\label{solution-7}}
+
+The error between the first 3 posterior predicted mean trend samples and
+the training set observations are calculated below.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\# error of the first posterior sample}
+\NormalTok{error\_01\_post\_01 }\OtherTok{\textless{}{-}}\NormalTok{ post\_pred\_samples\_01}\SpecialCharTok{$}\NormalTok{Umat[, }\DecValTok{1}\NormalTok{] }\SpecialCharTok{{-}}\NormalTok{ train\_01}\SpecialCharTok{$}\NormalTok{y}
+
+\DocumentationTok{\#\#\# error of the second posterior sample}
+\NormalTok{error\_01\_post\_02 }\OtherTok{\textless{}{-}}\NormalTok{ post\_pred\_samples\_01}\SpecialCharTok{$}\NormalTok{Umat[, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{{-}}\NormalTok{ train\_01}\SpecialCharTok{$}\NormalTok{y}
+
+\DocumentationTok{\#\#\# error of the third posterior sample}
+\NormalTok{error\_01\_post\_03 }\OtherTok{\textless{}{-}}\NormalTok{ post\_pred\_samples\_01}\SpecialCharTok{$}\NormalTok{Umat[, }\DecValTok{3}\NormalTok{] }\SpecialCharTok{{-}}\NormalTok{ train\_01}\SpecialCharTok{$}\NormalTok{y}
+\end{Highlighting}
+\end{Shaded}
+
+? Because we want to evaluate the performance of the model. Since the
+predicted response in Ymat contain the uncertainty sigma, if we use the
+predicted response then we will be disturbed by the uncertainty of
+likelihood. So we choose response rather than predicted response.
+
+\hypertarget{d-1}{%
+\subsubsection{2d)}\label{d-1}}
+
+You will now calculate the Mean Absolute Error (MAE) associated with
+each of the three error samples calculated in Problem 2c). However,
+before calculating the MAE, first consider the dimensions of the
+\texttt{error\_01\_post\_01}. What is the length of the
+\texttt{error\_01\_post\_01} vector? When you take the absolute value
+and then average across all elements in that vector, what are you
+averaging over?
+
+\textbf{What is the length of the \texttt{error\_01\_post\_01} vector?
+Calculate the MAE associated with each of the 3 error vectors you
+calculated in Problem 2c. What are you averaging over when you calculate
+the mean absolute error? Are the three MAE values the same? If not, why
+would they be different?}
+
+\emph{HINT}: The absolute value can be calculated with the
+\texttt{abs()} function.
+
+\hypertarget{solution-8}{%
+\paragraph{SOLUTION}\label{solution-8}}
+
+? The length of error\_01\_post\_01 is 21. This is correspondence to the
+number of training data. Hence, we are averaging over the
+difference(error) between predicted output and training set.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\#}
+\FunctionTok{length}\NormalTok{(error\_01\_post\_01)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 21
+\end{verbatim}
+
+Now calculate the MAE associated with each of the first three posterior
+samples.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mae\_01\_post\_01 }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(}\FunctionTok{abs}\NormalTok{(error\_01\_post\_01))}
+\NormalTok{mae\_01\_post\_01}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.2718539
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mae\_01\_post\_02 }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(}\FunctionTok{abs}\NormalTok{(error\_01\_post\_02))}
+\NormalTok{mae\_01\_post\_02}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.3064965
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mae\_01\_post\_03 }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(}\FunctionTok{abs}\NormalTok{(error\_01\_post\_03))}
+\NormalTok{mae\_01\_post\_03}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.2857988
+\end{verbatim}
+
+? No they are not the same because we are using different beta
+parameters. Hence, even the at the same point(input is the same) we
+still got different result and that lead to the different on the MAE
+
+\hypertarget{e-1}{%
+\subsubsection{2e)}\label{e-1}}
+
+In Problem 2d) you calculated the MAE associated with the first 3
+posterior samples. You will now work through calculating the MAE
+associated with every posterior sample. Although it might seem like you
+need to use a for-loop to do so, \texttt{R} will simplify the operation
+for you. If you perform an addition or subtraction between a matrix and
+a vector, \texttt{R} will find the dimension that that matches between
+the two and then repeat the action over the other dimension. Consider
+the code below, which has a vector, \texttt{a\_numeric}, subtracted from
+a matrix \texttt{a\_matrix}:
+
+\texttt{a\_matrix\ -\ a\_numeric}
+
+Assuming that \texttt{a\_matrix} has 10 rows and 25 columns and
+\texttt{a\_numeric} is length 10, \texttt{R} will subtract
+\texttt{a\_numeric} from each column in \texttt{a\_matrix}. The result
+will be another matrix with the same dimensionality as
+\texttt{a\_matrix}. To confirm this is the case, consider the example
+below where a vector of length 2 is subtracted from a matrix of 2 rows
+and 4 columns. The resulting dimensionality is 2 rows by 4 columns.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\# a 2 x 4 matrix}
+\FunctionTok{matrix}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{8}\NormalTok{, }\AttributeTok{nrow =} \DecValTok{2}\NormalTok{, }\AttributeTok{byrow =} \ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      [,1] [,2] [,3] [,4]
+## [1,]    1    2    3    4
+## [2,]    5    6    7    8
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\# a vector length 2}
+\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1 2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\# subtracting the two yields a matrix}
+\FunctionTok{matrix}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{8}\NormalTok{, }\AttributeTok{nrow =} \DecValTok{2}\NormalTok{, }\AttributeTok{byrow =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      [,1] [,2] [,3] [,4]
+## [1,]    0    1    2    3
+## [2,]    3    4    5    6
+\end{verbatim}
+
+You will use this fact to calculate the error associated with each
+training point and each posterior sample all at once.
+
+\textbf{Calculate the absolute value of the error between the mean trend
+matrix and the training set response. Print the dimensions of the
+\texttt{absE01mat} matrix to screen.}
+
+\hypertarget{solution-9}{%
+\paragraph{SOLUTION}\label{solution-9}}
+
+? The matrix is 25 * 2500
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{absE01mat }\OtherTok{\textless{}{-}} \FunctionTok{abs}\NormalTok{(post\_pred\_samples\_01}\SpecialCharTok{$}\NormalTok{Umat }\SpecialCharTok{{-}}\NormalTok{ train\_01}\SpecialCharTok{$}\NormalTok{y)}
+
+\DocumentationTok{\#\#\# dimensions?}
+\FunctionTok{dim}\NormalTok{(absE01mat)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1]   21 2500
+\end{verbatim}
+
+\hypertarget{f}{%
+\subsubsection{2f)}\label{f}}
+
+You must now summarize the absolute value errors by averaging them
+appropriately. Should you average across the rows or down the columns?
+In \texttt{R} the \texttt{colMeans()} will calculate the average value
+associated with each column in a matrix and returns a vector. Likewise,
+the \texttt{rowMeans()} function calculates the average value along each
+row and returns a vector. Which function should you use to calculate the
+MAE associated with each posterior sample?
+
+\textbf{Calculate the MAE associated with each posterior sample and
+assign the result to the \texttt{MAE\_01} object. Print the data type
+(the class) of the \texttt{MAE\_01} to the screen and display its
+length. Check your result is consistent with the MAEs you previously
+calculated in Problem 2d).}
+
+\hypertarget{solution-10}{%
+\paragraph{SOLUTION}\label{solution-10}}
+
+? We should use colMeans(), since each column represent a posterior
+sample(a ``curve'' like in the lecture slides). And as we can see, the
+result are the same as what I calculated previously.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{MAE\_01 }\OtherTok{\textless{}{-}} \FunctionTok{colMeans}\NormalTok{(absE01mat)}
+
+\DocumentationTok{\#\#\# data type?}
+\FunctionTok{class}\NormalTok{(MAE\_01)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "numeric"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\# length?}
+\FunctionTok{length}\NormalTok{(MAE\_01)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 2500
+\end{verbatim}
+
+Check with the results you calculated previously.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\# your code here}
+\NormalTok{mae\_01\_post\_01}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.2718539
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{MAE\_01[}\DecValTok{1}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.2718539
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mae\_01\_post\_02}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.3064965
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{MAE\_01[}\DecValTok{2}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.3064965
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mae\_01\_post\_03}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.2857988
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{MAE\_01[}\DecValTok{3}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.2857988
+\end{verbatim}
+
+\hypertarget{g}{%
+\subsubsection{2g)}\label{g}}
+
+You have calculated the MAE associated with each posterior sample, and
+thus represented the uncertainty in the MAE! Why is the MAE uncertain?
+
+\textbf{Use the \texttt{quantile()} function to print out summary
+statistics associated with the MAE. You can use the default arguments,
+and thus pass in \texttt{MAE\_01} into \texttt{quantile()} without
+setting any other argument. Why is the MAE uncertain? Or put another
+way, what causes the MAE to be uncertain?}
+
+\hypertarget{solution-11}{%
+\paragraph{SOLUTION}\label{solution-11}}
+
+Calculate the quantiles of the MAE below.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\# }
+\FunctionTok{quantile}\NormalTok{(MAE\_01)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##        0%       25%       50%       75%      100% 
+## 0.2553225 0.2688640 0.2774844 0.2918598 0.3780777
+\end{verbatim}
+
+? Bayes doesn't have a point estimate for beta parameter, which means
+that the beta parameter is different and uncertain even though for same
+input. Thus, without any doubts, the MAE is uncertain
+
+\hypertarget{problem-03}{%
+\subsection{Problem 03}\label{problem-03}}
+
+You will now make use of the model fitting and prediction functions you
+created in the previous problems to study the behavior of a more
+complicated non-linear modeling task. The code chunk below reads in two
+data sets. Both consist of two continuous variables, an input \texttt{x}
+and a response \texttt{y}. The first, \texttt{train\_02}, will serve as
+the training set, and the second, \texttt{test\_02}, will serve as a
+hold-out test set. You will only fit models based on the training set.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{url\_02\_train }\OtherTok{\textless{}{-}} \StringTok{"https://raw.githubusercontent.com/jyurko/INFSCI\_2595\_Spring\_2022/main/HW/07/train\_02.csv"}
+
+\NormalTok{train\_02 }\OtherTok{\textless{}{-}}\NormalTok{ readr}\SpecialCharTok{::}\FunctionTok{read\_csv}\NormalTok{(url\_02\_train, }\AttributeTok{col\_names =} \ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Rows: 150 Columns: 2
+\end{verbatim}
+
+\begin{verbatim}
+## -- Column specification --------------------------------------------------------
+## Delimiter: ","
+## dbl (2): x, y
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## i Use `spec()` to retrieve the full column specification for this data.
+## i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{url\_02\_test }\OtherTok{\textless{}{-}} \StringTok{"https://raw.githubusercontent.com/jyurko/INFSCI\_2595\_Spring\_2022/main/HW/07/test\_02.csv"}
+
+\NormalTok{test\_02 }\OtherTok{\textless{}{-}}\NormalTok{ readr}\SpecialCharTok{::}\FunctionTok{read\_csv}\NormalTok{(url\_02\_test, }\AttributeTok{col\_names =} \ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Rows: 50 Columns: 2
+\end{verbatim}
+
+\begin{verbatim}
+## -- Column specification --------------------------------------------------------
+## Delimiter: ","
+## dbl (2): x, y
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## i Use `spec()` to retrieve the full column specification for this data.
+## i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+\end{verbatim}
+
+\hypertarget{a-2}{%
+\subsubsection{3a)}\label{a-2}}
+
+It's always a good idea to start out by visualizing the data before
+modeling.
+
+\textbf{Create a scatter plot between the response and the input with
+\texttt{ggplot2}. Include both the training and test sets together in
+one graph. Use the marker color to distinguish between the two.}
+
+\hypertarget{solution-12}{%
+\paragraph{SOLUTION}\label{solution-12}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\#}
+\NormalTok{data }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{train\_set =}\NormalTok{ train\_02, }\AttributeTok{test\_set =}\NormalTok{ test\_02)}
+
+\NormalTok{data }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{()}\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ train\_set.x, }\AttributeTok{y =}\NormalTok{ train\_set.y, }\AttributeTok{color =} \StringTok{\textquotesingle{}Training set\textquotesingle{}}\NormalTok{))}\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ test\_set.x, }\AttributeTok{y =}\NormalTok{ test\_set.y, }\AttributeTok{color =} \StringTok{\textquotesingle{}Test set\textquotesingle{}}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_07_files/figure-latex/solution_03a-1.pdf}
+
+\hypertarget{b-2}{%
+\subsubsection{3b)}\label{b-2}}
+
+You will fit 25 different models to the training set. You will consider
+a one degree of freedom spline up to 49 degrees of freedom. You will
+consider only odd values for the degrees of freedom. Your goal will be
+to find which spline is the ``best'' in terms of generalizing from the
+training set to the test set. To do so, you will calculate the MAE on
+the training set and on the test set for each model. It will be rather
+tedious to set up all of the necessary information by hand, manually
+train each model, generate posterior samples, and make predictions from
+each model. Therefore, you will work through completing functions that
+will enable you to programmatically loop over each candidate model.
+
+You will start out by completing a function to create the training set
+and test set for a desired spline basis. The function
+\texttt{make\_spline\_basis\_mats()} is started for you in the first
+code chunk below. The first argument is the desired spline basis degrees
+of freedom, \texttt{J}. The second argument is the training set,
+\texttt{train\_data}, and the third argument is the hold-out test set,
+\texttt{test\_data}.
+
+The second through fifth code chunks below are provided to check that
+you completed the function correctly. The second code chunk uses
+\texttt{purrr::map\_dfr()} to create the training and test matrices for
+all 25 models. A glimpse of the resulting object,
+\texttt{spline\_matrices}, is displayed to the screen for you in the
+third code chunk. It is printed to the screen in the fourth code chunk.
+You should see a \texttt{tibble} consisting of two variables,
+\texttt{design\_matrix} and \texttt{test\_matrix}. Both variables are
+lists containing matrices. The matrices contained in the
+\texttt{spline\_matrices\$design\_matrix} variable are the different
+training design matrices, while the matrices contained in
+\texttt{spline\_matrices\$test\_matrix} are the associated hold-out test
+basis matrices.
+
+The fifth code chunk below prints the dimensionality of the 1st and 2nd
+order spline basis matrices to the screen. It shows that to access a
+specific matrix, you need to use the \texttt{{[}{[}{]}{]}} notation.
+
+\textbf{Complete the code chunk below. You must specify the
+\texttt{splines::ns()} function call correctly such that the
+degrees-of-freedom, \texttt{df}, argument equals the user specified
+degrees of freedom, \texttt{J}, and that the basis is applied to the
+\texttt{x} variable within the user supplied \texttt{train\_data}
+argument. The knots are extracted for you and saved to the
+\texttt{knots\_use\_basis} object. Create the training design matrix by
+calling the \texttt{model.matrix()} function with the
+\texttt{splines::ns()} function to create the basis for the \texttt{x}
+variable with \texttt{knots} equal to \texttt{knots\_use\_basis}. Make
+sure you assign the data sets correctly to the \texttt{data} argument of
+\texttt{model.matrix()}.}
+
+\textbf{How many rows are in the training matrices and how many rows are
+in the test matrices?}
+
+\hypertarget{solution-13}{%
+\paragraph{SOLUTION}\label{solution-13}}
+
+Define the \texttt{make\_spline\_basis\_mats()} function.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{make\_spline\_basis\_mats }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(J, train\_data, test\_data)}
+\NormalTok{\{}
+\NormalTok{  train\_basis }\OtherTok{\textless{}{-}}\NormalTok{ splines}\SpecialCharTok{::}\FunctionTok{ns}\NormalTok{(}\AttributeTok{x =}\NormalTok{ train\_data}\SpecialCharTok{$}\NormalTok{x, }\AttributeTok{df =}\NormalTok{ J)}
+  
+\NormalTok{  knots\_use\_basis }\OtherTok{\textless{}{-}} \FunctionTok{as.vector}\NormalTok{(}\FunctionTok{attributes}\NormalTok{(train\_basis)}\SpecialCharTok{$}\NormalTok{knots)}
+  
+\NormalTok{  train\_matrix }\OtherTok{\textless{}{-}} \FunctionTok{model.matrix}\NormalTok{( }\SpecialCharTok{\textasciitilde{}}\NormalTok{ splines}\SpecialCharTok{::}\FunctionTok{ns}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x, }\AttributeTok{knots =}\NormalTok{ knots\_use\_basis), }\AttributeTok{data =}\NormalTok{ train\_data)}
+  
+\NormalTok{  test\_matrix }\OtherTok{\textless{}{-}} \FunctionTok{model.matrix}\NormalTok{( }\SpecialCharTok{\textasciitilde{}}\NormalTok{ splines}\SpecialCharTok{::}\FunctionTok{ns}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x, }\AttributeTok{knots =}\NormalTok{ knots\_use\_basis), }\AttributeTok{data =}\NormalTok{ test\_data)}
+  
+\NormalTok{  tibble}\SpecialCharTok{::}\FunctionTok{tibble}\NormalTok{(}
+    \AttributeTok{design\_matrix =} \FunctionTok{list}\NormalTok{(train\_matrix),}
+    \AttributeTok{test\_matrix =} \FunctionTok{list}\NormalTok{(test\_matrix)}
+\NormalTok{  )}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+Create each of the training and test basis matrices.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{spline\_matrices }\OtherTok{\textless{}{-}}\NormalTok{ purrr}\SpecialCharTok{::}\FunctionTok{map\_dfr}\NormalTok{(}\FunctionTok{seq}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{50}\NormalTok{, }\AttributeTok{by =} \DecValTok{2}\NormalTok{), }
+\NormalTok{                                  make\_spline\_basis\_mats,}
+                                  \AttributeTok{train\_data =}\NormalTok{ train\_02, }
+                                  \AttributeTok{test\_data =}\NormalTok{ test\_02)}
+\end{Highlighting}
+\end{Shaded}
+
+Get a glimpse of the structure of \texttt{spline\_matrices}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{glimpse}\NormalTok{(spline\_matrices)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Rows: 25
+## Columns: 2
+## $ design_matrix <list> <<matrix[150 x 2]>>, <<matrix[150 x 4]>>, <<matrix[150 ~
+## $ test_matrix   <list> <<matrix[50 x 2]>>, <<matrix[50 x 4]>>, <<matrix[50 x 6~
+\end{verbatim}
+
+Display the elements of \texttt{spline\_matrices} to the screen.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{spline\_matrices}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 25 x 2
+##    design_matrix    test_matrix    
+##    <list>           <list>         
+##  1 <dbl [150 x 2]>  <dbl [50 x 2]> 
+##  2 <dbl [150 x 4]>  <dbl [50 x 4]> 
+##  3 <dbl [150 x 6]>  <dbl [50 x 6]> 
+##  4 <dbl [150 x 8]>  <dbl [50 x 8]> 
+##  5 <dbl [150 x 10]> <dbl [50 x 10]>
+##  6 <dbl [150 x 12]> <dbl [50 x 12]>
+##  7 <dbl [150 x 14]> <dbl [50 x 14]>
+##  8 <dbl [150 x 16]> <dbl [50 x 16]>
+##  9 <dbl [150 x 18]> <dbl [50 x 18]>
+## 10 <dbl [150 x 20]> <dbl [50 x 20]>
+## # ... with 15 more rows
+\end{verbatim}
+
+The code chunk below is created for you. It shows how to check the
+dimensions of several training and test matrices.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{dim}\NormalTok{(spline\_matrices}\SpecialCharTok{$}\NormalTok{design\_matrix[[}\DecValTok{1}\NormalTok{]])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 150   2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{dim}\NormalTok{(spline\_matrices}\SpecialCharTok{$}\NormalTok{test\_matrix[[}\DecValTok{1}\NormalTok{]])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 50  2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{dim}\NormalTok{(spline\_matrices}\SpecialCharTok{$}\NormalTok{design\_matrix[[}\DecValTok{2}\NormalTok{]])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 150   4
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{dim}\NormalTok{(spline\_matrices}\SpecialCharTok{$}\NormalTok{test\_matrix[[}\DecValTok{2}\NormalTok{]])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 50  4
+\end{verbatim}
+
+? According to the result, the training matrix has 150 rows while the
+test matrix has 50 rows
+
+\hypertarget{c-2}{%
+\subsubsection{3c)}\label{c-2}}
+
+Each element in the \texttt{spline\_matrices\$design\_matrix} object is
+a separate design matrix. You will use this structure to
+programmatically train each model. The first code chunk creates a list
+of information which stores the training set responses and defines the
+prior hyperparameters. The second code chunk below defines the
+\texttt{manage\_spline\_fit()} function. The first argument is a design
+matrix \texttt{Xtrain}, the second argument is the log-posterior
+function, \texttt{logpost\_func}, and the third argument is
+\texttt{my\_settings}. \texttt{manage\_spline\_fit()} sets the initial
+starting values to the \(\boldsymbol{\beta}\) parameters by generating
+random values from a standard normal. The initial value for the
+unbounded \(\varphi\) parameter is set by log-transforming a random draw
+from the prior on \(\sigma\). After creating the initial guess values,
+the \texttt{my\_laplace()} function is called to fit the model.
+
+You will complete both code chunks in order to programmatically train
+all 25 spline models. After completing the first two code chunks, the
+third code chunk performs the training for you. The fourth code chunk
+below shows how to access training results associated with the
+second-order spline by using the \texttt{{[}{[}{]}{]}} operator. The
+fifth code chunk checks that each model converged.
+
+\textbf{Complete the first two code chunks below. In the first code
+chunk, assign the training responses to the \texttt{yobs} variable
+within the \texttt{info\_02\_train} list. Specify the prior mean and
+prior standard deviation on the \(\boldsymbol{\beta}\)-parameters to be
+0 and 20, respectively. Specify the rate parameter on the unknown
+\(\sigma\) to be 1.}
+
+\textbf{Complete the second code chunk by generating a random starting
+guess for all \(\boldsymbol{\beta}\)-parameters from a standard normal.
+Create the random initial guess for \(\varphi\) by generating a random
+number from the Exponential prior distribution on \(\sigma\) and
+log-transforming the variable. Complete the call the
+\texttt{my\_laplace()} function by passing in the initial values as a
+vector of correct size.}
+
+\emph{HINT}: How can you determine the number of unknown
+\(\boldsymbol{\beta}\)-parameters if you know the training design
+matrix?
+
+\hypertarget{solution-14}{%
+\paragraph{SOLUTION}\label{solution-14}}
+
+Assemble the list of required information.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{info\_02\_train }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{(}
+  \AttributeTok{yobs =}\NormalTok{ train\_02}\SpecialCharTok{$}\NormalTok{y,}
+  \AttributeTok{mu\_beta =} \DecValTok{0}\NormalTok{,}
+  \AttributeTok{tau\_beta =} \DecValTok{20}\NormalTok{,}
+  \AttributeTok{sigma\_rate =} \DecValTok{1}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Complete the function which manages the execution of the Laplace
+Approximation to each spline model. Note that \texttt{Xtrain} is assumed
+to be a design matrix in the \texttt{manage\_spline\_fit()} function.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{manage\_spline\_fit }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(Xtrain, logpost\_func, my\_settings)}
+\NormalTok{\{}
+\NormalTok{  my\_settings}\SpecialCharTok{$}\NormalTok{design\_matrix }\OtherTok{\textless{}{-}}\NormalTok{ Xtrain}
+  
+\NormalTok{  init\_beta }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(}\FunctionTok{ncol}\NormalTok{(Xtrain))}
+  
+\NormalTok{  init\_varphi }\OtherTok{\textless{}{-}} \FunctionTok{log}\NormalTok{(}\FunctionTok{rexp}\NormalTok{(}\DecValTok{1}\NormalTok{, }\AttributeTok{rate =}\NormalTok{ my\_settings}\SpecialCharTok{$}\NormalTok{sigma\_rate))}
+  
+  \FunctionTok{my\_laplace}\NormalTok{(}\FunctionTok{c}\NormalTok{(init\_beta, init\_varphi), logpost\_func, my\_settings)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+The next three code chunks are completed for you. All 25 spline models
+are trained in the first code chunk below. Notice that because the
+training design matrices have already been created, we just need to loop
+over each element of \texttt{spline\_matrices\$design\_matrix}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{724412}\NormalTok{)}
+\NormalTok{all\_spline\_models }\OtherTok{\textless{}{-}}\NormalTok{ purrr}\SpecialCharTok{::}\FunctionTok{map}\NormalTok{(spline\_matrices}\SpecialCharTok{$}\NormalTok{design\_matrix, }
+\NormalTok{                                manage\_spline\_fit,}
+                                \AttributeTok{logpost\_func =}\NormalTok{ lm\_logpost,}
+                                \AttributeTok{my\_settings =}\NormalTok{ info\_02\_train)}
+\end{Highlighting}
+\end{Shaded}
+
+The code chunk below shows how to access a single model fitting result.
+Specifically, it extracts the result of the second trained model, the 3
+degree of freedom spline.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{all\_spline\_models[[}\DecValTok{2}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## $mode
+## [1] -1.0128021  0.3502016  2.5063039  1.1685141 -0.8202799
+## 
+## $var_matrix
+##               [,1]          [,2]          [,3]          [,4]          [,5]
+## [1,]  1.674059e-02 -2.947568e-03 -3.960273e-02 -4.056984e-03  1.988769e-06
+## [2,] -2.947568e-03  2.062475e-02 -2.310636e-03 -2.388290e-03  4.967796e-08
+## [3,] -3.960273e-02 -2.310636e-03  1.070993e-01  1.545448e-02 -5.267519e-06
+## [4,] -4.056984e-03 -2.388290e-03  1.545448e-02  1.853818e-02 -1.040898e-06
+## [5,]  1.988769e-06  4.967796e-08 -5.267519e-06 -1.040898e-06  3.340949e-03
+## 
+## $log_evidence
+## [1] -113.1528
+## 
+## $converge
+## [1] "YES"
+## 
+## $iter_counts
+## [1] 32
+\end{verbatim}
+
+The code chunk below shows how to check that all optimizations
+converged.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{purrr}\SpecialCharTok{::}\FunctionTok{map\_chr}\NormalTok{(all\_spline\_models, }\StringTok{"converge"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  [1] "YES" "YES" "YES" "YES" "YES" "YES" "YES" "YES" "YES" "YES" "YES" "YES"
+## [13] "YES" "YES" "YES" "YES" "YES" "YES" "YES" "YES" "YES" "YES" "YES" "YES"
+## [25] "YES"
+\end{verbatim}
+
+\hypertarget{d-2}{%
+\subsubsection{3d)}\label{d-2}}
+
+With all 25 spline models fit, it is time to assess which model is the
+best. Several different approaches have been discussed in lecture for
+how to identify the ``best'' model. You will start out by calculating
+the MAE on the training set and the test set. You went through the steps
+to generate posterior samples, make posterior predictions and to
+calculate the posterior MAE distribution in Problem 2. You will now
+define a function which performs all of those steps together.
+
+The function \texttt{calc\_mae\_from\_laplace()} is started for you in
+the first code chunk below. The first argument, \texttt{mvn\_result}, is
+the result of the \texttt{my\_laplace()} function for a particular
+model. The second and third arguments, \texttt{Xtrain} and
+\texttt{Xtest}, are the training and test basis matrices associated with
+the model, respectively. The fourth and fifth arguments,
+\texttt{y\_train} and \texttt{y\_test}, are the observations on the
+training set and test set, respectively. The last argument,
+\texttt{num\_samples}, is the number of posterior samples to generate.
+
+You will complete the necessary steps to generate posterior samples from
+the model, predict the training set, predict the test. Then you will
+calculate the training set MAE and test set MAE, associated with each
+posterior sample. The last portion of the
+\texttt{calc\_mae\_from\_laplace()} function is mostly completed for
+you.
+
+After you complete the \texttt{calc\_mae\_from\_laplace()}, the second
+code chunk applies the function to all 25 spline models. It is nearly
+complete. You must specify the arguments which define the training set
+observations, \texttt{y\_train}, the test set observations,
+\texttt{y\_train}, and the number of posterior samples,
+\texttt{num\_samples}.
+
+\textbf{Complete all steps to calculate the MAE on the training set and
+test sets in the first code chunk below. Complete the lines of code in
+order to: generate posterior samples from the supplied
+\texttt{mvn\_result} object, make posterior predictions on the training
+set, make posterior predictions on the test, and then calculate the MAE
+associated with each posterior sample on the training and test sets. In
+the book keeping portion of the function, you must specify the order of
+the spline model.}
+
+\textbf{You must specify the training set and test set observed
+responses correctly in the second code chunk. You must specify the
+number of posterior samples to be 2500.}
+
+\emph{HINT}: Remember that the result of the
+\texttt{make\_post\_lm\_pred()} function is a list!
+
+\hypertarget{solution-15}{%
+\paragraph{SOLUTION}\label{solution-15}}
+
+Complete all steps to define the \texttt{calc\_mae\_from\_laplace()}
+function below.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{calc\_mae\_from\_laplace }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(mvn\_result, Xtrain, Xtest, y\_train, y\_test, num\_samples)}
+\NormalTok{\{}
+  \CommentTok{\# generate posterior samples from the approximate MVN posterior}
+\NormalTok{  post }\OtherTok{\textless{}{-}} \FunctionTok{generate\_lm\_post\_samples}\NormalTok{(}\AttributeTok{mvn\_result =}\NormalTok{ mvn\_result, }\AttributeTok{length\_beta =} \FunctionTok{ncol}\NormalTok{(Xtrain), }\AttributeTok{num\_samples =}\NormalTok{ num\_samples)}
+  
+  \CommentTok{\# make posterior predictions on the training set}
+\NormalTok{  pred\_train }\OtherTok{\textless{}{-}} \FunctionTok{make\_post\_lm\_pred}\NormalTok{(Xtrain, post)}
+  
+  \CommentTok{\# make posterior predictions on the test set}
+\NormalTok{  pred\_test }\OtherTok{\textless{}{-}} \FunctionTok{make\_post\_lm\_pred}\NormalTok{(Xtest, post)}
+  
+  \CommentTok{\# calculate the error between the training set predictions}
+  \CommentTok{\# and the training set observations}
+\NormalTok{  error\_train }\OtherTok{\textless{}{-}}\NormalTok{ pred\_train}\SpecialCharTok{$}\NormalTok{Umat }\SpecialCharTok{{-}}\NormalTok{ y\_train}
+  
+  \CommentTok{\# calculate the error between the test set predictions}
+  \CommentTok{\# and the test set observations}
+\NormalTok{  error\_test }\OtherTok{\textless{}{-}}\NormalTok{ pred\_test}\SpecialCharTok{$}\NormalTok{Umat }\SpecialCharTok{{-}}\NormalTok{ y\_test}
+  
+  \CommentTok{\# calculate the MAE on the training set}
+\NormalTok{  mae\_train }\OtherTok{\textless{}{-}} \FunctionTok{colMeans}\NormalTok{(}\FunctionTok{abs}\NormalTok{(error\_train))}
+  
+  \CommentTok{\# calculate the MAE on the test set}
+\NormalTok{  mae\_test }\OtherTok{\textless{}{-}} \FunctionTok{colMeans}\NormalTok{(}\FunctionTok{abs}\NormalTok{(error\_test))}
+  
+  \CommentTok{\# book keeping, package together the results}
+\NormalTok{  mae\_train\_df }\OtherTok{\textless{}{-}}\NormalTok{ tibble}\SpecialCharTok{::}\FunctionTok{tibble}\NormalTok{(}
+    \AttributeTok{mae =}\NormalTok{ mae\_train}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%} 
+    \FunctionTok{mutate}\NormalTok{(}\AttributeTok{dataset =} \StringTok{"training"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+\NormalTok{    tibble}\SpecialCharTok{::}\FunctionTok{rowid\_to\_column}\NormalTok{(}\StringTok{"post\_id"}\NormalTok{)}
+  
+\NormalTok{  mae\_test\_df }\OtherTok{\textless{}{-}}\NormalTok{ tibble}\SpecialCharTok{::}\FunctionTok{tibble}\NormalTok{(}
+    \AttributeTok{mae =}\NormalTok{ mae\_test}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%} 
+    \FunctionTok{mutate}\NormalTok{(}\AttributeTok{dataset =} \StringTok{"test"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+\NormalTok{    tibble}\SpecialCharTok{::}\FunctionTok{rowid\_to\_column}\NormalTok{(}\StringTok{"post\_id"}\NormalTok{)}
+  
+  \CommentTok{\# you must specify the order, J, associated with the spline model}
+\NormalTok{  mae\_train\_df }\SpecialCharTok{\%\textgreater{}\%} 
+    \FunctionTok{bind\_rows}\NormalTok{(mae\_test\_df) }\SpecialCharTok{\%\textgreater{}\%} 
+    \FunctionTok{mutate}\NormalTok{(}\AttributeTok{J =} \FunctionTok{ncol}\NormalTok{(Xtrain) }\SpecialCharTok{{-}} \DecValTok{1}\NormalTok{)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+Apply the \texttt{calc\_mae\_from\_laplace()} function to all 25 spline
+models.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{52133}\NormalTok{)}
+\NormalTok{all\_spline\_mae\_results }\OtherTok{\textless{}{-}}\NormalTok{ purrr}\SpecialCharTok{::}\FunctionTok{pmap\_dfr}\NormalTok{(}\FunctionTok{list}\NormalTok{(all\_spline\_models,}
+\NormalTok{                                               spline\_matrices}\SpecialCharTok{$}\NormalTok{design\_matrix,}
+\NormalTok{                                               spline\_matrices}\SpecialCharTok{$}\NormalTok{test\_matrix),}
+\NormalTok{                                          calc\_mae\_from\_laplace,}
+                                          \AttributeTok{y\_train =}\NormalTok{ train\_02}\SpecialCharTok{$}\NormalTok{y,}
+                                          \AttributeTok{y\_test =}\NormalTok{ test\_02}\SpecialCharTok{$}\NormalTok{y,}
+                                          \AttributeTok{num\_samples =} \DecValTok{2500}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{e-2}{%
+\subsubsection{3e)}\label{e-2}}
+
+If you completed the \texttt{calc\_mae\_from\_laplace()} function
+correctly, you should have an object with 62500 rows for each split and
+just 4 columns. The object was structured in a ``tall'' or
+``long-format'' and is thus a ``tidy data'' object. We can therefore
+easily summarize the posterior MAE samples with \texttt{ggplot2} (if you
+are a Python user this is the same philosophy of the Seaborn statistical
+visualization package). You will summarize the MAE posterior
+distributions with boxplots and by focusing on the median MAE. To focus
+on the median MAE, you will use the \texttt{stat\_summary()} function.
+This is a flexible function capable of creating many different geometric
+objects. It consists of arguments such as \texttt{geom} to specify the
+type of geometric object to display and \texttt{fun} to specify what
+function to apply to the \texttt{y} aesthetic.
+
+\textbf{Complete the two code chunks below. In the first code chunk,
+pipe the \texttt{all\_spline\_mae\_results} object into
+\texttt{ggplot()}. Set the \texttt{x} aesthetic to be
+\texttt{as.factor(J)} and the \texttt{y} aesthetic to be \texttt{mae}.
+In the \texttt{geom\_boxplot()} call, map the \texttt{fill} aesthetic to
+the \texttt{dataset} variable. Use the scale
+\texttt{scale\_fill\_brewer()} with the \texttt{palette} argument set
+equal to \texttt{"Set1"}.}
+
+\textbf{In the second code chunk, pipe the
+\texttt{all\_spline\_mae\_results} object into a \texttt{filter()} call.
+Keep only the models with the spline order greater than 3. Pipe the
+result into a \texttt{ggplot()} call where you set the \texttt{x}
+aesthetic to \texttt{J} and the \texttt{y} aesthetic to \texttt{mae}.
+Use the \texttt{stat\_summary()} call to calculate the median MAE for
+each spline order. You must set the \texttt{geom} argument within
+\texttt{stat\_summary()} to be
+\texttt{\textquotesingle{}line\textquotesingle{}} and the \texttt{fun}
+argument to be \texttt{\textquotesingle{}median\textquotesingle{}}.
+Rather than coloring by \texttt{dataset}, use \texttt{facet\_wrap()} to
+specify separate facets (subplots) for each \texttt{dataset}.}
+
+\textbf{Based on these visualizations which models appear to overfit the
+training data?}
+
+\hypertarget{solution-16}{%
+\paragraph{SOLUTION}\label{solution-16}}
+
+Summarize the posterior samples on the MAE on the training and test sets
+with boxplots.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\# }
+\NormalTok{all\_spline\_mae\_results }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \FunctionTok{as.factor}\NormalTok{(J), }\AttributeTok{y =}\NormalTok{ mae))}\SpecialCharTok{+}
+  \FunctionTok{geom\_boxplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{fill =}\NormalTok{ dataset))}\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_brewer}\NormalTok{(}\AttributeTok{palette =} \StringTok{"Set1"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_07_files/figure-latex/solution_03e-1.pdf}
+
+Summarize the posterior samples on the MAE on the training and test sets
+by focusing on the posterior median MAE values.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\# }
+\NormalTok{all\_spline\_mae\_results }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(J }\SpecialCharTok{\textgreater{}} \DecValTok{3}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ J, }\AttributeTok{y =}\NormalTok{ mae))}\SpecialCharTok{+}
+  \FunctionTok{stat\_summary}\NormalTok{(}\AttributeTok{geom =} \StringTok{\textquotesingle{}line\textquotesingle{}}\NormalTok{, }\AttributeTok{fun =} \StringTok{\textquotesingle{}median\textquotesingle{}}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{dataset)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_07_files/figure-latex/solution_03e_b-1.pdf}
+
+? It all starts from the model \#7 where the MAE of testing set is much
+bigger than the MAE of training set. In another word, this model is
+overfitting the data.
+
+\hypertarget{f-1}{%
+\subsubsection{3f)}\label{f-1}}
+
+By comparing the posterior MAE values on the training and test splits
+you are trying to assess how well the models generalize to new data. As
+discussed in lecture, other metrics exist for trying to assess how well
+a model generalizes, based just on the training set performance. The
+Evidence or marginal likelihood is attempting to evaluate generalization
+by integrating the likelihood over all a-priori allowed parameter
+combinations. If the Evidence can be calculated, it can be used to
+weight all models relative to each other. Thereby allowing you to assess
+which model appears to be ``most probable''.
+
+You will now calculate the posterior model weights associated with each
+model. The first code chunk below is completed for you, by extracting
+the log-evidence associated with model into the \texttt{numeric} vector
+\texttt{spline\_evidence}. You will use the log-evidence to calculate
+the posterior model weights and visualize the results with a bar graph.
+
+\textbf{Calculate the posterior model weights associated with each
+spline model and assign the weights to the \texttt{spline\_weights}
+variable. The \texttt{spline\_dof} vector is created for you which
+stores the degrees of freedom considered in this problem. The
+\texttt{spline\_weights} vector is assigned to the \texttt{w} variable
+in a \texttt{tibble} and the result is piped into \texttt{mutate()}
+where you must specify the \texttt{J} variable to be the degrees of
+freedom values. Pipe the result into a \texttt{ggplot()} call where you
+set the \texttt{x} aesthetic to \texttt{as.factor(J)} and the \texttt{y}
+aesthetic to \texttt{w}. Include a \texttt{geom\_bar()} geometric object
+where the \texttt{stat} argument is set to \texttt{"identity"}.}
+
+\textbf{Based on your visualization, which model is considered the
+best?}
+
+\hypertarget{solution-17}{%
+\paragraph{SOLUTION}\label{solution-17}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{spline\_evidence }\OtherTok{\textless{}{-}}\NormalTok{ purrr}\SpecialCharTok{::}\FunctionTok{map\_dbl}\NormalTok{(all\_spline\_models, }\StringTok{"log\_evidence"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{spline\_weights }\OtherTok{\textless{}{-}} \FunctionTok{exp}\NormalTok{(spline\_evidence) }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(}\FunctionTok{exp}\NormalTok{(spline\_evidence))}
+
+\NormalTok{spline\_dof }\OtherTok{\textless{}{-}} \FunctionTok{seq}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{50}\NormalTok{, }\AttributeTok{by =} \DecValTok{2}\NormalTok{)}
+
+\NormalTok{tibble}\SpecialCharTok{::}\FunctionTok{tibble}\NormalTok{(}
+  \AttributeTok{w =}\NormalTok{ spline\_weights}
+\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{J =}\NormalTok{ spline\_dof) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \FunctionTok{as.factor}\NormalTok{(J), }\AttributeTok{y =}\NormalTok{ w))}\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{stat =} \StringTok{"identity"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_07_files/figure-latex/solution_03f_b-1.pdf}
+
+? According to the data, model \#7 is the best one and model \#9 is also
+very good as well.
+
+\hypertarget{g-1}{%
+\subsubsection{3g)}\label{g-1}}
+
+You have compared the models several different ways, are your
+conclusions the same?
+
+\textbf{How well do the assessments from the data split comparison
+compare to the Evidence-based assessment? If the conclusions are
+different, why would they be different?}
+
+\hypertarget{solution-18}{%
+\paragraph{SOLUTION}\label{solution-18}}
+
+? No, they are not the same. Through the data split approach, we can see
+the MAE of both test set and training set is keep decreasing until 7
+degree. After that, the increasing of degree won't lead to a significant
+improvement. The MAE is become more stable after that. So if we only
+evaluate it through the performance perspective, we can't really find a
+``best'' one.
+
+However, we all know that the higher degree the more complex this model
+is. And much more complex means much more consume. Hence, if several
+models' uncertainty are close to each other, we should pick the
+``simplest'' one. This principle is demonstrate by Evidence-based
+assessment: the more parameters, the more severe the penalty. So as we
+can see through the last figure, model \#7 and \#9 are outstanding by
+this approach.
+
+\end{document}

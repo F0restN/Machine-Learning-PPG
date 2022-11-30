@@ -1,0 +1,7 @@
+"0","### add more code chunks if you like"
+"0","pred_test_1 <- predict(mod_1_acc, type = ""prob"")"
+"0","typeof(pred_test_1)"
+"1","[1]"
+"1"," ""list"""
+"1","
+"

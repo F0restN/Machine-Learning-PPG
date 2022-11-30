@@ -1,0 +1,4 @@
+"0","summary_post_df_focus_empbayes <- post_df_focus_empbayes %>%"
+"0","  mutate(post_avg = anew / (anew + bnew),"
+"0","         post_q05 = qbeta(0.05, anew, bnew),"
+"0","         post_q95 = qbeta(0.95, anew, bnew))"

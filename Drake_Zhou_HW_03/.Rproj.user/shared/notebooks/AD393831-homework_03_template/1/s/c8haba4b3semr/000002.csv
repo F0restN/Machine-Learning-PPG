@@ -1,0 +1,6 @@
+"0","ctrl_roc <- trainControl(method = ""repeatedcv"","
+"0","                         summaryFunction = twoClassSummary,"
+"0","                         classProbs = TRUE,"
+"0","                         savePredictions = TRUE)"
+"0",""
+"0","metric_roc <- ""ROC"""

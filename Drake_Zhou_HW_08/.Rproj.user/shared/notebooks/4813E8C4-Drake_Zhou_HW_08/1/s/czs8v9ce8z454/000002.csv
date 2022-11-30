@@ -1,0 +1,3 @@
+"0","### add more code chunks if you like"
+"0","lasso_03 <- glmnet(X03_glmnet, df$y)"
+"0","lasso_06 <- glmnet(X06_glmnet, df$y)"

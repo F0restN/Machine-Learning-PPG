@@ -1,0 +1,4 @@
+"0","viz_input_grid %>% mutate(pred_class = pred_class_enet) %>% ggplot(mapping = aes(x=V41,y=V31))+"
+"0","  geom_raster(mapping = aes(fill=pred_class))+"
+"0","  facet_grid(vars(V27),vars(V17))+"
+"0","  scale_fill_brewer(palette = 'Set1')"

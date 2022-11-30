@@ -1,0 +1,7 @@
+"0","X02 <- model.matrix( ~ x, prob_01_df)"
+"0",""
+"0","nnet_hidden_2b <- calc_hidden_units(X02, params_01_2b$beta_matrix, boot::inv.logit)"
+"0",""
+"0","viz_hidden_trend_wrt_x(nnet_hidden_2b$A, "
+"0","                       prob_01_df,"
+"0","                       ""hidden linear predictors"")"

@@ -1,0 +1,1 @@
+"0","spline_evidence <- purrr::map_dbl(all_spline_models, ""log_evidence"")"

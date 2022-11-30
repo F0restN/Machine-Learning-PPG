@@ -1,0 +1,6 @@
+"0","### set the input arguments!"
+"0","log_binom_pmf <- function(events, trials, prob)"
+"0","{"
+"0","  log_lik <- lchoose(trials, events) + events * log(prob) + (trials - events) * log(1 - prob)"
+"0","  return(log_lik)"
+"0","}"

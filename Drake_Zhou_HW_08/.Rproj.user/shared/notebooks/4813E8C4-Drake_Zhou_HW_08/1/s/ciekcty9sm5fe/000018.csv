@@ -1,0 +1,4 @@
+"0","### make the posterior coefficient visualization for model 3"
+"0","post_means <- laplace_03_weak$mode[1:ncol(X03)]"
+"0","post_sd <- sqrt(diag(laplace_03_weak$var_matrix)[1:ncol(X03)])"
+"0","viz_post_coefs(post_means, post_sd, colnames(X03))"

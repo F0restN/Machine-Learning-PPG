@@ -1,0 +1,7 @@
+"0","### The dimensionality of the posterior predicted mean trend matrix"
+"0","dim(post_pred_samples_01$Umat)"
+"1","[1]"
+"1","   21"
+"1"," 2500"
+"1","
+"

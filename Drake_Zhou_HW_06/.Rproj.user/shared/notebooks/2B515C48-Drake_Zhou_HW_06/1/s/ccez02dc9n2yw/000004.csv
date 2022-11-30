@@ -1,0 +1,5 @@
+"0","pnorm(average_df, mean = laplace_result_01$mode[1], sd = sqrt(laplace_result_01$var_matrix[1]))"
+"1","[1]"
+"1"," 0.080534"
+"1","
+"

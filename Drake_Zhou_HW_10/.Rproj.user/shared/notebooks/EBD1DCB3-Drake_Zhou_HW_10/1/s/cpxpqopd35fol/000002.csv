@@ -1,0 +1,4 @@
+"0","X05 <- model.matrix( ~ x, data = prob_01_df)"
+"0","nnet_hidden_5a <- calc_hidden_units(X05, params_02_5a$beta_matrix, boot::inv.logit)"
+"0",""
+"0","nnet_hidden_5b <- calc_hidden_units(X05, params_02_5b$beta_matrix, boot::inv.logit)"

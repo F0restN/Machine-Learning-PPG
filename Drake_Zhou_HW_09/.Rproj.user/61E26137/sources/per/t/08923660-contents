@@ -1,0 +1,811 @@
+---
+title: "INFSCI 2595 Fall 2021 Homework: 09"
+subtitle: "Assigned November 5, 2021; Due: November 11, 2021"
+author: "Yifei Tai"
+date: "Submission time: November 12, 2021 at 11:00PM EST"
+output: html_document
+---
+
+```{r setup, include=FALSE, eval=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Collaborators
+
+Include the names of your collaborators here.  
+
+## Overview
+
+This homework assignment provides practice working with correlated inputs. You will fit Bayesian linear models with Gaussian priors and with Double Exponential priors. This will give you practice changing the prior distribution consistent with working with *ridge* vs *lasso* regression. You will then use `caret` to tune a non-Bayesian regression model with the **elastic net** penalty. This will give you practice tuning a model with multiple hyperparameteres/tuning parameters via resampling. You will see if the correlation structure influences the weighting between lasso and ridge.  
+
+You will work with `caret` and the `glmnet` packages. You should have both packages installed already.  
+
+You will also work with the `corrplot` package in this assignment. You must download and install `corrplot` before starting the assignment.  
+
+**IMPORTANT**: code chunks are created for you. Each code chunk has `eval=FALSE` set in the chunk options. You **MUST** change it to be `eval=TRUE` in order for the code chunks to be evaluated when rendering the document.  
+
+You are allowed to add as many code chunks as you see fit to answer the questions.  
+
+## Load packages
+
+The `tidyverse` suite of packages is loaded for you in the code chunk below. The `caret` package will be loaded later in the assignment.  
+
+```{r, load_tidyverse, eval=TRUE}
+library(tidyverse)
+```
+
+```{r, eval=TRUE}
+#install.packages("corrplot")
+library(corrplot)
+```
+
+
+
+## Problem 01
+
+A data set is loaded in the code chunk below for you. You will use this data set throughout this assignment. There are 6 continuous inputs, `x1` through `x6`, and a single continuous response `y`.  
+
+```{r, load_hw_data, eval=TRUE}
+data_url <- "https://raw.githubusercontent.com/jyurko/INFSCI_2595_Fall_2021/main/HW/09/hw09.csv"
+
+df <- readr::read_csv(data_url, col_names = TRUE)
+
+df %>% glimpse()
+```
+
+
+### 1a)
+
+**Create a scatter plot between the response, `y`, and each input using `ggplot()`.**  
+
+**Based on the visualizations, do you think there are trends between either input and the response?**  
+
+#### SOLUTION
+
+```{r, solution_01a, eval=TRUE}
+### add more code chunks if you like
+df %>% 
+  pivot_longer(!y, names_to="x", values_to="value") %>% 
+  ggplot() +
+  geom_point(mapping = aes(x = value, y = y), color = 'blue') +
+  geom_smooth(mapping = aes(x = value, y = y), color = "red") +
+  facet_wrap(~x)
+```
+
+No specific trends as I see.
+
+### 1b)
+
+You visualized the output to input relationship, but you must also examine the relationship between the inputs! The `cor()` function can be used to calculate the correlation matrix between all columns in a data frame.  
+
+**Pipe `df` into `select()` and select all columns except the response `y`. Pipe the result to the `cor()` function and display the correlation matrix to screen.**  
+
+#### SOLUTION
+
+```{r, solution_01b, eval=TRUE}
+### add more code chunks if you like
+df %>%
+  select(-y) %>% 
+  cor()
+```
+
+### 1c)
+
+Rather than displaying the numbers of the correlation matrix, let's create a **correlation plot** to visualize the correlation coefficient between each pair of inputs. The `corrplot` package provides the `corrplot()` function to easily create clean and simple to visualize correlation plots. You do not have to load the `corrplot` package, instead you will call the `corrplot()` function from `corrplot` using the `::` operator. Thus, you call the function as `corrplot::corrplot()`.  
+
+The first argument to `corrplot::corrplot()` is a correlation matrix. You must therefore calculate the correlation matrix associated with a data frame and pass that matrix into `corrplot::corrplot()`.  
+
+**You will create two correlation plots. For the first, use the default input arguments to `corrplot::corrplot()`. For the second, set the `type` argument equal to `'upper'` to visualize the correlation plot as an upper-triangular matrix.**  
+
+Are the inputs correlated? 
+
+#### SOLUTION
+
+```{r, solution_01c1, eval=TRUE}
+### first corrplot
+df %>%
+  select(-y) %>% 
+  cor() %>% 
+  corrplot()
+```
+
+
+```{r, solution_01c2, eval=TRUE}
+### second corrplot
+df %>%
+  select(-y) %>% 
+  cor() %>% 
+  corrplot(type = 'upper')
+```
+
+
+What do you think?  
+
+Except x5 and x6, the rest of inputs are correlated to some extend.
+
+
+### 1d)
+
+In lecture, we discussed the influence of the input correlation structure on the posterior correlation between the unknown regression parameters. You must calculate the posterior correlation matrix between the regression coefficients of a model with **linear additive features**, assuming an infinitely diffuse prior. Assume $\sigma=1$ for this calculation, that way you focus on the parameter-to-parameter correlation.  
+
+**Calculate the posterior correlation matrix between the regression coefficients (the $\beta parameters) for a model with linear additive features for all 6 inputs. Display the correlation matrix as a correlation plot using `corrplot::corrplot()`.**  
+
+**How does the $\beta$ parameter posterior correlation matrix compare to the input correlation matrix?**  
+
+*HINT*: The `cov2cor()` function can be helpful here.  
+
+#### SOLUTION
+
+```{r, solution_01d, eval=TRUE}
+### add as many code chunks as you feel are necessary
+mod01 <- (model.matrix(y ~ x1 + x2 + x3 + x4 + x5 + x6, data = df))
+SSmat <- t(mod01) %*% mod01
+SSmat %>% 
+  solve() %>% 
+  cov2cor() %>% 
+  corrplot(type = 'upper') 
+```
+
+From the image, we can see there are less of the betas correlated compared to the inputs. We want less correlations between inputs becase the posterior uncertainty will increase when the inputs are related.
+
+### 1e)
+
+In previous assignments, you were focused on identifying the best model out of a set of candidate models. In this assignment however, you will instead work with a relatively complex model and focus on understanding the influence of the prior distribution type and prior regularization strength on the non-zero coefficients. Specifically, you will work with all **triplet** or **three-way** interactions between the 6 inputs.  
+
+**Create a design matrix for a model with up to all triplet interactions between the 6 inputs. Assign the result to the `Xtrips` object.**  
+
+#### SOLUTION
+
+```{r, solution_01e, eval=TRUE}
+### add your code here
+Xtrips <- model.matrix(y ~ (.)^3, df)
+```
+
+
+### 1f)
+
+Before fitting the Bayesian models, let's examine the posterior correlation matrix for the model with all triplet interactions assuming an infinitely diffuse prior.  
+
+**Create the correlation plot for the regression coefficient (\beta parameter) posterior correlation matrix for the model with all triplet interactions using `corrplot::corrplot()`. Assign the `type` argument to `'upper'` and set the `method` argument to `'square'` to visualize the correlation coefficients as colored square "tiles" within an upper triangular matrix.**  
+
+*HINT*: The `cov2cor()` function can be helpful here.  
+
+#### SOLUTION
+
+```{r, solution_01f, eval=TRUE}
+### add as many code chunks as you'd like
+
+SSmat <- t(Xtrips) %*% Xtrips;
+matrix01f <- SSmat %>% 
+  solve() %>% 
+  cov2cor() %>% 
+  corrplot(type = 'upper', method = 'square')
+
+```
+
+## Problem 02
+
+Now that you have a feel for the feature relationships in the model, you will fit Bayesian linear models with independent Gaussian priors on the unknown regression coefficients. As discussed in lecture, Gaussian priors are consistent with the **ridge penalty** in non-Bayesian regularized approaches. Thus, we will refer to these models as Bayesian ridge linear models within this assignment.  
+
+### 2a)
+
+As in previous assignments, you will program the Bayesian model from scratch and use the Laplace Approximation to execute the Bayesian inference. You will use independent Gaussian priors on the $\beta$ parameters with prior means equal to zero, $\mu_{\beta} = 0$, and an Exponential prior on the likelihood noise, $\sigma$, with a prior rate parameter equal to 1. Similar to previous assignments, you will examine the posterior distribution under three different prior specifications by trying out 3 different $\beta$ parameter prior standard deviations. A weak prior will use $\tau_{\beta} = 20$, a strong prior will use $\tau_{\beta} = 1$, and a very strong prior will use $\tau_{\beta} = 0.02$.  
+
+As you did in previous assignments, you must define the list of required information that will be provided to the log-posterior function. The list must include the observed output, `yobs`, the design matrix, `design_matrix`, the prior mean and prior standard deviation on the $\beta$ parameters (`mu_beta` and `tau_beta`, respectively), and the prior rate parameter on $\sigma$, `sigma_rate`.  
+
+**Complete the three code chunks below. In the first, create the list of required information for the weak prior. In the second, create the list of required information for the strong prior. Lastly, create the list of required information for the very strong prior in the third code chunk. The object names correspond to the prior strength and state you are working with the ridge style penalty.**  
+
+#### SOLUTION
+
+```{r, solution_02a_1, eval=TRUE}
+info_weak_ridge <- list(
+  yobs = df$y,
+  design_matrix = Xtrips,
+  mu_beta = 0,
+  tau_beta = 20,
+  sigma_rate = 1
+)
+```
+
+
+```{r, solution_02a_2, eval=TRUE}
+info_strong_ridge <- list(
+  yobs = df$y,
+  design_matrix = Xtrips,
+  mu_beta = 0,
+  tau_beta = 1,
+  sigma_rate = 1
+)
+```
+
+
+```{r, solution_02a_c, eval=TRUE}
+info_very_strong_ridge <- list(
+  yobs = df$y,
+  design_matrix = Xtrips,
+  mu_beta = 0,
+  tau_beta = 0.02,
+  sigma_rate = 1
+)
+```
+
+
+### 2b)
+
+You will now define the log-posterior function for the ridge style penalty (Gaussian priors). The function name is `bayes_ridge_logpost()` to reflect this assignments focus on comparing the prior distribution type. You will continue to use the log-transformation on $\sigma$, and so you will actually define the log-posterior in terms of the regression coefficients $\beta$-parameters and the unbounded log-transformed noise, $\varphi = \log\left[\sigma\right]$.  
+
+The comments in the code chunk below tell you what you need to fill in. The unknown parameters to learn are contained within the first input argument, `unknowns`. You will assume that the unknown $\boldsymbol{\beta}$-parameters are listed before the unknown $\varphi$ parameter in the `unknowns` vector. You must specify the number of $\boldsymbol{\beta}$ parameters programmatically to allow scaling up your function to an arbitrary number of unknowns. You will assume that all variables contained in the `my_info` list (the second argument to `bayes_ridge_logpost()`) are the same fields in the lists of required information defined previously.  
+
+#### SOLUTION
+
+```{r, solution_02b, eval=TRUE}
+bayes_ridge_logpost <- function(unknowns, my_info)
+{
+  # specify the number of unknown beta parameters
+  length_beta <- ncol(my_info$design_matrix)
+  
+  # extract the beta parameters from the `unknowns` vector
+  beta_v <- unknowns[1:length_beta]
+  
+  # extract the unbounded noise parameter, varphi
+  lik_varphi <- unknowns[length_beta + 1]
+  
+  # back-transform from varphi to sigma
+  lik_sigma <- exp(lik_varphi)
+  
+  # extract design matrix
+  X <- my_info$design_matrix
+  
+  # calculate the linear predictor
+  mu <- as.vector(X %*% as.numeric(beta_v))
+  
+  # evaluate the log-likelihood
+  log_lik <- sum(dnorm(x = my_info$yobs,
+                       mean = mu,
+                       sd = lik_sigma,
+                       log = TRUE))
+  
+  # evaluate the log-prior
+  log_prior_beta <- sum(dnorm(x = beta_v,
+                              mean = my_info$mu_beta,
+                              sd = my_info$tau_beta,
+                              log = TRUE))
+  
+  log_prior_sigma <- dexp(x = lik_sigma,
+                          rate = my_info$sigma_rate,
+                          log = TRUE)
+  
+  # add the mean trend prior and noise prior together
+  log_prior <- log_prior_beta + log_prior_sigma
+  
+  # account for the transformation
+  log_derive_adjust <- lik_varphi
+  
+  # sum together
+  return(log_lik + log_prior + log_derive_adjust)
+}
+```
+
+
+### 2c)
+
+The `my_laplace()` function is defined for you in the code chunk below. This function executes the laplace approximation and returns the object consisting of the posterior mode, posterior covariance matrix, and the log-evidence.  
+
+```{r, define_my_laplace_func, eval=TRUE}
+my_laplace <- function(start_guess, logpost_func, ...)
+{
+  # code adapted from the `LearnBayes`` function `laplace()`
+  fit <- optim(start_guess,
+               logpost_func,
+               gr = NULL,
+               ...,
+               method = "BFGS",
+               hessian = TRUE,
+               control = list(fnscale = -1, maxit = 1001))
+  
+  mode <- fit$par
+  post_var_matrix <- -solve(fit$hessian)
+  p <- length(mode)
+  int <- p/2 * log(2 * pi) + 0.5 * log(det(post_var_matrix)) + logpost_func(mode, ...)
+  # package all of the results into a list
+  list(mode = mode,
+       var_matrix = post_var_matrix,
+       log_evidence = int,
+       converge = ifelse(fit$convergence == 0,
+                         "YES", 
+                         "NO"),
+       iter_counts = as.numeric(fit$counts[1]))
+}
+```
+
+
+**Execute the Laplace Approximation for all triplet interactions using the three separate prior specifications (weak, strong, and very strong). Assign the result of the weak prior to `laplace_weak_ridge` object, the result of the strong prior to the `laplace_strong_ridge` object, and the result of the very strong prior to the `laplace_very_strong_ridge` object.**  
+
+**Confirm that the optimization scheme converged successfully for each prior specification.**  
+
+#### SOLUTION
+
+```{r, solution_2c, eval=TRUE}
+### add as many code chunks as you feel are necessary
+laplace_weak_ridge <-my_laplace(rep(0, ncol(Xtrips)+1), bayes_ridge_logpost, info_weak_ridge)
+laplace_strong_ridge <-my_laplace(rep(0, ncol(Xtrips)+1), bayes_ridge_logpost, info_strong_ridge)
+laplace_very_strong_ridge <-my_laplace(rep(0, ncol(Xtrips)+1), bayes_ridge_logpost, info_very_strong_ridge)
+laplace_weak_ridge$converge
+laplace_strong_ridge$converge
+laplace_very_strong_ridge$converge
+```
+
+
+### 2d)
+
+A function is defined for you in the code chunk below. This function creates a coefficient summary plot in the style of the `coefplot()` function, but uses the Bayesian results from the Laplace Approximation. The first argument is the vector of posterior means, and the second argument is the vector of posterior standard deviations. The third argument is the name of the feature associated with each coefficient. This function is similar to `viz_post_coefs()` function in the previous assignment, except that the plot bounds are set to facilitate visualizing the results specific to this assignment.  
+
+```{r, make_coef_viz_function, eval=TRUE}
+viz_post_coefs <- function(post_means, post_sds, xnames)
+{
+  tibble::tibble(
+    mu = post_means,
+    sd = post_sds,
+    x = xnames
+  ) %>% 
+    mutate(x = factor(x, levels = xnames)) %>% 
+    ggplot(mapping = aes(x = x)) +
+    geom_hline(yintercept = 0, color = 'grey', linetype = 'dashed') +
+    geom_point(mapping = aes(y = mu)) +
+    geom_linerange(mapping = aes(ymin = mu - 2 * sd,
+                                 ymax = mu + 2 * sd,
+                                 group = x)) +
+    labs(x = 'feature', y = 'coefficient value') +
+    coord_flip(ylim = c(-15, 15)) +
+    theme_bw()
+}
+```
+
+
+**Create the posterior summary visualizations for regression coefficients associated with the three prior specifications in each of the three code chunks started below. The comment in the code chunk tells you which prior specification you should visualize. You must provide the posterior means and posterior standard deviations for the $\beta$ parameters. Do NOT include the $\varphi$ parameter. The feature names associated with the coefficients can be extracted from the design matrix using the `colnames()` function.**  
+
+#### SOLUTION
+
+```{r, solution_02d_1, eval=TRUE}
+### figure for the weak prior
+viz_post_coefs(laplace_weak_ridge$mode[1:ncol(Xtrips)], sqrt(diag(laplace_weak_ridge$var_matrix))[1:ncol(Xtrips)], colnames(Xtrips))
+```
+
+
+```{r, solution_02d_2, eval=TRUE}
+### figure for the strong prior
+viz_post_coefs(laplace_strong_ridge$mode[1:ncol(Xtrips)], sqrt(diag(laplace_strong_ridge$var_matrix))[1:ncol(Xtrips)], colnames(Xtrips))
+```
+
+
+```{r, solution_02d_3, eval=TRUE}
+#### figure for the very strong prior
+viz_post_coefs(laplace_very_strong_ridge$mode[1:ncol(Xtrips)], sqrt(diag(laplace_very_strong_ridge$var_matrix))[1:ncol(Xtrips)], colnames(Xtrips))
+```
+
+
+### 2e)
+
+Next, you must examine the posterior correlation matrix between the unknown parameters associated with each prior specification. For simplicity, you can include $\varphi$ parameter with the regression coefficients.  
+
+**Create the posterior correlation plot associated with the three prior specifications using `corrplot::corrplot()`. Assign the `type` argument to `'upper'` and the `method` argument to `'square'` in the `corrplot::corrplot()` call. As a hint, the `cov2cor()` function can help you easily calculate the correlation matrix from the posterior covariance matrix.**  
+
+**The comments in the code chunks instruct which prior you should.**  
+
+#### SOLUTION
+
+```{r, solution_02e_1, eval=TRUE}
+### figure for the weak prior
+laplace_weak_ridge$var_matrix %>% 
+  cov2cor() %>% 
+  corrplot(type = 'upper', method = 'square')
+```
+
+```{r, solution_02e_2, eval=TRUE}
+### figure for the strong prior
+laplace_strong_ridge$var_matrix %>% 
+  cov2cor() %>% 
+  corrplot(type = 'upper', method = 'square')
+```
+
+
+```{r, solution_02e_3, eval=TRUE}
+### figure for the very strong prior
+laplace_very_strong_ridge$var_matrix %>% 
+  cov2cor() %>% 
+  corrplot(type = 'upper', method = 'square')
+```
+
+
+### 2f)
+
+**Describe the influence of the prior regularization strength on the posterior. How did the prior regularization strength influence the marginal posterior summaries? Which features are statistically significant for both the weak and strong priors? How does the posterior correlation behave as the prior regularization strength increases? Is the correlation structure the same for all prior strengths?**  
+
+#### SOLUTION
+
+What do you think?  
+1. When the regularization strength becomes larger, the posterior becomes more centralized at 0.
+2. The feature x1:x4 is statistically significant for both the weak and strong priors.
+3. When the regularization strength increases, the posterior correlation decreases.
+4. Not exactly, the correlation structure will change when prior strength changes.
+
+
+## Problem 03
+
+Although we have mostly worked with Gaussian priors in our linear models, we are not only limited to that specific distribution type. For example, if we use the **double exponential** distribution as a prior we are using a distribution consistent with the **lasso penalty** in non-Bayesian regularization. You will repeat the procedure from the previous question, but this time assuming independent **double exponential** prior distributions on the unknown regression coefficients.  
+
+### 3a)
+
+Before programming the log-posterior function, you must write your own function to calculate the density of the double exponential distribution. You are **not** allowed to use an existing density function from a package for this calculation.  
+
+**You must define a function named, `double_exp_density`. This function must have three arguments. The first is the generic random variable, `x`. The second is the location parameter, `mu`. And the third is the scale parameter, `b`. These names are used to be consistent with the slides from lecture. Your function must return the density and not the log-density.**  
+
+**Test that your function is working correctly**.  Assign the first argument the vector `c(-1, -0.5, -0.25)`, the second argument, `mu=0`, and the third argument `b=1`. If your function is correct you should get the following:  
+
+`0.1839397 0.3032653 0.3894004`  
+
+#### SOLUTION
+
+```{r, solution_03a, eval=TRUE}
+### add your code here
+double_exp_density <- function(x, mu, b) {
+  return((1/(2*b)) * exp(-(1/b)*abs(x - mu)))
+}
+```
+
+```{r, eval=TRUE}
+x = c(-1,-0.5,-0.25)
+double_exp_density(x, 0, 1)
+```
+
+
+
+### 3b)
+
+The Double Exponential distribution's scale parameter, `b`, is analogous to the standard deviation of a Gaussian distribution. The scale parameter controls the width of the distribution and thus the uncertainty. As a prior distribution, the scale parameter therefore controls the prior regularization strength. You will try out three different prior specifications of a weak, strong, and very strong prior. However, you must set the Double Exponential distribution's scale parameter so that the variance is the **same** as the Gaussian priors you used in Problem 02. 
+
+**Derive an expression for the prior Double Exponential distribution's scale, $b$, in terms of the prior Gaussian standard deviation, $\tau_{\beta}$ such that the two distributions have the same variance.**  
+
+#### SOLUTION
+
+Add as many equation blocks as you feel are necessary. 
+$$
+2b^{2} = \tau_{\beta}^{2}
+$$
+$$
+b = \frac{\sqrt{2}}{2} \tau_{\beta}
+$$
+
+
+### 3c)
+
+**Visualize the Double Exponential distribution using ggplot() for a random variable between -3 and +3 with location, `mu=0`, and scale parameter, `b`, such that the variance is equal to a standard normal distribution.**  
+
+#### SOLUTION
+
+```{r, solution_03c, eval=TRUE}
+### add as many code chunks as you feel are neceessary
+x <- runif(101, -3, 3)
+b = sqrt(2)/2
+  ggplot(mapping = aes(x = x, y = double_exp_density(x, 0, b))) +
+  geom_line()
+```
+
+
+### 3d)
+
+You will use the Double Exponential as the prior on the regression coefficients ($\beta$ parameters) and thus create a Bayesian Lasso model. Before programming the log-posterior function though, you will setup the lists of required information to support three prior specifications. Those lists are started for you in the code chunks below. The information is similar to your ridge-style Bayesian linear model, but the $\beta$ parameter prior parameters are named `mu_beta` and `b_beta` for the prior location and prior scale, respectively.  
+
+**Complete the three code chunks below by specifying the observed output, `yobs`, the design matrix, `design_matrix`, and the `sigma_rate` parameter consistent with what you did in Problem 02. You will use a prior location parameter, `mu_beta`, equal to 0 for all three prior specifications. The weak Double Exponential distribution must have the prior scale set such that it has the same variance as the weak Gaussian prior. The strong Double Exponential distribution must have the prior scale set such that it has the same variance as the strong Gaussian prior. The very strong Double Exponential distribution must have the prior scale set such that it has the same variance as the very strong Gaussian prior.**  
+
+#### SOLUTION
+
+```{r, solution_03d_1, eval=TRUE}
+info_weak_lasso <- list(
+  yobs = df$y,
+  design_matrix = Xtrips,
+  mu_beta = 0,
+  b_beta = 20/sqrt(2),
+  sigma_rate = 1
+)
+```
+
+
+```{r, solution_03d_2, eval=TRUE}
+info_strong_lasso <- list(
+  yobs = df$y,
+  design_matrix = Xtrips,
+  mu_beta = 0,
+  b_beta = 1/sqrt(2),
+  sigma_rate = 1
+)
+```
+
+
+```{r, solution_03d_c, eval=TRUE}
+info_very_strong_lasso <- list(
+  yobs = df$y,
+  design_matrix = Xtrips,
+  mu_beta = 0,
+  b_beta = 0.02/sqrt(2),
+  sigma_rate = 1
+)
+```
+
+
+### 3e)
+
+You must now define the log-posterior function for the Bayesian lasso model, `bayes_lasso_logpost()`. Think carefully about the differences between the ridge style penalty and the lasso style penalty. You will continue to use the log-transformation on $\sigma$, and so you will actually define the log-posterior in terms of the regression coefficients $\beta$-parameters and the unbounded log-transformed noise, $\varphi = \log\left[\sigma\right]$.  
+
+**Define the log-posterior function by completing the code chunk below for the Bayesian lasso model.**  
+
+**Test out your function for the weak Lasso prior and a guess of -2.2 for all unknown parameters. If your function is coded correctly you should have a log-posterior value of:**  
+
+`-390504.7`  
+
+#### SOLUTION
+
+```{r, solution_03e, eval=TRUE}
+bayes_lasso_logpost <- function(unknowns, my_info)
+{
+  # specify the number of unknown beta parameters
+  length_beta <- ncol(my_info$design_matrix)
+  
+  # extract the beta parameters from the `unknowns` vector
+  beta_v <- unknowns[1:length_beta]
+  
+  # extract the unbounded noise parameter, varphi
+  lik_varphi <- unknowns[length_beta + 1]
+  
+  # back-transform from varphi to sigma
+  lik_sigma <- exp(lik_varphi)
+  
+  # extract design matrix
+  X <- my_info$design_matrix
+  
+  # calculate the linear predictor
+  mu <- as.vector(X %*% as.numeric(beta_v))
+  
+  # evaluate the log-likelihood
+  log_lik <- sum(dnorm(x = my_info$yobs,
+                       mean = mu,
+                       sd = lik_sigma,
+                       log = TRUE))
+  
+  # evaluate the log-prior
+  log_prior_beta <- sum(log(double_exp_density(beta_v,
+                                           my_info$mu_beta,
+                                           my_info$b_beta)))
+  
+  
+  log_prior_sigma <- dexp(x = lik_sigma,
+                         rate = my_info$sigma_rate,
+                         log = TRUE)
+  
+  
+  # add the mean trend prior and noise prior together
+  log_prior <- log_prior_beta + log_prior_sigma
+  
+  # account for the transformation
+  log_derive_adjust <- lik_varphi
+  
+  # sum together
+  return(log_lik + log_prior + log_derive_adjust)
+}
+```
+
+
+Test the function with a guess of -2 for all parameters and the weak lasso prior.  
+
+```{r, solution_03e_b, eval=TRUE}
+### try out the function for the weak lasso prior
+bayes_lasso_logpost(rep(-2.2,ncol(Xtrips)+1), info_weak_lasso)
+```
+
+
+### 3f)
+
+**Execute the Laplace Approximation for all triplet interactions using the three separate Lasso prior specifications (weak, strong, and very strong). Assign the result of the weak prior to `laplace_weak_lasso` object, the result of the strong prior to the `laplace_strong_lasso` object, and the result of the very strong prior to the `laplace_very_strong_lasso` object.**  
+
+**Confirm that the optimization scheme converged successfully for each prior specification.**  
+
+#### SOLUTION
+
+```{r, solution_03f, eval=TRUE}
+### add as many code chunks as you feel are necessary
+laplace_weak_lasso <- my_laplace(rep(0, ncol(Xtrips)+1,), bayes_lasso_logpost, info_weak_lasso)
+laplace_strong_lasso <- my_laplace(rep(0, ncol(Xtrips)+1,), bayes_lasso_logpost, info_strong_lasso)
+laplace_very_strong_lasso <- my_laplace(rep(0, ncol(Xtrips)+1,), bayes_lasso_logpost, info_very_strong_lasso)
+laplace_weak_lasso$converge
+laplace_strong_lasso$converge
+laplace_very_strong_lasso$converge
+
+```
+
+
+### 3g)
+
+You will now visualize the Laplace Approximation's marginal posterior summaries for the regression coefficients, associated with the three separate Lasso style priors.  
+
+**Create the posterior summary visualizations for regression coefficients associated with the three Lasso prior specifications in each of the three code chunks started below. The comment in the code chunk tells you which prior specification you should visualize. You must provide the posterior means and posterior standard deviations for the $\beta$ parameters. Do NOT include the $\varphi$ parameter. The feature names associated with the coefficients can be extracted from the design matrix using the `colnames()` function.**  
+
+#### SOLUTION
+
+```{r, solution_03g_1, eval=TRUE}
+### figure for the weak prior
+viz_post_coefs(laplace_weak_lasso$mode[1:ncol(Xtrips)], sqrt(diag(laplace_weak_lasso$var_matrix))[1:ncol(Xtrips)], colnames(Xtrips))
+```
+
+
+```{r, solution_03g_2, eval=TRUE}
+### figure for the strong prior
+viz_post_coefs(laplace_strong_lasso$mode[1:ncol(Xtrips)], sqrt(diag(laplace_strong_lasso$var_matrix))[1:ncol(Xtrips)], colnames(Xtrips))
+
+```
+
+
+```{r, solution_03g_3, eval=TRUE}
+#### figure for the very strong prior
+viz_post_coefs(laplace_very_strong_lasso$mode[1:ncol(Xtrips)], sqrt(diag(laplace_very_strong_lasso$var_matrix))[1:ncol(Xtrips)], colnames(Xtrips))
+```
+
+
+### 3h)
+
+**How do the marginal posterior summaries associated with the Double Exponential priors (Lasso style) compare with the marginal posterior summaries associated with the Gaussian priors (Ridge style)? What is different about their behavior?**  
+
+#### SOLUTION
+
+What do you think?
+
+The posterior with the Double Exponential priors looks more centralized between -10 and 10 compared with the Gaussian priors. In a weak prior case, the marginal posterior with Lasso style looks more unstable with larger uncertainty interval. 
+In a strong prior case, the marginal posterior with Lasso style also looks more centralized than Ridge style. Especially for the triplet features, the Lasso style has less uncertainty interval. 
+In a very strong prior case, they are both equal 0.
+
+
+### 3i)
+
+**Technically, the Laplace Approximation is not the best approach for executing Bayesian inference with a Double Exponential or Lasso-style prior on the regression coefficients of a linear model. We used the Laplace Approximation here to highlight the major differences with the Gaussian prior. However, why do you think the Laplace Approximation is not truly appropriate to use when we have Double Exponential priors?**
+
+*Note*: The `rstanarm` package uses MCMC sampling to execute Bayesian inference and so can use the Lasso style prior without any issue. The Lasso style prior is available as a prior in that package.  
+
+#### SOLUTION
+
+What do you think? 
+
+Because the basic idea of Laplace approximation is to use Gaussian distribution to approximate other complex distributions. Therefore, we need prior to be a distribution closer to the Gaussian distribution, so that the results obtained are more accurate. The double exponential prior has a "peak", at which the effect of the Laplace approximation is weakened.
+
+## Problem 04
+
+Now that you have explored the mathematical differences between lasso and ridge style penalties in a Bayesian setting, it is time to **blend** the two with the **elastic net** penalty. You will work in a non-Bayesian setting in this problem and so will focus on tuning the two elastic net hyperparameters, the mixing fraction, $\alpha$, and the penalization factor, $\lambda$. You will use the `caret` package to manage the tuning with resampling of the hyperparameters for the elastic net model in `glmnet`.  
+
+The code chunk below loads in the `caret` package for you. You do not need to load in `glmnet`, the `caret` package will manage that when it is called.  
+
+```{r, load_caret, eval=TRUE}
+library(caret)
+```
+
+
+### 4a)
+
+You must specify the resampling scheme that `caret` will use to train, assess, and tune a model. You worked with `caret` in an earlier assignment and there are several examples provided in lecture if you need additional help.  
+
+**Specify the resampling scheme to be 5 fold with 5 repeats. Assign the result of the `trainControl()` function to the `my_ctrl` object. Specify the primary performance metric to be `'RMSE'` and assign that to the `my_metric` object.**  
+
+#### SOLUTION
+
+```{r, solution_04a, eval=TRUE}
+### your code here
+my_ctrl <- trainControl(method = "repeatedcv", number = 5, repeats = 5)
+my_metric <- "RMSE"
+```
+
+
+### 4b)
+
+You must train, assess, and tune an elastic model using the **default** `caret` tuning grid. In the `caret::train()` function you must use the formula interface to specify a model with all triplet interactions to predict the response `y`. Assign the `method` argument to `'glmnet'` and set the `metric` argument to `my_metric`. You must also instruct `caret` to standardize the features by setting the `preProcess` argument equal to `c('center', 'scale')`. Assign the `trControl` argument to the `my_ctrl` object.  
+
+**Train, assess, and tune the `glmnet` elastic net model consisting of all triplet interactions with the defined resampling scheme. Assign the result to the `enet_default` object and print the result to the screen. Which tuning parameter combinations are considered to be the best? Is the best set of tuning parameters more consistent with lasso or ridge regression?**  
+
+#### SOLUTION
+
+```{r, solution_04b, eval=TRUE}
+### your code here
+enet_default <- train(y ~ (.)^3,
+                      data = df,
+                      method = "glmnet",
+                      metric = my_metric,
+                      preProcess = c("center", "scale"),
+                      trControl = my_ctrl)
+enet_default
+
+```
+
+What do you think?  
+
+The best combination is that one with alpha=1 and lambda=0.008321703. The best set of tuning parameters are more consistent with lasso regression, because the formula of elastic net will be the same as lasso regression as the alpha becomes one.
+
+
+### 4c)
+
+Create a custom tuning grid to further tune the elastic net `lambda` and `alpha` tuning parameters.  
+
+**Create a tuning grid with the `expand.grid()` function which has two columns named `alpha` and `lambda`. The `alpha` variable should have 9 evenly spaced values between 0.1 and 0.9. The `lambda` variable should have 25 evenly spaced values in the log-space between the minimum and maximum `lambda` values from the caret default tuning grid. Assign the tuning grid to the `enet_grid` object.**  
+
+**How many tuning parameter combinations are you trying out? How many total models will be fit assuming the 5-fold with 5-repeat resampling approach?**  
+
+#### SOLUTION
+
+```{r, solution_04c, eval=TRUE}
+### your code here
+enet_grid <- expand.grid(alpha = seq(0.1, 0.9, length.out = 9),
+                         lambda = exp(seq(log(min(enet_default$results$lambda)),
+                          log(max(enet_default$results$lambda)),
+                          length.out = 25)))
+enet_grid %>% nrow()
+```
+255 pairs of parameters are tried out. And there will be 225 * 5 * 5 which means 5625 models will be fit.
+
+### 4d)
+
+**Train, assess, and tune the elastic net model with the custom tuning grid and assign the result to the `enet_tune` object. You should specify the arguments to `caret::train()` consistent with your solution in Problem 4b), except you should also assign `enet_grid` to the `tuneGrid` argument.**  
+
+**Do not print the result to the screen. Instead use the default plot method to visualize the resampling results. Assign the `xTrans` argument to `log` in the default plot method call. Use the `$bestTune` field to print the identified best tuning parameter values to the screen. Is the identified best elastic net model more similar to lasso or ridge regression?**  
+
+#### SOLUTION
+
+```{r, solution_04d, eval=TRUE}
+### add more code chunks if you'd like
+enet_tune <- train(y ~ (.)^3,
+                   data = df,
+                   method = "glmnet",
+                   metric = my_metric,
+                   preProcess = c("center", "scale"),
+                   trControl = my_ctrl,
+                   tuneGrid = enet_grid)
+```
+
+```{r, eval=TRUE}
+enet_tune %>% plot(xTrans = log)
+```
+
+```{r, eval=TRUE}
+enet_tune$bestTune
+```
+
+According to this result, I think the identified best elastic net model more similar to lasso regression.
+
+### 4e)
+
+**Print the coefficients to the screen for the tuned elastic net model. Which coefficients are non-zero? Are the results consistent with your Bayesian lasso model results with the strong prior?**  
+
+#### SOLUTION
+
+
+```{r, solution_04e, eval=TRUE}
+### add more code chunks if you'd like
+coef(enet_tune$finalModel, s = enet_tune$bestTune$lambda)
+```
+
+What do you think? 
+
+We have non-zero coefficients:
+
+(Intercept), x2, x3, x5, x6, x1:x2 ,x1:x6, x2:x6, x3:x5, x5:x6, x1:x2:x4, x1:x2:x5
+But they are not consistent with the result from strong Lasso.
+
+### 4f)
+
+`caret` provides several useful helper functions for ranking the features based on their influence on the response. This is known as ranking the variable importances and the `varImp()` function will extract the variable importances from a model for you. Wrapping the `varImp()` result with `plot()` will plot the variable importances with the importance values displayed in a relative scale with 100 corresponding to the most important variable.  
+
+**Plot the variable importances for your tuned elastic net model. Are the rankings consistent with the magnitude of the coefficients you printed to the screen in Problem 4e)?**  
+
+#### SOLUTION
+
+```{r, solution_4f, eval=TRUE}
+plot(varImp(enet_tune))
+```
+
+What do you think?  
+
+The rankings are consistent with the magnitude of the coefficients in 4e.

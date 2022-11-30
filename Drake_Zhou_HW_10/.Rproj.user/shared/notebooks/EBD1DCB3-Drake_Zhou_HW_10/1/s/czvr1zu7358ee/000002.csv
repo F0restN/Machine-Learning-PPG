@@ -1,0 +1,5 @@
+"0","###"
+"0","prob_01_df %>%"
+"0","  ggplot()+"
+"0","  geom_line(mapping = aes(x = x, y = f))+"
+"0","  geom_point(mapping = aes(x = x, y = f))"

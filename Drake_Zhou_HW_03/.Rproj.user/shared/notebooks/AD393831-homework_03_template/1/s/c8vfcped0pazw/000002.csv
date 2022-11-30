@@ -1,0 +1,8 @@
+"0","roc_results <- resamples(list(mod_1 = mod_1_roc,"
+"0","                              mod_2 = mod_2_roc,"
+"0","                              mod_3 = mod_3_roc,"
+"0","                              mod_4 = mod_4_roc,"
+"0","                              mod_5 = mod_5_roc,"
+"0","                              mod_6 = mod_6_roc,"
+"0","                              mod_7 = mod_7_roc,"
+"0","                              mod_8 = mod_8_roc))"

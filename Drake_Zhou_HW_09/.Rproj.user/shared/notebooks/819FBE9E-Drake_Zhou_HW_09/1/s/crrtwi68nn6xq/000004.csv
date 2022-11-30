@@ -1,0 +1,7 @@
+"0","small_laplace_from_inform <- my_laplace(rep(0, ncol(Xmat)), logistic_logpost, info_small_inform)"
+"0","small_laplace_from_inform$mode"
+"1","[1]"
+"1"," -0.9928784"
+"1"," -1.8610769"
+"1","
+"

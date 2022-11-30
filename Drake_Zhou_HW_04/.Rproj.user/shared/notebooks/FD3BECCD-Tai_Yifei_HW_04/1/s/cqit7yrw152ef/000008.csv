@@ -1,0 +1,7 @@
+"0","tibble::tibble("
+"0","  mu = seq(0.1, 0.6, length.out = 101)"
+"0",") %>% "
+"0","  mutate(log_lik = log_likelihood_cal(mu)) %>% "
+"0","  ggplot(mapping = aes(x = mu, y = log_lik)) +  "
+"0","  geom_line() +"
+"0","  geom_vline(xintercept = player_mle)"

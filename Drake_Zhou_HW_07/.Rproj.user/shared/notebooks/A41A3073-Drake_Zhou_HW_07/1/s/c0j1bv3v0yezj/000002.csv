@@ -1,0 +1,6 @@
+"0","info_02_train <- list("
+"0","  yobs = train_02$y,"
+"0","  mu_beta = 0,"
+"0","  tau_beta = 20,"
+"0","  sigma_rate = 1"
+"0",")"

@@ -1,0 +1,8 @@
+"0","###"
+"0","parameters <- rep(-1, ncol(info_01$design_matrix)+1)"
+"0",""
+"0","lm_logpost(parameters, info_01)"
+"1","[1]"
+"1"," -109.5809"
+"1","
+"

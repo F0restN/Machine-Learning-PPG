@@ -1,0 +1,641 @@
+---
+title: "INFSCI 2595 Spring 2022 Homework: 05"
+subtitle: "Assigned February 9, 2022; Due: February 17, 2022"
+author: "YOUR NAME HERE"
+date: "Submission time: February 17, 2022 at 11:00PM EST"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Collaobrators
+
+Include the names of your collaborators here.  
+
+## Overview
+
+This assignment provides practice working with and manipulating Gaussian distributions. You will calculate derivatives, perform change-of-variable transformations, and also start working with the `optim()` function.  
+
+**IMPORTANT**: code chunks are created for you. Each code chunk has `eval=FALSE` set in the chunk options. You **MUST** change it to be `eval=TRUE` in order for the code chunks to be evaluated when rendering the document.  
+
+## Load packages
+
+You will use the `tidyverse` in this assignment, as you have done in the previous assignments.  
+
+```{r, load_packages}
+library(tidyverse)
+```
+
+## Problem 01
+
+Consider a situation where a manufacturing company wants to get a better idea about the **mean** performance of a part they produce. Unfortunately, measuring the performance of that part requires a destructive experiment. Therefore, they would like to test as few parts as possible. Engineers within the company have performed experiments in the past, and so they hope that experience can help in some way.  
+
+To help out this company, we will assume that the part performance can be represented by a Gaussian likelihood, given the mean performance $\mu$ and the noise $\sigma$. We will assume the observations, $x_{n}$, are conditionally independent given those parameters. The joint distribution between $N$ observations can therefore be factored into the product of $N$ likelihoods:  
+
+$$ 
+p\left( \mathbf{x} \mid \mu, \sigma \right) = \prod_{n=1}^{N} \{ \mathrm{normal}\left(x_{n} \mid \mu, \sigma \right) \}
+$$
+
+### 1a)
+
+In order to perform a Bayesian analysis, we will need to specify our prior belief on the unknown parameters. The parameter the engineers are most concerned about is $\mu$. Let's represent our prior belief on $\mu$ with a Gaussian prior parameterized by $\mu_{0}$ and $\tau_{0}$. After asking multiple engineers, it seems that the prior $\pm 2$ standard deviation interval or roughly 95% uncertainty interval around the prior mean, $\mu_{0}$ is between 115 units and 135 units.  
+
+**Based on the interval suggested by the engineers, solve for the $\mu_{0}$ and $\tau_{0}$ parameters for the Gaussian prior on the mean, $\mu$.**  
+
+#### SOLUTION
+
+You may add as many equation blocks as you see fit to answer this question. You can use separate equation blocks for each equation if you would like.  
+
+$$
+\mu_{0} = 135+115 / 2 = 125
+\\ \tau_{0} = \left( 135 - 115\right) / 4 = 5
+$$
+
+### 1b)
+
+Let's examine the prior uncertainty another way besides the 95% prior uncertainty interval.  
+
+**Based on your result in Problem 1a), calculate the 25th and 75th quantile associated with the prior Gaussian on $\mu$.**  
+
+**The interval between these two quantile contains what fraction of the probability mass?**  
+
+#### SOLUTION
+
+You may add as many code chunks as you see fit to answer this question.  
+
+```{r, solution_01b}
+q3 = qnorm(0.75, mean = 125, sd = 5)
+q1 = qnorm(0.25, mean = 125, sd = 5)
+
+#Output
+q3
+q1
+q3-q1
+```
+According to the Standard normal table, 0.6744 deviation represent 50% of the probability.
+
+### 1c)
+
+Besides wanting to produce parts with as high as performance as possible, the manufacturing company has several customer requirements they must satisfy. One of their customers has stated they are concerned if large numbers of parts would have performance values of 117 units or less.  
+
+**Calculate the prior probability that the mean performance, $\mu$ is less than 117, based on your solution to Problem 1a).**  
+
+#### SOLUTION
+
+Add as many code chunks as you see fit to answer this question.  
+```{r, solution_01c}
+pnorm(117, mean = 125, sd = 5)
+```
+
+### 1d)
+
+Most of the engineers feel confident that the process standard deviation, $\sigma$, is known and is $\sigma = 5$ units. We will now use this value of $\sigma$ to estimate the required number of observations to achieve a target posterior standard deviation on the mean performance, $\mu$. 
+
+**Based on $\sigma = 5$ and your result in Problem 1a), how many observations are required to have a posterior standard deviation on $\mu$ to be $\tau_{N} = 2$? How many observations are required to have $\tau_{N} = 0.5$?**  
+
+**You should write out the expression for the number of required observations to achieve this goal and then calculate the values associated with two different $\tau_{N}$ values.**  
+
+#### SOLUTION
+
+You may add as many equation blocks and code chunks as you see fit to answer this question. 
+
+$$
+ \frac{1}{\tau_{N}^{2}} = \frac{1}{\tau_{0}^{2}} + \frac{N}{\sigma^{2}}
+$$
+
+```{r, solution_01d, eval=TRUE}
+
+trials_req = function(t0, tN, sig) {
+  return ( sig^2 * (t0^2 - tN^2) / (tN^2 * t0^2) )
+}
+
+```
+
+```{r, soluton_01d_02}
+trials_req(5, 2, 5)
+trials_req(5, 0.5, 5)
+```
+5.25(or you can say 6) observations are required for $\tau_{N} = 0.5$ and 99 observations for $\tau_{N} = 2$
+
+### 1e)
+
+A small contingent of engineers feel that the others are overly optimistic. This group of engineers feel that the process standard deviation is $\sigma = 15$ units, and they do not feel comfortable specifying such a tight prior on $\mu$. They are worried that a large number of tests will be needed to achieve $\tau_{N} = 3$ units.  
+
+**Based on this small group of engineers, estimate the number of observations required to achieve $\tau_{N} = 3$ assuming $\sigma = 15$ and an infinitely diffuse prior with $\tau_{0} \rightarrow \infty$.**  
+
+**You should first write out the expression for the number of required observations and then calculate the value.**  
+
+#### SOLUTION
+
+You may add as many equation blocks and code chunks as you see fit to answer this question.  
+
+$$
+\frac{1}{\tau_{N}^{2}} = \frac{1}{\tau_{0}^{2}} + \frac{N}{\sigma^{2}} when(\tau_{0} \rightarrow \infty)
+$$
+
+$$
+N = \frac{\sigma^{2}}{\tau_{N}^{2}}
+$$
+```{r, solution_01e}
+trials <- 15^2 / 3^2
+trials
+```
+## Problem 02
+
+In lecture, we introduced the normal-normal model with an unknown mean, $\mu$, and known standard deviation, $\sigma$. Although we discussed the interpretation of the posterior distribution when using the conjugate normal prior on $\mu$, we did not fully derive the posterior. In this problem, you will get practice working with Gaussians by deriving the expression for the *posterior mode* or Max A-Posteriori (MAP) estimate. You do **not** need to *complete the square* to solve this problem. Instead, you will find the MAP by optimizing the un-normalized log-posterior with respect to $\mu$. The recording and notes provided on Canvas which show how to derive the Maximum Likelihood Estimate (MLE) may be helpful with this problem.  
+
+This problem uses the same nomenclature as lecture. The prior on $\mu$ is a Gaussian with prior mean $\mu_{0}$ and prior standard deviation $\tau_{0}$.  
+
+### 2a)
+
+The posterior on $\mu$ given $N$ observations $\mathbf{x}$ and known standard deviation $\sigma$ is proportional to:  
+
+$$ 
+p\left(\mu \mid \mathbf{x}, \sigma\right) \propto \prod_{n=1}^{N} \left( \mathrm{normal} \left( x_n \mid \mu, \sigma \right) \right) \times \mathrm{normal}\left( \mu \mid \mu_0, \tau_0\right)
+$$
+
+The denominator in Bayes' rule is ignored in the above expression. Because of that I will typically refer to the expression above as the *un-normalized* posterior.  
+
+**Write out the expression for the un-normalized log-posterior on $\mu$. You may drop all terms that do not involve $\mu$. You should show several steps and not simply write down the final answer.**  
+
+#### SOLUTION
+
+You may add as many equation blocks as you see fit to answer this question.  
+
+$$
+\log \left[p\left(\mu \mid \mathbf{x}, \sigma\right) \right] \propto \log \left[\prod_{n=1}^{N} \left( \mathrm{normal} \left( x_n \mid \mu, \sigma \right) \right) \right] + \log \left[\mathrm{normal}\left( \mu \mid \mu_0, \tau_0\right) \right]
+$$
+$$
+\log \left[p\left(\mu \mid \mathbf{x}, \sigma\right) \right] \propto \log \left[\prod_{n=1}^{N} \left( \frac{1}{\sqrt{2 \pi \sigma^{2}}} \exp \left(- \frac{1}{2 \sigma^{2}} \left(x_{n} - \mu \right)^{2} \right) \right) \right] + \log \left[\frac{1}{\sqrt{2 \pi \tau_{0}^{2}}} \exp \left(- \frac{1}{2 \tau_{0}^{2}} \left(\mu - \mu_{0} \right)^{2} \right) \right]
+$$
+$$
+\log \left[p\left(\mu \mid \mathbf{x}, \sigma\right) \right] \propto N \log \left(\frac{1}{\sqrt{2 \pi \sigma^{2}}} \right) + \log \left[\prod_{n=1}^{N} \left(\exp \left(- \frac{1}{2 \sigma^{2}} \left(x_{n} - \mu \right)^{2} \right) \right) \right] + \log \left(\frac{1}{\sqrt{2 \pi \tau_{0}^{2}}} \right) + \log \left[\exp \left(- \frac{1}{2 \tau_{0}^{2}} \left(\mu - \mu_{0} \right)^2 \right) \right]
+$$
+$$
+\log \left[p\left(\mu \mid \mathbf{x}, \sigma\right) \right] \propto - \frac{1}{2 \sigma^{2}} \sum_{n=1}^{N} \left[\left(x_{n} - \mu \right)^2 \right] - \frac{1}{2 \tau_{0}^{2}} \left(\mu - \mu_{0} \right)^2
+$$
+
+### 2b)
+
+**Derive the derivative of the un-normalized log-posterior with respect to $\mu$.**  
+
+**Your final answer MUST be written in terms of the sufficient statistic, the sample average $\bar{x}$.**  
+
+#### SOLUTION
+
+You may add as many equation blocks as you see fit to answer this question. 
+
+$$
+\frac{\partial}{\partial \mu} \left(\log \left[p\left(\mu \mid \mathbf{x}, \sigma\right) \right] \right) \propto  \sum_{n=1}^{N} \left[\frac{\partial}{\partial \mu} \left(- \frac{1}{2 \sigma^{2}} \left(x_{n} - \mu \right)^{2} \right) \right] - \frac{1}{2 \tau_{0}^{2}} \frac{\partial}{\partial \mu} \left(\mu - \mu_{0} \right)^{2}
+$$
+$$
+\frac{\partial}{\partial \mu} \left(\log \left[p\left(\mu \mid \mathbf{x}, \sigma\right) \right] \right) \propto 
+\frac{1}{\sigma^{2}} \sum_{n=1}^{N} \left( x_{n} - \mu \right) - \frac{1}{\tau_{0}^{2}} \mu - \mu_{0}
+$$
+$$
+\frac{\partial}{\partial \mu} \left(\log \left[p\left(\mu \mid \mathbf{x}, \sigma\right) \right] \right) \propto 
+\frac{1}{\sigma^{2}} \left( \sum_{n=1}^{N} x_{n} - \sum_{n=1}^{N} \mu \right) - \frac{\mu - \mu_{0}}{\tau_{0}^{2}}
+$$
+$$
+\frac{\partial}{\partial \mu} \left(\log \left[p\left(\mu \mid \mathbf{x}, \sigma\right) \right] \right) \propto 
+N \left( \frac{\bar{x} - \mu}{\sigma^{2}} \right) -\frac{\mu - \mu_{0}}{\tau_{0}^{2}}  
+$$
+### 2c)
+
+**Determine the posterior mode or MAP by setting the derivative expression you determined in Problem 2b) to 0. Denote the posterior mode on $\mu$ as $\mu_{MAP}$.**  
+
+#### SOLUTION
+
+You may add as many equation blocks as you see fit to answer this question.  
+
+$$
+N \left( \frac{\bar{x} - \mu}{\sigma^{2}} \right) -\frac{\mu - \mu_{0}}{\tau_{0}^{2}}  = 0
+$$
+$$
+\mu_{MAP} = \frac{\frac{1}{\tau_{0}^{2}} \mu_{0} + \frac{N}{\sigma^{2}} \bar{x}}{\frac{1}{\tau_{0}^{2}} + \frac{N}{\sigma^{2}}}
+$$
+### 2d)
+
+Your expression for the posterior mode should look familiar. In fact, we worked with the expression for the MAP in lecture, but we referred to that expression by a different name.  
+
+**Your answer in Problem 2c) should be equivalent to an expression provided in lecture. Which expression is it the same as? Why is your result for the posterior mode the same as that expression?**  
+
+*HINT*: What type of distribution is the posterior in this case?  
+
+#### SOLUTION
+
+Type your answer here.  
+
+Posterior Mean. Because Gaussian distribution or standard distribution is unimodal distribution. It's symmetrical which then the mode refers to the local maximum or the peak point. Hence, they are the same.
+
+## Problem 03
+
+In lecture, we discussed learning an unknown mean of a normal likelihood, given a series of observations. We compared the MLE to the Bayesian result with a conjugate normal prior, assuming the measurement standard deviation (the likelihood noise) was known. We qualitatively and graphically discussed the more complicated situation of an unknown mean and unknown noise. We will continue that discussion in our next lecture, where we will see how to approximate the joint posterior with the Laplace Approximation.  
+
+As a stepping stone to the two unknown parameter model, you will work with a normal likelihood but switch which parameters are known and unknown. Thus, you will work with a normal likelihood with a *known* mean, $\mu$, while the standard deviation, $\sigma$, is unknown. The $N$ observations (or measurements) are still denoted as a vector, $\mathbf{x}$.  
+
+The posterior distribution on the unknown $\sigma$ given the observations, $\mathbf{x}$, and the known mean, $\mu$, is proportional to:  
+
+$$ 
+p \left(\sigma \mid \mathbf{x}, \mu\right) \propto p\left(\mathbf{x} \mid \mu, \sigma \right) p\left(\sigma\right)
+$$
+
+We will continue to assume all observations are conditionally independent given the parameters. The likelihood therefore factors into the product of $N$ normal likelihoods, and the posterior is proportional to:  
+
+$$ 
+p \left(\sigma \mid \mathbf{x}, \mu\right) \propto \prod_{n=1}^{N} \left(\mathrm{normal}\left( x_n \mid \mu, \sigma \right) \right) \times  p\left(\sigma\right)
+$$
+
+Notice that the prior distribution must be placed on $\sigma$. The example discussed in lecture used a Uniform distribution as the prior on $\sigma$. However, in this assignment you will work with a different distribution, one that we will work with more when we start fitting regression models. You will use an **Exponential distribution** as the prior on $\sigma$. The shorthand notation for the Exponential distribution is usually $\mathrm{Exp}$, and I will always use a capital $\mathrm{E}$ to denote the distribution and not the exponential function $\exp()$. The Exponential distribution has a single hyperparameter, known as the rate parameter which is usually denoted as $\lambda$. The Exponential probability density function with rate $\lambda$ is:  
+
+$$ 
+\mathrm{Exp}\left(\sigma \mid \lambda\right) = \lambda \exp \left(-\lambda \sigma \right)
+$$
+
+The un-normalized posterior on the unknown likelihood noise, $\sigma$, is therefore:  
+
+$$ 
+p \left(\sigma \mid \mathbf{x}, \mu\right) \propto \prod_{n=1}^{N} \left(\mathrm{normal}\left( x_n \mid \mu, \sigma \right) \right) \times  \mathrm{Exp}\left( \sigma \mid \lambda \right)
+$$
+
+### 3a)
+
+You will now start working with the un-normalized log-posterior for the unknown $\sigma$.  
+
+**You must derive the expression for the un-normalized log-posterior on $\sigma$. You may drop the constant terms and terms that do not directly involve $\sigma$. You do not need to simplify the quadratic portion within the likelihood.**  
+
+#### SOLUTION
+
+Add as many equation blocks as you see fit to answer this question.  
+$$
+\log \left[p \left(\sigma \mid \mathbf{x}, \mu\right) \right] \propto \log \left[\prod_{n=1}^{N} \left( \frac{1}{\sqrt{2 \pi \sigma^{2}}} \exp \left(- \frac{1}{2 \sigma^{2}} \left(x_{n} - \mu \right)^{2} \right) \right) \right] + \log \left[ \lambda \exp \left(-\lambda \sigma \right)\right]
+$$
+$$
+\log \left[p \left(\sigma \mid \mathbf{x}, \mu\right) \right] \propto N \log \left(\frac{1}{\sigma} \right) - \frac{1}{2 \sigma^{2}} \sum_{n=1}^{N} \left[\left(x_{n} - \mu \right)^2 \right] - \lambda \sigma
+$$
+
+### 3b)
+
+When we discussed the normal-normal model for the unknown mean, we talked about the sufficient statistic being the sample average. In this situation, an unknown standard deviation with a known mean, we also have a sufficient statistic, but it is **not** the sample average. The sufficient statistic is defined for you in the equation block below:  
+
+$$ 
+v = \frac{1}{N} \sum_{n=1}^{N}\left( \left(x_n - \mu\right)^2 \right)
+$$
+
+**Simplify your result from Problem 3a) by making use of the sufficient statistic, $v$. Why do you think the quantity $v$ is referred to as being "sufficient"? Does your expression for the un-normalized log-posterior depend on the individual observations after making use of $v$?**  
+
+#### SOLUTION
+
+Add as many equation blocks as you see fit to answer this question. 
+$$
+\log \left[p \left(\sigma \mid \mathbf{x}, \mu\right) \right] \propto N \log \left(\frac{1}{\sigma} \right) - \frac{Nv}{2 \sigma^{2}} - \lambda \sigma
+$$
+Since we have two unknown factor, our sufficient can not be simply represented by the sample average. But as we can see in the formula of V, it actually contains the second variable $\sigma$. With the help of $\sigma$, V now can represent the variance of sample and the "information content". That's why we say $v$ is "sufficient"
+
+After making use of $v$ the expression doesn't depends on individual observations any more.
+
+
+### 3c)
+
+Let's see how the un-normalized log-posterior behaves under a particular set of assumptions. The code chunk below defines a sample size of $N = 21$ and a sufficient statistic $v = 4.2$.  
+
+```{r, set_prob3_assumptions, eval=TRUE}
+N <- 21
+v <- 4.2
+```
+
+
+In this problem, you will define a function `log_post_sigma_unnorm()` which has as input arguments, `sigma`, `N`, `v`, and `lambda`. The argument `sigma` is the $\sigma$ value, `N` is the sample size, `v` is the sufficient statistic, and `lambda` is the prior rate parameter, $\lambda$.  
+
+**Define the `log_post_sigma_unnorm()` function using the arguments and order of the arguments given in the problem statement.**  
+
+#### SOLUTION
+
+```{r, solution_03c, eval=TRUE}
+### set input arguments !!!
+log_post_sigma_unnorm <- function(sigma, N, v, lambda)
+{
+  return(N * log(1 / sigma) - (N * v) / (2 * sigma^2) - lambda * sigma)
+}
+```
+
+
+### 3d)
+
+Let's visualize the log-posterior with respect to $\sigma$. You will use the assigned `N` and `v` variables, and assume that the prior rate parameter is equal to 0.75, $\lambda=0.75$.  
+
+**Complete the code chunk below. Assign a vector of 101 evenly spaced values between 0.5 and 4.5 to the variable `sigma` within the `tibble`. Pipe the result to a `mutate()` call and calculate the log-posterior using the `log_post_sigma_unnorm()` function. The log-posterior should be saved to the variable `log_post`. Pipe the result to `ggplot()` and plot the `sigma` and `log_post` variables as the `x` and `y` aesthetics, respectively. Use a `geom_line()` geometric object.**  
+
+**Does the log-posterior have one or several modes? Does the shape of the log-posterior look like a parabola?**  
+
+#### SOLUTION
+
+```{r, solution_03d, eval=TRUE}
+tibble::tibble(
+  sigma = seq(0.5, 4.5, length.out=101)
+) %>% 
+  mutate(log_post = log_post_sigma_unnorm(sigma = sigma, N = N, v = v, lambda = 0.75)) %>%
+  ggplot(mapping = aes(x = sigma, y = log_post)) +
+  geom_line() 
+```
+
+What do you think?  
+No, it doesn't have several mode, but it doesn't look like a parabola.
+
+### 3e)
+
+Next week in lecture, we will work with the quadratic or Laplace Approximation to approximate the posterior distribution as a Multivariate Normal. Although this can be a useful approximation, it is not appropriate for this type of situation. The likelihood noise, $\sigma$, has a natural lower bound of 0. A Gaussian distribution has no such constraints, and so allows all values from negative infinity to positive infinity! Therefore, even though the prior Exponential distribution respects the bound on $\sigma$, if we apply the Laplace Approximation to approximate the posterior, the lower bound would be violated!  
+
+We need to make use of a transformation in order to overcome this limitation. Since the likelihood noise is lower bounded at 0, we will apply a log-transformation. The transformed variable, $\varphi$, will be equal to the log of $\sigma$. Thus, the transformation or **link** function, $g\left(\right)$, is equal to the log function:  
+
+$$ 
+\varphi = g\left(\sigma\right) = \log \left(\sigma\right)
+$$
+
+The change-of-variables formula, written in terms of the log-density, is given below:  
+
+$$ 
+\log\left(p_{\varphi} \left(\varphi \mid \mathbf{x}, \mu\right) \right) = \log \left( p_{\sigma} \left( g^{-1} \left(\varphi \right) \mid \mathbf{x}, \mu \right) \right) + \log \left( \left| \frac{d}{d\varphi} \left( g^{-1}\left(\varphi\right) \right) \right| \right)
+$$
+
+This may seem like an intimidating expression, but it simply says plug in the expression for $\sigma$ in terms of $\varphi$ (the inverse of the link function) into the log-posterior expression on $\sigma$. Then add in the log of the derivative of the inverse link function with respect to $\varphi$. The recording and notes provided on Canvas about performing change-of-variables with the simple linear z-score transformation can help with further discussion and practice working with the change-of-variables procedure.  
+
+Let's tackle this problem by first determining the log of the derivative of the inverse link function.  
+
+**The link function is the log. What is the inverse link function? Write down the expression for calculating $\sigma$ as a function of $\varphi$. Then calculate the derivative of the inverse link function with respect to $\varphi$. Finally, write down the log of the derivative of the inverse link function.**  
+
+#### SOLUTION
+
+Add as many equation blocks as you see fit to answer this question.
+$$
+\sigma = \exp \left(\varphi \right)
+$$
+
+$$
+\frac{\partial}{\partial \varphi} \sigma = \frac{\partial}{\partial \varphi} \exp \left(\varphi \right)
+$$
+
+$$
+\frac{\partial}{\partial \varphi} \sigma = \exp \left(\varphi \right)
+$$
+$$
+\log \left(\frac{\partial}{\partial \varphi} \sigma \right) = \log \left(\exp \left(\varphi \right) \right)
+$$
+$$
+\log \left(\frac{\partial}{\partial \varphi} \sigma \right) = \varphi
+$$
+
+### 3f)
+
+To handle the substitution portion, you will define a new function `log_post_varphi_unnorm()` which accepts as input arguments, `varphi`, `N`, `v`, and `lambda`. The last three arguments are identical to those in `log_post_sigma_unnorm()`, while the first argument is the value of the transformed variable $\varphi$. Within the function, you must calculate `sigma` based on the supplied value of `varphi` using the correct inverse link function. With the value of `sigma` calculated, you can evaluate the log-posterior just as you did in previously. You must then account for the log-derivative adjustment by correctly adding in the log of the derivative you calculated in Problem 3e).  
+
+**Complete the code chunk below by calculating the quantities specified in the comments.**  
+
+#### SOLUTION
+
+```{r, solution_03f, eval=TRUE}
+### set the input arguments !!!
+log_post_varphi_unnorm <- function(varphi, N, v, lambda)
+{
+  sigma <- exp(varphi)
+  log_post <- log_post_sigma_unnorm(sigma, N, v, lambda)
+  derivative_adj = log_post + varphi
+  return(derivative_adj)
+}
+```
+
+
+### 3g)
+
+Now visualize the un-normalized log-posterior on the transformed variable $\varphi$. The code chunk below is similar to that used Problem 3d), except now you must define a vector of $\varphi$ values instead of $\sigma$ values. In Problem 3d), you calculated an evenly spaced vector of points between 0.5 and 4.5, in the $\sigma$ space. Transform those bounds to the appropriate values in $\varphi$ space and define a vector of 101 evenly spaced points between the transformed bounds. Pipe the result into `mutate()` and calculate the un-normalized log-posterior using the `log_post_varphi_unnorm()` function and save the result to the `log_post` variable. Pipe the result into `ggplot()` and visualize `varphi` and `log_post` as the `x` and `y` aesthetics with a `geom_line()`.  
+
+You will continue to use a prior rate parameter value of 0.75, $\lambda = 0.75$.  
+
+**Visualize the un-normalized log-posterior on the transformed $\varphi$ variable, following the instructions in the problem statement. Does the log-posterior appear more parabolic now?**  
+
+#### SOLUTION
+
+```{r, solution_03g, eval=TRUE}
+tibble::tibble(
+  varphi = seq(log(0.5), log(4.5), length.out = 101)
+) %>% 
+  mutate(log_post = log_post_varphi_unnorm(varphi, N, v, 0.75)) %>% 
+  ggplot(mapping = aes(x = varphi, y = log_post)) +
+  geom_line() 
+```
+
+What do you think?  
+Yes. It now looks more like a parabola than previous. 
+
+## Problem 04
+
+As you have seen in both lecture and the homework assignments, we will work with optimizing likelihoods and posteriors a lot in this course. Although we will work through the derivations for most problems, you will be allowed to use existing general purpose optimization packages to manage the optimization. There are many different optimization frameworks and packages we could try, but we will use `optim()` in base `R` as our optimization engine. This problem introduces you to the `optim()` function so that you may get used to its arguments and syntax.  
+
+### 4a)
+
+You will use `optim()` to find the value of `x` which maximizes the function `sin(x)` over the interval $-5\pi/8$ to $9\pi/8$. First, plot the `sin()` function over this interval. There are multiple ways to accomplish plotting a function within `ggplot2`, the method outlined below is a simple approach to get you further practice working with basic `ggplot2` commands.  
+
+**Use the `seq()` function to create a vector `x` within the `tibble` started in the code chunk below. Set the arguments to `seq()` such that the vector contains 1001 elements from $-5\pi/8$ to $9\pi/8$. Pipe the `tibble` into `ggplot()` and plot the `sin(x)` with `geom_line()`.**  
+
+#### SOLUTION
+
+```{r, solution_04a, eval=TRUE}
+tibble::tibble(
+  x = seq(-(5 * pi / 8), (9 * pi /8), length.out = 1001)
+) %>% 
+  ggplot(mapping = aes(x = x, y = sin(x))) +
+  geom_line()
+```
+
+### 4b)
+
+Let's now optimize the function with `optim()`. Type `?optim` into the R console to bring up the help documentation for the function. The documentation describes the arguments we need to pass into the function. The `par` argument is the first argument to `optim()` and is the initial guess. The second argument, `fn`, is the function we wish to optimize.  
+
+**Use `optim()` to find the `x` value which maximizes `sin()` within the interval of interest. Set the initial guess to 0. Set the `method` in `optim()` to be `"Brent"` and set the `hessian` argument equal to `TRUE`. Set the `lower` and `upper` arguments in the `optim()` to be `-5*pi/8` and `9*pi/8`, respectively. Store the result to `opt_sine_01` and print the result to the screen. Which `control` argument in `optim()` tells `optim()` to maximize instead of minimize? We will not pass in a gradient function, what should `gr` be set to?**  
+
+#### SOLUTION
+
+```{r, solution_04b, eval=TRUE}
+opt_sine_01 <- optim(0,
+                     sin,
+                     gr = NULL,
+                     method = "Brent",
+                     lower = -5*pi/8, upper = 9*pi/8,
+                     hessian = TRUE,
+                     control = list(fnscale = -1))
+opt_sine_01
+
+```
+
+If value of fnscale is negative, then it will turns the problem into a maximization problem. Set gr = null.
+
+### 4c)
+
+**Reperform the `optim()` call from Problem 3b), but this time with an initial guess of 3 instead of 0. Store the result to `opt_sine_02`. Print `opt_sine_02` to the screen.**  
+
+```{r, solution_04c, eval=TRUE}
+opt_sine_02 <- optim(3,
+                     sin,
+                     gr = NULL,
+                     method = "Brent",
+                     lower = - (5 * pi / 8), upper = (9 * pi /8),
+                     hessian = TRUE,
+                     control = list(fnscale = -1))
+
+opt_sine_02
+```
+
+
+### 4d)
+
+We will now practice passing in extra arguments to the function we wish to optimize. We will first create our own custom function, for the following relationship:  
+
+$$ 
+f\left(x \right) = -\mathrm{exp} \left( \left(x - a \right)^m \right)
+$$
+
+You must create a custom function and define a list which stores the necessary or required information needed to evaluate the function.  
+
+**Create the function, `my_func()` for the functional relationship shown in the above equation. The first argument to `my_func()` must be the variable `x`. The second argument will be a list named `constants`. The parameters $a$ and $m$ will be contained within this list as elements `a` and `m`, respectively. After defining `my_func()` create the list `my_constants` with elements `a` set to 0.7 and `m` equal to 2.**  
+
+#### SOLUTION
+
+```{r, solution_04d, eval=TRUE}
+my_func <- function(x, constants)
+{
+  return(-exp((x - constants$a) ^ constants$m))
+}
+
+my_constants <- list(a = 0.7, m = 2)
+```
+
+
+### 4e)
+
+Let's visualize our custom function over the interval -0.5 to 2.  
+
+**Within the `tibble` started below, set the `x` variable equal to the result of the `seq()` function consisting of 501 elements between -0.5 and 2. Pipe the `tibble` into `ggplot()` and plot the result of `my_func()` by passing in the `my_constants` list. Use `geom_line()` as the geometric object.**  
+
+#### SOLUTION
+
+```{r, solution_04e, eval=TRUE}
+tibble::tibble(
+  x = seq(-0.5, 2, length.out = 501)
+) %>% 
+  ggplot(mapping = aes(x = x, y = my_func(x,my_constants))) +
+  geom_line()
+```
+
+
+### 4f)
+
+We will now call `optim()` to optimize our custom function over the interval -0.5 to 2.  
+
+**Use `optim()` to find the `x` value which maximizes `my_func()`. Set the initial guess to 1.75. Set the `method` in `optim()` to be `"Brent"` and set the `hessian` argument equal to `TRUE`. Set the `lower` and `upper` arguments in the `optim()` to be -0.5 and 2, respectively. Which `control` argument in `optim()` tells `optim()` to maximize instead of minimize? We will not pass in a gradient function, what should `gr` be set to? You need to pass the `my_constants` list in order for `my_func()` to execute properly! Store the result to `opt_result` and print the result to the screen.**  
+
+#### SOLUTION
+
+```{r, solution_04f, eval=TRUE}
+opt_result <- optim(1.75,
+                    my_func,
+                    gr = NULL,
+                    my_constants,
+                    method = "Brent",
+                    lower = -0.5, upper = 2,
+                    hessian = TRUE,
+                    control = list(fnscale = -1, maxit = 1001))
+
+opt_result
+```
+If value of fnscale is negative, then it will turns the problem into a maximization problem. Set gr = null.
+
+### 4g)
+
+We will now plot the identified optimal `x` value as a vertical line on top of the function over the interval of interest.  
+
+**Add a vertical line with `geom_vline()` to your plot from Problem 4e). Set the `xintercept` within the `geom_vline()` function equal to the optimal `x` value by accessing the result stored in `opt_result` correctly. Set the color of the vertical line to red.**  
+
+#### SOLUTION
+
+```{r, solution_04g, eval=TRUE}
+tibble::tibble(
+  x = seq(-0.5, 2, length.out = 501)
+) %>% 
+  ggplot(mapping = aes(x = x, y = my_func(x,my_constants))) +
+  geom_line() +
+  geom_vline(xintercept = opt_result$par, color = "red")
+```
+
+
+## Problem 05
+
+Now that you have practiced working with the `optim()` function, it's time to use `optim()` to find the posterior mode or MAP of the unknown $\varphi$ parameter from Problem 03. Because $\varphi$ is unbounded you do not have to include the `lower` and `upper` arguments to the `optim()` function call. Also, specify `method='BFGS'` instead of `method='Brent'` as used in Problem 04. Otherwise the `optim()` function arguments are consistent with the previous questions from Problem 04.  
+
+### 5a)
+
+**Use `optim()` to find the MAP of the log-transformed likelihood noise, $\varphi$, using an initial guess equal to -0.5. Assign all arguments to `optim()` that you feel are required to find the value that maximizes the log-posterior. However, assign the `method='BFGS'` instead of `method='Brent'` as used in Problem 04.**  
+
+**Assign the result to the `varphi_opt_a` object and display the object to the screen.**  
+
+**HINT**: The additional parameters to the function are supplied after `gr`. Those additional arguments should be supplied in the order consistent with the function you are optimizing.  
+
+**Continue to use `lambda = 0.75`**.  
+
+#### SOLUTION
+
+Add as many code chunks as you feel are necessary to solve the problem.  
+```{r, solution_05a, eval=TRUE}
+varphi_opt_a <- optim(-0.5,
+                      log_post_varphi_unnorm,
+                      gr = NULL,
+                      N, v, 0.75,
+                      method = "BFGS",
+                      hessian = TRUE,
+                      control = list(fnscale = -1, maxit = 1001))
+
+varphi_opt_a
+```
+
+### 5b)
+
+**Repeat the `optim()` call from 5a), but this time use an initial guess of 1.35. Assign the result to the `varphi_opt_b` object and display the result to the screen.**  
+
+**Is the posterior mode from the initial guess of 1.35 different from the initial guess of -0.5?**  
+
+#### SOLUTION
+
+Add as many code chunks as you feel are necessary to solve the problem.
+```{r, solution_05b, eval=TRUE}
+varphi_opt_b <- optim(1.35,
+                      log_post_varphi_unnorm,
+                      gr = NULL,
+                      N, v, 0.75,
+                      method = "BFGS",
+                      hessian = TRUE,
+                      control = list(fnscale = -1, maxit = 1001))
+
+varphi_opt_b
+```
+The are the same
+
+### 5c)
+
+Let's confirm the `optim()` identified parameter value is the mode by visualizing the optimal value relative to the log-posterior of the log-transformed noise, $\varphi$.  
+
+**Visualize the un-normalized log-posterior on the transformed $\varphi$ variable, just as you did in Problem 3g). However, this time include the optimal value as a vertical red line with `geom_vline()`.**  
+
+#### SOLUTION
+
+Add as many code chunks as you feel are necessary to solve the problem.  
+
+```{r, solution_05c, eval=TRUE}
+tibble::tibble(
+  varphi = seq(log(0.5), log(4.5), length.out = 101)
+) %>% 
+  mutate(log_post = log_post_varphi_unnorm(varphi, N, v, 0.75)) %>% 
+  ggplot(mapping = aes(x = varphi, y = log_post)) +
+  geom_line() +
+  geom_vline(xintercept = varphi_opt_b$par, color = "red")
+```

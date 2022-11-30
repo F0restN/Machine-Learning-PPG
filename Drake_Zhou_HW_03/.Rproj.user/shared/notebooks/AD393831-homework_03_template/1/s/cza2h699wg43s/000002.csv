@@ -1,0 +1,5 @@
+"0","tibble::tibble(x = 0:100) %>% "
+"0","  mutate(x_bins = cut(x,"
+"0","                      breaks = seq(0, 100, by = 10),"
+"0","                      include.lowest = TRUE)) %>% "
+"0","  count(x_bins)"

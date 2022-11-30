@@ -1,0 +1,774 @@
+---
+title: "INFSCI 2595 Spring 2022 - MIDTERM"
+subtitle: "Assigned February 28, 2022; Due: March 8, 2022"
+author: "Drake Zhou"
+date: "Submission time: March 8, 2022 at 11:00PM EST"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Collaborators
+
+You are **NOT** allowed to collaborate within anyone. Collaboration, copying, and/or cheating of any kind will not be tolerated.  
+
+## Overview
+
+This midterm tests your understanding of the concepts, math, and programming required to learn distributions from data. You are required to perform a mixture of derivations and programming to solve the questions on the exam. **Read the problem statements carefully.**  
+
+**IMPORTANT**: code chunks are created for you. Each code chunk has `eval=FALSE` set in the chunk options. You **MUST** change it to be `eval=TRUE` in order for the code chunks to be evaluated when rendering the document.  
+
+You are allowed to add as many code chunks as you see fit to answer the questions.  
+
+## Load packages
+
+This assignment will use packages from the `tidyverse` suite.  
+
+```{r, load_packages}
+library(tidyverse)
+```
+
+## Problem 01
+
+You have fit discrete and continuous distributions to data, using non-Bayesian and Bayesian approaches. Bayesian analyses require a prior to be formulated, and it can be difficult to understand how a prior is specified in a general setting. This exam seeks to give you some practice doing that by using the **Empirical Bayes** approach. Empirical Bayes is a rather odd sounding name, but the idea is that you will estimate the parameters of the prior using all of the data. It is useful when the data can be structured into **groups**. Some groups might have many observations, while others may have a limited number of samples. Empirical Bayes is useful when there are many groups (potentially in the thousands) that can be used to estimate the prior parameters. Once estimated, the prior is applied to each group separately. In this manner you have made use of data to understand the relevant bounds on your unknowns and specified those bounds within a prior probability distribution. The prior is updated based on each group's data to yield the updated belief (the posterior) for each group. (Note that if we would have very few groups we could not use Empirical Bayes and thus would need to use full Bayesian approaches via multilevel, hierarchical, or partial pooling models.)  
+
+To see how the Empirical Bayes process works you will work with a Sports related application. You are interested in learning the catch probability (or catch rate) in the National Football League (NFL). The catch rate is defined as the number of successful receptions (catches) by a player divided by the number of targets (a target corresponds to a pass thrown at the player). You can therefore consider successfully catching a pass as the **event**, and the number of times the player was targeted as the number of **trials**. The probability of catching a pass is therefore the **event probability** we are interested in learning.  
+
+Let's consider you are working on this application because you were recently hired as a sports analytics intern for an NFL team. You are provided with 3 seasons worth of data (2018, 2019, and 2020) of every player with at least 1 target (thus at least 1 trial). Calculating the catch rate is simple to do. It is also easy to search for and find. For example, [here](https://www.pro-football-reference.com/years/2019/receiving.htm) are the catch rates for all NFL players in the 2019 season. You were hired because the NFL team wishes to move away from simple *point estimates*. The team wants to have a better understanding of the *uncertainty* in the performance. Understanding the uncertainty is critical when evaluating talent, and making decisions for which players to sign in free agency.  
+
+You will work with two datasets for this exam. Both are loaded for you in code chunk below. The first, `df_all`, is the larger of the two. The second, `df_focus`, is a subset of `df_all` so that we way can focus on 23 players to help with visualization and discussion.  
+
+```{r, load_datasets, eval=TRUE}
+url_all <- "https://raw.githubusercontent.com/jyurko/INFSCI_2595_Spring_2022/main/HW/midterm/midterm_all_data.csv"
+df_all <- readr::read_csv(url_all, col_names = TRUE)
+
+url_focus <- "https://raw.githubusercontent.com/jyurko/INFSCI_2595_Spring_2022/main/HW/midterm/midterm_focus_data.csv"
+df_focus <- readr::read_csv(url_focus, col_names = TRUE)
+```
+
+
+Both data sets consist of 3 variables, `player_id`, `num_events`, and `num_trials`. The `num_events` is the number of receptions, and `num_trials` is the number of targets (just written in general terms that we have used in the class). The `player_id` variable is an ID variable for each player. Thus, one row in either data set tells us the number of receptions and number of targets associated with an individual player over the three seasons. The data in this exam are real and were downloaded from the `nflfastR` package (documentation available [here](https://www.nflfastr.com/index.html) if you are interested). The `player_id` variable is an anonymous identification number I created so that NFL fans cannot easily tell which player is which.  
+
+### 1a)
+
+To help understand why Empirical Bayes can be useful, let's suppose you're not sure how to specify an informative prior for this example. Even if you watch every Pittsburgh Steelers' game, you might not know what the average catch rate is in the NFL. Since you do not feel comfortable specifying reasonable bounds, you decide to use a vague prior formulation.  
+
+You will use a Binomial likelihood and a conjugate Beta prior on the unknown catch rate (or event probability in general terms), $\mu$. For generality, you will denote each player with a subscript $j$ and the total number of players as $J$. Thus, the unknown event probability for the $j$-th player is $\mu_j$ where $j=1,...,J$. The posterior distribution on the $j$-th player's unknown catch rate, $\mu_j$ given the $m_j$ catches (events) out of $N_j$ targets (trials) is proportional to:  
+
+$$ 
+p\left(\mu_j \mid \left( m, N \right)_j \right) \propto \mathrm{Binomial}\left(m_j \mid \mu_j, N_j\right) \times \mathrm{Beta} \left( \mu_j \mid a, b\right)
+$$
+
+Notice that in the above posterior formulation, each player has a potentially distinct event probability, $\mu_j$. The prior consists of two shape hyperparameters, $a$ and $b$. The same prior hyperparameters are applied to every player.  
+
+**You will assume prior shape parameters of $a=0.5$ and $b=0.5$. How many "prior trials" or "prior targets" does this specification correspond to? Why do you think it represents being "uninformed" about a process?**  
+
+#### SOLUTION
+
+What do you think?  
+
+Beta is a good distribution for prior if we don't know what exactly probability of a thing. Because it is a probability density function for continuous variables bounded between 0 and 1 and it also gives us the distribution of all probabilities(what is the probability of a probability). In beta distribution, a is number of event while b is the number of non_event and trials = a + b. Given a = 0.5 b = 0.5, we are saying that the number of trial is 1. There is no way set up a prior with 1 trial if we are "informed". Hence, it represent we are "uninformed"
+
+### 1b)
+
+You are using a conjugate prior to the Binomial likelihood, for each player.  
+
+**What type of distribution is the posterior for the unknown event probability, $\mu_j$, for each player, $j=1,...,J$?**  
+
+#### SOLUTION
+
+What do you think?  
+Since we are using a conjugate prior which is beta distribution to the likelihood, according to the principle of conjugate, the posterior is also Beta distribution.
+
+### 1c)
+
+**Write out the formula for the updated or posterior hyperparameters, $a_{new,j}$ and $b_{new,j}$, based on each player's observed number of catches $m_j$ and observed number of targets $N_j$, as well as the prior shape parameters, $a$ and $b$.**  
+
+#### SOLUTION
+
+Add your equation blocks here.
+
+$$
+p\left(\mu_j \mid \left( m, N \right)_j \right) \propto
+\mu^{a+m_{j}} (1-\mu)^{b+N_{j}-m_{j}}
+\\ \text{Hence}
+\\ a_{new,j} = a+m_{j}
+\\b_{new,j} = b+N_{j}-m_{j}
+$$
+
+### 1d)
+
+**Based on your formula in Problem 1c), calculate the updated shape parameters for the `r nrow(df_focus)` players in the `df_focus` `tibble`. You should add two columns using `mutate()` named `anew` and `bnew`. Assign your result to the `post_df_focus_from_vague` object.**  
+
+#### SOLUTION
+
+```{r, solution_01d, eval=TRUE}
+post_df_focus_from_vague <- 
+  df_focus %>%
+  mutate(anew=0.5+num_events, bnew=0.5+num_trials-num_events)
+
+post_df_focus_from_vague
+```
+
+
+### 1e)
+
+**Calculate the posterior mean, 5th quantile, and 95th quantile for each player in `post_df_focus_from_vague`. You should add 3 columns using `mutate()` named `post_avg`, `post_q05`, and `post_q95`. Assign the result to the variable `summary_post_df_focus_from_vague`.**  
+
+#### SOLUTION
+
+```{r, solution_01e, eval=TRUE}
+summary_post_df_focus_from_vague <- post_df_focus_from_vague %>%
+  mutate(post_avg = anew / (anew + bnew),
+         post_q05 = qbeta(0.05, anew, bnew),
+         post_q95 = qbeta(0.95, anew, bnew))
+
+summary_post_df_focus_from_vague
+```
+
+
+### 1f)
+
+You will now visualize the posterior summaries for the `r nrow(df_focus)` players associated with the `df_focus` data set.  
+
+**Pipe `summary_post_df_focus_from_vague` into `ggplot()` and map the `x` aesthetic to `as.factor(player_id)`. You will use the `geom_linerange()` to represent the posterior uncertainty by setting the `ymin` and `ymax` aesthetics to `post_q05` and `post_q95`, respectively. You will display the posterior mean with a `geom_point()` by setting the `y` aesthetic to `post_avg`.**  
+
+**Include the maximum likelihood estimate (MLE) on the event probability as an additional `geom_point()` geom by mapping the `y` aesthetic to the correct value, which you must calculate.**  
+
+**Are there players with MLEs that are outside the posterior uncertainty interval? Are there players with posterior mean values that are quite close to the MLEs?**  
+
+#### SOLUTION
+
+```{r, solution_01f, eval=TRUE}
+summary_post_df_focus_from_vague %>% 
+  ggplot(mapping = aes(x = as.factor(player_id)))+
+  geom_linerange(aes(ymin = post_q05, ymax = post_q95))+
+  geom_point(mapping = aes(y = post_avg, color = "AVG"))+
+  geom_point(mapping = aes(y = num_events / num_trials, color = "MLE"))
+
+```
+
+What do you think?
+There are MLEs that really closed to the outside of uncertainty interval but most of them are covered by the uncertainty interval. There are also several MLEs(e.g. player 260, 607, 636...) that pretty close to the posterior mean.
+
+### 1g)
+
+**You will create a similar visualization to that from Problem 1f), except instead of mapping the `x` aesthetic to `as.factor(player_id)` you will map the `x` aesthetic to `as.factor(num_trials)`. You must also map the `group` aesthetic in each geom to the `player_id` variable. Doing so allows you to "dodge" the posterior summaries for each player associated with each `num_trials` value.**  
+
+To properly apply the dodging, set the `position` argument to be `position = position_dodge(0.2)` in `geom_linerange()` and both `geom_point()` calls. You should not place `position` inside `aes()`, it should be outside `aes()`.  
+
+**Based on your visualization, which players have high posterior uncertainty in the event probability?**  
+
+#### SOLUTION
+
+```{r, solution_01g}
+summary_post_df_focus_from_vague %>% 
+  ggplot(mapping = aes(x = as.factor(num_trials)))+
+  geom_linerange(aes(ymin = post_q05, ymax = post_q95, group = player_id), position = position_dodge(0.2))+
+  geom_point(mapping = aes(y = post_avg, color = "AVG"),position = position_dodge(0.2))+
+  geom_point(mapping = aes(y = num_events / num_trials, color = "MLE"), position = position_dodge(0.2))
+```
+
+What do you think?  
+Those players who has less trials have high posterior uncertainty.
+
+## Problem 02
+
+In Problem 01, you estimated the unknown event probability for each player separately from all other players. Essentially, you were focused on one player at a time. This style of analysis is known as an **unpooled estimate**, since you are not combining or "pooling" the players (or in general terms the "groups") together.  
+
+The opposite view point is to **completely pool** all players together in order to estimate a single unknown event probability $\mu$. For this, you will assume that all players are independent of the others, thus the posterior distribution on the unknown "pooled" event probability, $\mu$, is proportional to:  
+
+$$ 
+p \left( \mu \mid \left( \left(m, N\right)_j \right)_{j=1}^{J} \right) \propto \prod_{j=1}^{J} \left( \mathrm{Binomial} \left(m_j \mid \mu, N_j \right) \right) \times \mathrm{Beta} \left(\mu \mid a, b\right)
+$$
+
+Pay close attention to the subscripts in the above expression. And notice that the prior on the "pooled" unknown $\mu$ relies on the prior shape parameters $a$ and $b$.  
+
+### 2a)
+
+**Write out the log-posterior on the pooled unknown $\mu$ up to a normalizing constant in terms of the observations, $m_j$ and $N_j$ for $j=1,...,J$, and the prior shape parameters, $a$ and $b$. Your result should contain a summation series over the $J$ players.**  
+
+#### SOLUTION
+
+Add as many equation blocks as you feel are necessary to show the steps to derive the answer.
+$$
+p \left( \mu \mid \left( \left(m, N\right)_j \right)_{j=1}^{J} \right) \propto
+\sum_{j=1}^{J} \left( \mu^{m_{j}} (1-\mu)^{N_{j}-m_{j}} \right) \times
+\mu^{a-1} (1-\mu)^{b-1}
+$$
+$$
+p \left( \mu \mid \left( \left(m, N\right)_j \right)_{j=1}^{J} \right) \propto
+\sum_{j=1}^{J} \left( \mu^{a+m_{j}-1} (1-\mu)^{b+N_{j}-m_{j}-1} \right)
+$$
+
+$$
+log\left(p \left( \mu \mid \left( \left(m, N\right)_j \right)_{j=1}^{J} \right) \right) \propto
+log\left( \sum_{j=1}^{J} (\mu^{a+m_{j}-1}) \right) +
+log\left( \sum_{j=1}^{J} (\mu-1)^{b+N_{j}-m_{j}-1} \right)
+$$
+$$
+log\left(p \left( \mu \mid \left( \left(m, N\right)_j \right)_{j=1}^{J} \right) \right) \propto
+\left(\sum_{j=1}^{J} \left(m_{j} \right) + a -1\right) \times \log \left(\mu \right) + \left(\sum_{j=1}^{J} \left(N_{j} - m_{j} \right) +
+ b - 1\right)
+\times
+\log \left(1-\mu \right) 
+$$
+
+### 2b)
+
+The summation series in your solution to 2a) can be simplified by using the average number of events, $\bar{m}$ and the average number of trials $\bar{N}$. The average number of events is defined as:  
+
+$$ 
+\bar{m} = \frac{1}{J} \sum_{j=1}^{J} \left( m_j \right)
+$$
+
+and the average number of trials is defined as:  
+
+$$ 
+\bar{N} = \frac{1}{J} \sum_{j=1}^{J} \left( N_j \right)
+$$
+
+**Write your result from 2a) in terms of $\bar{m}$, $\bar{N}$, $J$, and the prior shape parameters $a$ and $b$.**  
+
+#### SOLUTION
+
+Add as many equation blocks as you feel are necessary to show the steps to derive the answer.
+$$
+log\left(p \left( \mu \mid \left( \left(m, N\right)_j \right)_{j=1}^{J} \right) \right) \propto
+(a+J \bar{m_{j}} -1) \log(\mu) +
+(b+J \bar{N_{j}} -J \bar{m_{j}} -1) \log(1-\mu)
+$$
+
+### 2c)
+
+Your expression in 2b) should look familiar.  
+
+**What type of posterior distribution does the unknown "pooled" estimate $\mu$ have?**  
+
+**Write out the formulas for the posterior or updated hyperparameters for your specified posterior distribution.**  
+
+#### SOLUTION
+
+What do you think?
+It looks like a Beta distribution with two new parameters
+
+Add as many equation blocks as you feel are necessary to show the steps to derive the answer.  
+$$
+\text{Let's define:}
+\\ a_{new} = a + J \bar{m}
+\\ b_{new} = b + J \bar{N} - J\bar{m}
+$$
+$$
+\log (p \left( \mu \mid \left( \left(m, N\right)_j \right)_{j=1}^{J} \right) ) \propto
+\left( a_{new} - 1 \right) \log \left(\mu \right) + 
+\left(b_{new} - 1 \right) \log \left(1 - \mu \right)
+$$
+### 2d)
+
+**Based on your formula in Problem 2c), calculate the updated shape parameters for the `r nrow(df_focus)` players in the `df_focus` `tibble`. You should add two columns using `mutate()` named `anew` and `bnew`. Assign your result to the `post_df_focus_pooled` object.**  
+
+You will still assume a vague prior and thus use $a=b=0.5$ as you did in Problem 01. And remember that we are pooling **all** players together to learn the pooled estimate.  
+
+#### SOLUTION
+
+```{r, solution_02d, eval=TRUE}
+J = nrow(df_focus)
+m_avg = mean(df_focus$num_events)
+N_avg = mean(df_focus$num_trials)
+
+post_df_focus_pooled <- df_focus %>%
+  mutate(anew = 0.5 + J * m_avg,
+         bnew = 0.5 + J * N_avg - J * m_avg)
+
+post_df_focus_pooled
+```
+
+### 2e)
+
+**Calculate the posterior mean, 5th quantile, and 95th quantile for each player in `post_df_focus_pooled`. You should add 3 columns using `mutate()` named `post_avg`, `post_q05`, and `post_q95`. Assign the result to the variable `summary_post_df_focus_pooled`.**  
+
+#### SOLUTION
+
+```{r, solution_02e, eval=TRUE}
+summary_post_df_focus_pooled <- post_df_focus_pooled %>%
+  mutate(post_avg = anew / (anew + bnew),
+         post_q05 = qbeta(0.05, anew, bnew),
+         post_q95 = qbeta(0.95, anew, bnew))
+
+summary_post_df_focus_pooled
+```
+
+### 2f)
+
+**Pipe `summary_post_df_focus_pooled` into `ggplot()` and map the `x` aesthetic to `as.factor(player_id)`. You will use the `geom_linerange()` to represent the posterior uncertainty by setting the `ymin` and `ymax` aesthetics to `post_q05` and `post_q95` respectively. You will display the posterior mean with a `geom_point()` by setting the `y` aesthetic to `post_avg`. Include the maximum likelihood estimate (MLE) on the event probability as an additional `geom_point()` geom by mapping the `y` aesthetic to the correct value, which you must calculate.**  
+
+**Are there players with MLEs that are outside the posterior uncertainty interval? Are there players with posterior mean values that are quite close to the MLEs?**  
+
+#### SOLUTION
+
+```{r, solution_02f}
+summary_post_df_focus_pooled %>%
+  ggplot(mapping = aes(x = as.factor(player_id)))+
+  geom_linerange(aes(ymin = post_q05, ymax = post_q95))+
+  geom_point(mapping = aes(y = post_avg, color = "AVG"))+
+  geom_point(mapping = aes(y = num_events / num_trials, color = "MLE"))
+```
+
+What do you think?  
+Most of MLEs are outside the uncertainty interval. Only one player's MLE (id. 232) is relatively close to posterior average but it is still far. 
+
+### 2g)
+
+Your visualization in Problem 2f) should not "feel right". Something should seem off.  
+
+**Why does the "pooled" estimate seem incorrect for this application?**  
+
+#### SOLUTION
+
+What do you think?  
+Because with pooled estimate we are reaching an average that comes from all players' data rather than individually treat them. Its unfair. Hence, most of the MLEs are outside the uncertainty interval and far away from the average.
+
+## Problem 03
+
+You have now worked through two extremes, the **unpooled** and the completely **pooled** estimates on the unknown event probabilities. You will now try to blend the two approaches to reach a compromise by using the Empirical Bayes approach.  
+
+As stated at the beginning of the document, Empirical Bayes estimates the prior from data. In this setting you are interested in deciding informative values for the prior shape hyperparameters, $a$ and $b$, of the Beta prior on each $\mu_j$. If you have a relevant informative prior you will be able to apply that prior to each player separately (the unpooled approach) while "borrowing strength" from the rest of the data. The Empirical Bayes approach is an approximation to more formal *partial pooling* models where groups with larger sample sizes help estimate parameters associated with small sample size groups. Empirical Bayes is useful when there are hundreds to thousands of separate groups. Estimating the prior hyperparameters from many groups allows specifying relevant informative priors without requiring numerous conversations with Subject Matter Experts (SMEs) and allows the data to provide representative bounds.  
+
+### 3a)
+
+The Beta prior defines the prior belief on a probability (a fraction). From an Empirical Bayes approach, you can therefore view the "data" of interest as the observed "catch rate".  
+
+**Plot the histogram of the "catch rate" for all players in the `df_all` data set. Use the `geom_histogram()` geom and set the `binwidth` to be 0.05.**  
+
+#### SOLUTION
+
+```{r, solution_03a}
+df_all %>%
+  ggplot()+
+  geom_histogram(mapping = aes(x = num_events / num_trials), binwidth = 0.05)
+```
+
+
+### 3b)
+
+**Plot the histogram for all "catch rates" in the `df_all` data set again. However, this time use `facet_wrap()` to break up the visualization into `num_trials > 24`.**  
+
+**What can you say about the observations of the players with greater than 25 targets?**  
+
+#### SOLUTION
+
+What do you think?  
+The distribution of players who has more than 24 trials looks like a bell curve, which looks more plausible. There's no player whose catch rate is about 100% or 0%(exist in the left figure, which is nearly impossible). The majority is between 50% to 75%. This is more reasonable since they are professional player in NFL so they got a very high catch rate. But there's no way they can catch the ball every time, so it won't be 100%.
+
+```{r, solution_03b}
+### 
+df_all %>%
+  ggplot()+
+  geom_histogram(mapping = aes(x = num_events / num_trials), binwidth = 0.05) +
+  facet_wrap(df_all$num_trials > 24)
+```
+
+### 3c)
+
+To keep things simple for now, you will estimate the prior parameters, $a$ and $b$, based only on the players with greater than 24 targets.  
+
+**Use the `filter()` function to keep all players with greater than 24 targets and assign the result to the `df_24` object. Use the `summary()` function to check the summary stats on `num_trials` to make sure you performed the operation correctly.**  
+
+#### SOLUTION
+
+```{r, solution_03c, eval=TRUE}
+df_24 <- df_all %>%
+  filter(num_trials >24)
+
+summary(df_24$num_trials)
+```
+
+
+### 3d)
+
+Since the "catch rate" is a fraction, we can use a Beta distribution as the likelihood of the "fraction" given the shape parameters. Those shape parameters, $a$ and $b$, are unknown and so you must estimate them from the data. Within the Empirical Bayes approach, you will treat this step as finding $a$ and $b$ which **maximize the likelihood**, and so you will not specify prior distributions on the parameters.  
+
+Each observation of the "catch rate" is assumed conditionally independent given the unknown $a$ and $b$ shape parameters. The observed "catch rate" will be denoted as, $\theta_j$, for each player and is defined as:  
+
+$$ 
+\theta_j = \frac{m_j}{N_j}
+$$
+
+The likelihood on all $j=1,...,J$ catch rates is therefore the product of $J$ conditionally independent Beta distributions:  
+
+$$ 
+p \left( \left(\theta_j\right)_{j=1}^{J} \mid a, b\right) = \prod_{j=1}^{J} \mathrm{Beta} \left( \theta_j \mid a, b \right)
+$$
+
+**You will define a log-likelihood function in the style of the log-posterior functions we have used so far this semester by completing the two code chunks below.**  
+
+**In the first code chunk, the list of required information, `info_for_ab`, is defined and contains a single variable `theta`. You must calculate it based on the players in the `df_24` data set.**  
+
+**The second code chunk defines the `my_beta_loglik()` function. The first argument, `unknowns`, is the vector of unknown parameters. The second argument, `my_info`, is the list of required information. The comments and variable names provide hints for actions you should perform to calculate the log-likelihood.**  
+
+**The $a$ and $b$ parameters are lower-bounded at zero and thus you must apply the log-transformation to both parameters. You must properly account for the log-derivative adjustment on both parameters when you calculate the log-likelihood.**  
+
+*NOTE*: Several test points are provided for you to check that you have coded your function correctly.  
+
+#### SOLUTION
+
+Define the list of required information. The observed data in your `my_beta_loglik()` must be named `theta`.  
+
+```{r, solution_03d_a, eval=TRUE}
+info_for_ab <- list(
+  theta = df_24$num_events / df_24$num_trials
+)
+```
+
+Define the Beta log-likelihood. The first element in `unknowns` is the log-transformed $a$ parameter and the second element is the log-transformed $b$ parameter. You are allowed to use built in density functions to complete this question.    
+
+```{r, solution_03d_b, eval=TRUE}
+my_beta_loglik <- function(unknowns, my_info)
+{
+  # unpack the log-transformed shape parameters
+  log_a <- unknowns[1]
+  log_b <- unknowns[2]
+  
+  # back transform
+  a <- exp(log_a)
+  b <- exp(log_b)
+  
+  # calculate the log-likelihood for all observations
+  log_lik <- sum(dbeta(my_info$theta, a, b, log = TRUE))
+
+  # account for the change of variables
+  return(log_lik+log_a+log_b)
+}
+```
+
+Try out values of -2 for both log-transformed parameters. If your function is coded correctly you should get a value of -571.8519.  
+
+```{r, solution_03d_c}
+my_beta_loglik(c(-2, -2), info_for_ab)
+```
+
+Try out values of 2.5 for both log-transformed parameters. If your function is coded correctly you should get a value of -254.3934.  
+
+```{r, solution_03d_d}
+my_beta_loglik(c(2.5, 2.5), info_for_ab)
+```
+
+
+### 3e)
+
+You will now identify the maximum likelihood estimates for $a$ and $b$. You should use the `optim()` function to manage the optimization for you. Be sure to specify the arguments to `optim()` to make sure that `optim()` knows to *MAXIMIZE* and not *MINIMIZE* the function. Set the `method` argument to `"BFGS"` when you call `optim()`. The gradient argument should be set to `NULL`, `gr=NULL`.  
+
+**Try out two different starting guesses values. The first guess, `init_guess_01`, should be zeros for both parameters and the second guess, `init_guess_02`, should be -1 for both parameters.**  
+
+**Assign your `optim()` results to `log_ab_opt_01` and `log_ab_opt_02`.**  
+
+**Do you get the same parameter estimates regardless of your initial guess?**  
+
+#### SOLUTION
+
+Set the initial guesses.  
+
+```{r, solution_03e, eval=TRUE}
+init_guess_01 <- c(0, 0)
+init_guess_02 <- c(-1, -1)
+```
+
+Perform the optimization using the first starting guess.  
+
+```{r, solution_03e_b, eval=TRUE}
+log_ab_res_01 <- optim(init_guess_01,
+                       my_beta_loglik,
+                       gr=NULL,
+                       info_for_ab,
+                       method = "BFGS",
+                       control = list(fnscale = -1, maxit = 1001))
+log_ab_res_01
+```
+
+Perform the optimization using the second starting guess.  
+
+```{r, solution_03e_c, eval=TRUE}
+log_ab_res_02 <- optim(init_guess_02,
+                       my_beta_loglik,
+                       gr=NULL,
+                       info_for_ab,
+                       method = "BFGS",
+                       control = list(fnscale = -1, maxit = 1001))
+log_ab_res_02
+```
+
+**Are the identified log-transformed estimates the same?**  
+Yes, they are very close to each other.
+### 3f)
+
+The optimal parameters in the Problem 3e) are in the log-transformed space.  
+
+**You must back-transform them to calculate the estimates for the prior $a$ and $b$ shape hyperparameters. Assign the back-transformed parameters to `ab_emp_bayes`.**  
+
+**How many a-priori trials does your estimated hyperparameters represent?**  
+
+#### SOLUTION
+
+```{r, solution_03f, eval=TRUE}
+ab_emp_bayes <- exp(log_ab_res_01$par)
+ab_emp_bayes
+```
+
+How many a-priori trials?  
+trials = a + b = 15.79+7.83 = 23.62 ~ 24. Hence, roughly 16 events and 8 non-events and 24 trials(targets)
+
+### 3g)
+
+You will now visualize the prior distribution you calculated using the Empirical Bayes approach and compare it to the histogram of the observed "catch rates" for all players with more than 24 targets.  
+
+**Complete the two code chunks below. In the first, set the `x` variable within the `prior_for_viz` `tibble` to be 1001 evenly spaced points between the minimum observed catch rate in `df_24` and the maximum observed catch rate in `df_24`. Pipe the result into `mutate()` and calculate the beta density using the `ab_emp_bayes` shape hyperparameters and assign the result to the `beta_pdf` variable.**  
+
+**In the second code chunk, pipe the `df_24` `tibble` into `ggplot()` and map the `x` aesthetic to the observed catch rates. Use a `geom_histogram()` geom and set the `binwidth` to be 0.05. Modify the `y` aesthetic so that way `geom_histogram()` displays the estimated density on the `y` axis instead of the count. To do so you must set `y=stat(density)` within `aes()`. Include a `geom_line()` geom and specify the `data` argument to be the `prior_for_viz` object and map the `x` and `y` aesthetics to `x` and `beta_pdf`, respectively. Set the `color` argument (outside the `aes()` call) to be `'red'` and the `size` argument to 1.15.**  
+
+**How does the empirically derived prior distribution on the event probability compare to the observed histogram of the catch rates?**  
+
+*IMPORTANT*: If you are *not* comfortable with your `ab_emp_bayes` values, you may use `shape1=13` and `shape2=8`. These are **not** the correct answers, though they are in the right ballpark...  
+
+#### SOLUTION
+
+Calculate the Beta PDF based on the calculated prior hyperparameters.  
+
+```{r, solution_03g, eval=TRUE}
+prior_for_viz <- tibble::tibble(
+  x = seq(from = min(df_24$num_events / df_24$num_trials), to = max(df_24$num_events / df_24$num_trials), length.out = 1001)
+) %>% 
+  mutate(beta_pdf = dbeta(x, ab_emp_bayes[1], ab_emp_bayes[2]))
+
+prior_for_viz
+```
+
+Visualize the derived prior relative to the observed "catch rates" in the data set.  
+
+```{r, solution_03g_b}
+df_24 %>%
+  ggplot(mapping = aes(x = num_events / num_trials))+
+  geom_histogram(mapping = aes(y = stat(density)), binwidth = 0.05)+
+  geom_line(mapping = aes(x = x, y = beta_pdf), data = prior_for_viz, color = 'red', size = 1.15)
+```
+
+
+### 3h)
+
+**Calculate the 5th and 95th quantiles associated with your informative prior.**  
+
+*IMPORTANT*: If you are *not* comfortable with your `ab_emp_bayes` values, you may use `shape1=13` and `shape2=8`. These are **not** the correct answers, though they are in the right ballpark...  
+
+#### SOLUTION
+
+```{r, solution_03h, eval=TRUE}
+quan_05 = qbeta(0.05, ab_emp_bayes[1], ab_emp_bayes[2])
+quan_95 = qbeta(0.95, ab_emp_bayes[1], ab_emp_bayes[2])
+print(quan_05)
+print(quan_95)
+```
+
+
+
+## Problem 04
+
+You now have everything in place to calculate the posterior on the event probability associated with each player, $\mu_j$. The $a$ and $b$ parameters that you had originally set to both be 0.5, are now equal to your Empirical Bayes estimated values.  
+
+If you are not comfortable with your estimates you may use the same values as in Problem 3g) of `shape1=13` and `shape2=8`.  
+
+### 4a)
+
+**Calculate the updated or new shape parameters for the players in the `df_focus` `tibble`. You should add two columns using `mutate()` named `anew` and `bnew`. Assign your result to the `post_df_focus_empbayes` object.**  
+
+#### SOLUTION
+
+```{r, solution_04a, eval=TRUE}
+post_df_focus_empbayes <- df_focus %>%
+  mutate(anew = num_events + ab_emp_bayes[1],
+         bnew = (num_trials - num_events) + ab_emp_bayes[2])
+```
+
+### 4b)
+
+**Calculate the posterior mean, 5th quantile, and 95th quantile for each player in `post_df_focus_empbayes`. You should add 3 columns using `mutate()` named `post_avg`, `post_q05`, and `post_q95`. Assign the result to the variable `summary_post_df_focus_empbayes`.**  
+
+#### SOLUTION
+
+```{r, solution_04b, eval=TRUE}
+summary_post_df_focus_empbayes <- post_df_focus_empbayes %>%
+  mutate(post_avg = anew / (anew + bnew),
+         post_q05 = qbeta(0.05, anew, bnew),
+         post_q95 = qbeta(0.95, anew, bnew))
+
+summary_post_df_focus_empbayes
+```
+
+### 4c)
+
+You will repeat the visualizations from Problem 1) to understand the effect of your informative prior distribution.  
+
+**Pipe `summary_post_df_focus_empbayes` into `ggplot()` and map the `x` aesthetic to `as.factor(player_id)`. You will use the `geom_linerange()` to represent the posterior uncertainty by setting the `ymin` and `ymax` aesthetics to `post_q05` and `post_q95` respectively. You will display the posterior mean with a `geom_point()` by setting the `y` aesthetic to `post_avg`. Include the maximum likelihood estimate (MLE) on the event probability as an additional `geom_point()` geom by mapping the `y` aesthetic to the correct value, which you must calculate.**  
+
+**How does this visualization compare to those you made using the vague unpooled estimate and the completely pooled estimate?**  
+
+#### SOLUTION
+
+Compared to the figure above, the uncertainty interval has been greatly narrowed down. Besides, it also prevent some restrict outcome from appearing. Especially for those players who has small dataset. For example No.308 who has probability of close to 100%, has more reasonable probability now. 
+
+```{r, solution_04c}
+summary_post_df_focus_empbayes %>%
+  ggplot(mapping = aes(x = as.factor(player_id)))+
+  geom_linerange(aes(ymin = post_q05, ymax = post_q95))+
+  geom_point(mapping = aes(y = post_avg, color = "AVG"))+
+  geom_point(mapping = aes(y = num_events / num_trials, color = "MLE"))
+```
+
+### 4d)
+
+**You will create a similar visualization, except instead of mapping the `x` aesthetic to `as.factor(player_id)` you will map the `x` aesthetic to `as.factor(num_trials)`. You must also map the `group` aesthetic in each geom to the `player_id` variable. Doing so allows you "dodge" the posterior summaries for each player associated with each `num_trials` value.**  
+
+To properly apply the dodging, set the `position` argument to be `position = position_dodge(0.2)` in `geom_linerange()` and both `geom_point()` calls. You should not place `position` inside `aes()`, it should be outside `aes()`.  
+
+#### SOLUTION
+
+```{r, solution_04d}
+summary_post_df_focus_empbayes %>%
+  ggplot(mapping = aes(x = as.factor(num_trials)))+
+  geom_linerange(aes(ymin = post_q05, ymax = post_q95, group = player_id), position = position_dodge(0.2))+
+  geom_point(mapping = aes(y = post_avg, color = "AVG", group = player_id), position = position_dodge(0.2))+
+  geom_point(mapping = aes(y = num_events / num_trials, color = "MLE", group = player_id), position = position_dodge(0.2))
+```
+
+
+### 4e)
+
+You will now calculate the posteriors for *all* players using the Empirical Bayes approach, not just the limited number of players in the "focused" data set.  
+
+**Calculate the updated shape parameters for all players in the `df_all` `tibble`. You should add two columns using `mutate()` named `anew` and `bnew`. Assign your result to the `post_df_all_empbayes` object.**  
+
+#### SOLUTION
+
+```{r, solution_04e, eval=TRUE}
+post_df_all_empbayes = df_all %>%
+    mutate(anew = num_events + ab_emp_bayes[1],
+           bnew = (num_trials - num_events) + ab_emp_bayes[2])
+```
+
+
+### 4f)
+
+**Calculate the posterior mean, 5th quantile, and 95th quantile for each player in `post_df_all_empbayes`. You should add 3 columns using `mutate()` named `post_avg`, `post_q05`, and `post_q95`. Assign the result to the variable `summary_post_df_all_empbayes`.**  
+
+```{r, solution_04f, eval=TRUE}
+summary_post_df_focus_empbayes <- post_df_all_empbayes %>%
+  mutate(post_avg = anew / (anew + bnew),
+         post_q05 = qbeta(0.05, anew, bnew),
+         post_q95 = qbeta(0.95, anew, bnew))
+```
+
+### 4g)
+
+You will now visualize the posterior mean, based on the Empirical Bayes informative prior, relative to the maximum likelihood estimate for the event probability.  
+
+**Create a scatter plot with `ggplot2` where you plot the `post_mean` with respect to the maximum likelihood estimate to the unknown event probability for all players. Map the `color` aesthetic to `num_trials` and include a `geom_abline()` layer with `slope = 1` and `intercept=0`.**  
+
+#### SOLUTION
+
+```{r, solution_04g}
+summary_post_df_focus_empbayes %>%
+  ggplot()+
+  geom_point(mapping = aes(x = (num_events / num_trials), y=post_avg, color = "num_trials"))+
+  geom_abline(slope = 1, intercept = 0, color = "black", linetype = 'dashed')
+```
+
+### 4h)
+
+**Create a scatter plot for the middle 90% uncertainty interval range (difference between the 95th and 5th quantiles) with respect to the `num_trials` using `ggplot2`.**  
+
+#### SOLUTION
+
+```{r, solution_04h}
+summary_post_df_focus_empbayes %>% 
+  ggplot()+
+  geom_point(mapping = aes(x = num_trials, y = post_q95 - post_q05))
+```
+
+### 4i)
+
+**Based on your visualizations in this exam, discuss how an informative prior influences posterior when the sample size is small compared with large sample sizes.**  
+
+#### SOLUTION
+
+What do you think?
+
+First thing first, posterior can be considered as a compromise of prior and likelihood. And Also, the posterior will rule by whichever is more precise. When we have a small sample size, the posterior would become more "controlled" by prior. The sample size will not greatly affect the outcome. On the contrary, if sample size is large enough, the posterior will "controlled" by the observation.
+
+Secondly, the prior help us bounded the posterior which means prevent some extreme value from happening especially when we have a small sample size. For example, if a player get a catch out of only one trial, is his catch rate forcast equal to 100%? That's the result but clearly impossible! The informative prior helps us constrain this kind of extreme result. And also, it clear off some unreasonable value such as negative. 
+
+## Problem 05
+
+Now that you have posterior distributions based on an informative prior for every player in the data set, it is time to consider answering a question the NFL team is interested in. The team wants to identify the best receivers in the data set, and it wants to be confident in that selection. Your Bayesian analysis allows answering probabilistic questions. You will answer several such questions now.  
+
+### 5a)
+
+**Calculate the probability that each player has a catch rate (event probability) of greater than 0.67. Add a column to the `summary_post_df_all_empbayes` object named `prob_grt_67`. Assign the result to a new variable `post_player_eval`.**  
+
+#### SOLUTION
+
+```{r, solution_05a, eval=TRUE}
+post_player_eval = summary_post_df_focus_empbayes %>%
+  mutate(prob_grt_67 = (1 - pbeta(0.67, anew, bnew)))
+```
+
+### 5b)
+
+**Identify the top 10 players based on the posterior probability that their catch rate is greater than 0.67. What do these players all have in common, besides the `prob_grt_67` value?**  
+
+#### SOLUTION
+
+Those players whose posterior probability is higher than 0.67 have high catch rate and large sample size which means their posterior probability is more likely been impacted by observations. What's more, with large sample size, we are more confidence about their posterior.
+
+```{r, solution_05b}
+post_player_eval %>% arrange(desc(prob_grt_67)) %>% head(10)
+```
+
+### 5c)
+
+**Identify the 10 players with the lowest posterior probability that their catch is greater than 0.67. What is the smallest number of targets (trial size) associated with these 10 players?**  
+
+#### SOLUTION
+
+The smallest number of targets is 47.
+
+```{r, solution_05c}
+post_player_eval %>% arrange((prob_grt_67)) %>% head(10)
+```
+
+### 5d)
+
+A player with a large sample size could mean that player is well known, especially around the NFL. The team is interested in identifying players that are not as well known, and yet seem to have high catch rates.  
+
+**Identify 10 players with the smallest sample sizes (number of trials) while still having `prob_grt_67` values greater than 0.75.**  
+
+#### SOLUTION
+
+```{r, solution_05d}
+post_player_eval %>% 
+  filter(prob_grt_67 > 0.75) %>%
+  arrange((num_trials)) %>% 
+  head(10)
+```
+
+
+### 5e)
+
+**Why do you think the questions in this problem were focused on calculating the probability that the catch rate is greater than 0.67? What is the interpretation of such a question?**  
+
+*HINT*: Consider the interpretation of the completely pooled estimate.  
+
+#### SOLUTION
+
+What do you think?  
+
+Because 0.67 is roughly the pooled average estimation which represent the average level of the whole league. So those whose catch rate is higher than 0.67 are players better than the average of league and those whose catch rate is lower than 0.67 are players worse than the average level. 

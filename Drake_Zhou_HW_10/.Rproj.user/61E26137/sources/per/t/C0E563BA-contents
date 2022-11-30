@@ -1,0 +1,1146 @@
+---
+title: "INFSCI 2595 Fall 2021 Homework: 11"
+subtitle: "Assigned November 20, 2021; Due: December 3, 2021"
+author: "Yifei Tai"
+date: "Submission time: December 3, 2021 at 11:00PM EST"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Collaborators
+
+Include the names of your collaborators here.  
+
+## Overview
+
+This assignment focuses on the architecture of single hidden layer feedforward neural networks. You will practice calculating hidden units and neural network responses for a regression task. You will gain experience understanding the interaction between the hidden unit and output layer parameters. You will also fit a regression neural network to data by minimizing the sum of squared errors (SSE).  
+
+**IMPORTANT**: code chunks are created for you. Each code chunk has `eval=FALSE` set in the chunk options. You **MUST** change it to be `eval=TRUE` in order for the code chunks to be evaluated when rendering the document.  
+
+You are allowed to add as many code chunks as you see fit to answer the questions.  
+
+## Load packages
+
+This assignment will use packages from the `tidyverse` suite.  
+
+```{r, load_packages, eval=TRUE}
+library(tidyverse)
+library(ggthemes)
+```
+
+This assignment also uses the `scale_color_colorblind()` function from the `ggthemes` package. If you do not have `ggthemes` already installed please type `install.packages("ggthemes")` into the `R` console, or use the RStudio package installer GUI. You only need to run that command **ONCE**. Once the package is installed, you do **not** need to run the command again.  
+
+## Problem 01
+
+In lecture we discussed that neural networks are just matrix multiplications. Hidden units are essentially transformed linear models. The output layer is a linear basis function model with the hidden units acting as the basis functions. In this problem, you will work through the various matrix calculations. The neural network parameters are provided to you.
+
+As practice, you will work with a noise-free toy problem. The response, $f$, is simply equal to $\mathrm{sin}\left(x\right)$. You will practice neural network calculations to try and approximate that functional relationship.  
+
+The toy dataset is loaded for you in the code chunk below and a glimpse is printed to screen. To distinguish between noisy observations the response is named `f` in the dataset. The input is named `x` as in previous homework assignments.  
+
+```{r, read_prob_01_data, eval=TRUE}
+url_01 <- 'https://raw.githubusercontent.com/jyurko/INFSCI_2595_Fall_2021/main/HW/11/hw_11_prob_01_train.csv'
+
+prob_01_df <- readr::read_csv(url_01, col_names = TRUE)
+
+prob_01_df %>% glimpse()
+```
+
+### 1a)
+
+**Plot `f` with respect to `x` with `ggplot()`. Since the response is noise-free, use a `geom_line()` and a `geom_point()` geoms to make "connect the dots".**  
+
+#### SOLUTION
+
+```{r, solution_01a, eval=TRUE}
+###
+prob_01_df %>% 
+  ggplot(mapping = aes(x = x, y = f)) +
+  geom_line() +
+  geom_point()
+```
+
+### 1b)
+
+A set of neural network parameters are downloaded in the code chunk below. The parameters are stored in a list consisting of two variables. The first, `beta_matrix` is a matrix containing the $\beta$-parameters associated with the hidden units. The second, `alpha_vector`, is a "regular vector" containing the output layer parameters. The list is printed to screen for you.  
+
+```{r, read_prob_01_params_a, eval=TRUE}
+url_load_dir <- 'https://github.com/jyurko/INFSCI_2595_Fall_2021/blob/main/HW/11'
+
+url_load_01_2a <- paste(paste(url_load_dir, "hw_11_prob_01_params_2a.rds", sep = "/"), 
+                        "raw=true",
+                        sep="?")
+
+params_01_2a <- readr::read_rds( file = url_load_01_2a )
+
+params_01_2a
+```
+
+The `$beta_matrix` is constructed such that each column corresponds to a separate *hidden unit* within the hidden layer. The particular neural network model associated with the `params_01_2a` parameters therefore has 2 hidden units.  
+
+**Why does the `$beta_matrix` contain 2 rows and why does `$alpha_vector` consist of 3 elements? What does each $\beta$ parameter correspond to relative to the hidden units?**  
+
+#### SOLUTION
+
+What do you think?  
+
+1.Because the rows of `$beta_matrix` are (D + 1), which means number of inputs plus 1. And there is only one input, so this matrix will have 2 rows.
+
+2.`$alpha_vector` consists of intercept and slopes. The number of slope is same as the number of hidden units. But the intercept must be included, so it must be the number of hidden units plus 1, which means 3.
+
+3.Every column in $\beta$ represents s set of parameters for a hidden unit. So, First colunm corresponds to first hidden unit, and second one corresponds to second hidden unit.
+
+### 1c)
+
+The hidden units consist of two calculations. The first calculates the "linear predictors" based on the inputs and hidden unit parameters. The second is a non-linear transformation of the "linear predictors". We discussed in lecture that there are many possible non-linear transformation functions to use, but the logistic function is a popular choice. Assume the inputs are stored in a design matrix $\mathbf{X}$, which includes a column of 1s, and the hidden unit parameters are stored in a matrix $\mathbf{B}$.  
+
+**Write out the expressions for the linear predictor matrix $\mathbf{A}$ and the non-linear hidden unit values $\mathbf{H}$ assuming a logistic (inverse logit) function is used.**  
+
+#### SOLUTION
+
+Add as many equation blocks as you feel are necessary.  
+$$
+\mathbf{A} = \mathbf{X}\mathbf{B}
+$$
+$$
+\mathbf{H} = g(\mathbf{X}\mathbf{B})
+$$
+$$
+\mathbf{H} = \mathbf{logit}^{-1} (\mathbf{X}\mathbf{B})
+$$
+$$
+\mathbf{H} = \frac{\mathbf{exp(\mathbf{X}\mathbf{B})}}{1 + \mathbf{exp(\mathbf{X}\mathbf{B})}}
+$$
+
+### 1d)
+
+You will now define a function which calculates the hidden unit "linear predictor" and non-linear values. The function is named `calc_hidden_units()` and it has three input arguments. The first, `X`, is the input design matrix, the second, `B`, is the hidden unit parameter matrix, and the third is the non-linear transformation function. The transformation function argument is named `g` to be consistent with the lecture notation of $g\left( \cdot \right)$.  
+
+This function is general and therefore allows passing in an arbitrary non-linear transformation function.  
+
+**Complete the code chunk below. Calculate the linear predictor matrix `A` and the non-linear transformed hidden unit matrix `H`. The results are returned in a list for you.**  
+
+#### SOLUTION
+
+```{r, solution_01d, eval=TRUE}
+calc_hidden_units <- function(X, B, g)
+{
+  ### your code
+  A = X %*% B
+  
+  H = g(A)
+  
+  ### book keeping
+  return(list(A = A, H = H))
+}
+```
+
+### 1e)
+
+You will calculate the hidden units for the `prob_01_df` dataset and the `params_01_2a` parameters. The code chunk below provides a function which visualizes the hidden units with respect to a single input, `x`. You will use this function to interpret the behavior of the hidden units. `viz_hidden_trend_wrt_x()` accepts three input arguments. The first, `v_mat`, is a matrix of hidden unit values. The second, `x_df`, is a `data.frame` which must contain a column named `x`. The third, `trend_type`, is a character string containing the "type" of hidden unit values contained in the `v_mat` matrix. The `trend_type` variable is assigned to the legend title. The `trend_type` argument is used to state whether the resulting figure is plotting the hidden unit "linear predictors" or the non-linear hidden unit values.  
+
+
+```{r, define_hidden_viz_func, eval=TRUE}
+viz_hidden_trend_wrt_x <- function(v_mat, x_df, trend_type)
+{
+  x_df %>% 
+    select(all_of(c("x"))) %>% 
+    tibble::rowid_to_column("obs_id") %>% 
+    left_join(v_mat %>% as.data.frame() %>% 
+                tibble::as_tibble() %>% 
+                purrr::set_names(sprintf("h_%02d", 1:ncol(v_mat))) %>% 
+                tibble::rowid_to_column("obs_id"),
+              by = "obs_id") %>% 
+    pivot_longer(!c("obs_id", "x")) %>% 
+    ggplot(mapping = aes(x = x, y = value)) +
+    geom_vline(xintercept = 0, color = 'grey50') +
+    geom_line(mapping = aes(color = name, group = name),
+              size = 1.15) +
+    ggthemes::scale_color_colorblind(trend_type) +
+    theme_bw() +
+    theme(legend.position = "top")
+}
+```
+
+
+**IMPORTANT**: In this problem you will use the **logistic** function as the non-linear (activation) function.  
+
+**Complete the two code chunks below. You must create the design matrix `X01`. You must call the `calc_hidden_units()` function by passing in the appropriate arguments and storing the result to `nnet_hidden_2a`. Two calls to `viz_hidden_trend()` are started for you. Complete the calls by assigning the correct element from `nnet_hidden_2a`, `A` or `H`, as the first argument to the `viz_hidden_trend()` call.**  
+
+*HINT*: The third argument to `viz_hidden_trend_wrt_x()` tells you to whether to assign the "linear predictors" or the non-linear hidden unit values.  
+
+*HINT*: Use the `$` operator to access the elements from the list `nnet_hidden_2a`.  
+
+*HINT*: What function can we use for the logistic function?  
+
+#### SOLUTION
+
+```{r, eval=TRUE}
+logit_reverse <- function(eta)
+{
+  return(exp(eta) / (1 + exp(eta)))
+}
+
+```
+
+
+```{r, solution_01e_a, eval=TRUE}
+X01 <- model.matrix( ~ x, data = data.frame(x = prob_01_df$x))
+
+nnet_hidden_2a <- calc_hidden_units(X01, params_01_2a$beta_matrix, logit_reverse)
+
+
+```
+
+Visualize the hidden unit trends below.  
+
+```{r, solution_01e_b, eval=FALSE}
+viz_hidden_trend_wrt_x(nnet_hidden_2a$A,
+                       prob_01_df,
+                       "hidden linear predictors")
+
+viz_hidden_trend_wrt_x(nnet_hidden_2a$H,
+                       prob_01_df,
+                       "hidden non-linear units")
+```
+
+### 1f)
+
+**Describe the trends of the hidden linear predictors relative to the $\beta$ parameter values displayed in Problem 1b).**  
+
+#### SOLUTION
+
+What do you think?  
+
+We can see both lines have the same intercept in the hidden linear predictors. But these lines have different slopes. In the $\beta$, the first column is positive, so the slope of black line is positive, and the second is negative, so the slope of orange line is negative.
+
+### 1g)
+
+The neural network response, $f$, is calculated as a linear combination of the non-linear hidden unit values in the output layer. Assume the output layer consists of an intercept (bias) $\alpha_{0}$ and a column vector of slopes (weights) $\boldsymbol{\alpha}$.  
+
+**Write out the expression for the response vector $\mathbf{f}$ given the output layer parameters, $\alpha_{0}$, $\boldsymbol{\alpha}$, and the matrix of non-linear hidden unit values $\mathbf{H}$.**  
+
+#### SOLUTION
+
+Add as many equation blocks as you feel are necessary.  
+
+$$
+\mathbf{f} = \alpha_{0} + \mathbf{H} \boldsymbol{\alpha}
+$$
+$$
+\mathbf{f} = \alpha_{0} + \left[g(\mathbf{X}\mathbf{B}) \right] \boldsymbol{\alpha}
+$$
+$$
+\mathbf{f} = \alpha_{0} + \left[g(\mathbf{X}\mathbf{B}) \right] \boldsymbol{\alpha}
+$$
+
+
+
+### 1h)
+
+As with the hidden units, you will use a function to calculate the neural network response. The code chunk below defines the `calc_nnet_response()` function. It accepts two arguments. The first, `H`, is the matrix of non-linear hidden unit values and the second, `a`, is the "regular vector" of output layer parameters. Note that `a` contains the intercept (the bias) and the slopes (the weights).  
+
+**Complete the code chunk below. You must separate the `a` vector into the intercept (bias) and the slopes (weights). Store the intercept as the `a_0` variable and the slopes as the `a_w` regular vector. You must then convert the `a_w` regular vector into a column vector `a_col`. Finally, you must calculate the response, `f`. The response is returned as a vector for you.**  
+
+#### SOLUTION
+
+```{r, solution_01h, eval=TRUE}
+calc_nnet_response <- function(H, a)
+{
+  ### separate the vector into bias and weights
+  a_0 <- a[1]
+  a_w <- a[c(-1)]
+  
+  # convert the weights to a column vector
+  a_col <- as.matrix(a_w)
+  
+  # calculate the response (the output layer)
+  f <- a_0 + H %*% a_col
+  
+  as.vector(f)
+}
+```
+
+
+### 1i)
+
+With all the calculations completed, let's now compare the neural network response to the true sine wave.  
+
+**Complete the code chunk below by assigning the correct the arguments to the `calc_nnet_response()` function. The rest of the code, which generates the figure, is completed for you.**  
+
+**How would you describe the neural network's fit? Which portions are approximated well?**  
+
+#### SOLUTION
+
+```{r, solution_01i, eval=TRUE}
+prob_01_df %>% 
+  mutate(nnet_f = calc_nnet_response(nnet_hidden_2a$H, params_01_2a$alpha_vector)) %>% 
+  ggplot(mapping = aes(x = x)) +
+  geom_line(mapping = aes(y = nnet_f),
+            color = "black", size = 1.15) +
+  geom_point(mapping = aes(y = f),
+             color = "red", shape = 1, size = 3.5) +
+  labs(y = "f") +
+  theme_bw()
+```
+
+What do you think?  
+
+According to this figure, we can see that the fit seems not very good when x is at the left of -1 and the right of 1. The neural network's fit perform well between -1 and 1.
+
+## Problem 02
+
+You will now repeat your calculations from Problem 1. You will first try out a different set of parameters for a two hidden unit neural network. Then you consider a neural network with 5 hidden units.  
+
+### 2a)
+
+The code chunk below reads in a new set of neural network parameters. The format is consistent with that from Problem 1, in that the hidden unit parameters are contained within the element `$beta_matrix` and the output layer parameters are stored in `$alpha_vector`. The parameters ar e printed to the screen below.  
+
+```{r, read_in_prob_02a_params_b, eval=TRUE}
+url_load_01_2b <- paste(paste(url_load_dir, "hw_11_prob_01_params_2b.rds", sep = "/"), 
+                        "raw=true",
+                        sep="?")
+
+params_01_2b <- readr::read_rds( url_load_01_2b )
+
+params_01_2b
+```
+
+You will use these new parameters to calculate the hidden unit "linear predictors" and the non-linear hidden unit values for the two hidden unit neural network. 
+
+**Complete the code chunk below. Call the `calc_hidden_units()` function with the appropriate arguments and assign the result to the `nnet_hidden_2b` object. Then assign the correct arguments to the `viz_hidden_trend()` functions calls. Are the trends of the hidden unit values (linear and non-linear) consistent with the trends from Problem 1? If not, what would be causing the change? Based on the figures generated in the code chunk below, do you think the resulting neural network will be different from that in Problem 1?**  
+
+#### SOLUTION
+
+```{r, solution_02, eval=TRUE}
+nnet_hidden_2b <- calc_hidden_units(X01, params_01_2b$beta_matrix, logit_reverse)
+
+viz_hidden_trend_wrt_x(nnet_hidden_2b$A, 
+                       prob_01_df,
+                       "hidden linear predictors")
+
+viz_hidden_trend_wrt_x(nnet_hidden_2b$H , 
+                       prob_01_df,
+                       "hidden non-linear units")
+```
+
+What do you think?  
+
+Are the trends of the hidden unit values (linear and non-linear) consistent with the trends from Problem 1? If not, what would be causing the change? Based on the figures generated in the code chunk below, do you think the resulting neural network will be different from that in Problem 1?**  
+
+1.The trends are not consistent with previous one. 
+2.The change of trends happened because of the differences of beta parameters. We can see the values of current beta matrix is different from the previous one. Actually, we changed the weights, so the trends look different.
+3.Yes, because the hidden units are different which means we have different basis functions of the model. So, It will be different. 
+
+### 2b)
+
+Let's now compare the responses associated with the two sets of parameters.  
+
+**Complete the first code chunk below by assigning the correct arguments to the two `calc_nnet_response()` calls. The first call is associated with the parameters from Problem 1, with the result stored to the `nnet_fa` variable. The second call is associated with the new set of parameters, and the result is stored to the `nnet_fb` variable.**  
+
+**The second code chunk is completed for you. It plots the two responses together with the true sine wave output. Based on the figure below, how do the two different neural network models compare?**  
+
+#### SOLUTION
+
+```{r, solution_02b_a, eval=TRUE}
+results_2hidden <- prob_01_df %>% 
+  mutate(nnet_fa = calc_nnet_response(nnet_hidden_2a$H, params_01_2a$alpha_vector),
+         nnet_fb = calc_nnet_response(nnet_hidden_2b$H, params_01_2b$alpha_vector))
+```
+
+Now visualize the neural network predictions and compare to the true sine wave.  
+
+```{r, solution_02b_b, eval=TRUE}
+results_2hidden %>% 
+  pivot_longer(!c("x", "f")) %>% 
+  ggplot(mapping = aes(x = x)) +
+  geom_line(mapping = aes(y = value,
+                          group = name,
+                          linetype = name,
+                          color = name),
+            size = 1.15) +
+  geom_point(mapping = aes(y = f),
+             color = "red", size = 3, shape = 1) +
+  ggthemes::scale_color_colorblind("Model") +
+  scale_linetype_discrete("Model") +
+  labs(y = "f") +
+  theme_bw()
+```
+
+What do you think?  
+
+Two sets of parameters have the same performance on the training reponse.
+
+From the figure, we can see two different neural network models achieved almost the same results. In details, the second model perform better than the first, especially as the x is between about 1.5 and 2.75.
+
+### 2c)
+
+**Based on your results, can you "explain" or interpret the neural network behavior by ONLY examining the slopes (weights) acting on the inputs?**  
+
+#### SOLUTION
+
+What do you think?  
+
+Basically, it works. Because the weights correspond to the slope of the line. The more positive the parameter value is, the more positive the slope of the line will be. So you can roughly determine the trend of the line.
+
+### 2d)
+
+Let's now perform the same type of calculations, but on a neural network with 5 hidden units instead of 2. As before, you will compare two sets of parameters for the 5 hidden unit model. The code chunk below reads in the two different sets of neural network parameters. The format is consistent with that from Problem 1, except now there are more parameters since there are more hidden units.  
+
+
+```{r, read_in_prob_2_5_hidden_params, eval=TRUE}
+url_load_01_5a <- paste(paste(url_load_dir, "hw_11_prob_01_params_5a.rds", sep = "/"), 
+                        "raw=true",
+                        sep="?")
+
+params_02_5a <- readr::read_rds( url_load_01_5a )
+
+url_load_01_5b <- paste(paste(url_load_dir, "hw_11_prob_01_params_5b.rds", sep = "/"), 
+                        "raw=true",
+                        sep="?")
+
+params_02_5b <- readr::read_rds( url_load_01_5b )
+
+params_02_5a
+
+params_02_5b
+```
+
+
+**Calculate the hidden unit "linear predictors" and non-linear values for the two different 5 hidden unit models. Then complete the calls to the `viz_hidden_trend_wrt_x()` function to plot the hidden unit trends with respect to the input.**  
+
+**Describe the trends of the non-linear values for the fifth hidden unit, `h_05`, relative to its "linear predictor" values. Discuss the differences between the two models (sets of parameters).**  
+
+#### SOLUTION
+
+Calculate the hidden unit "linear predictors" and non-linear hidden unit values.  
+
+```{r, solution_02d_a, eval=TRUE}
+nnet_hidden_5a <- calc_hidden_units(X01, params_02_5a$beta_matrix, logit_reverse)
+
+nnet_hidden_5b <- calc_hidden_units(X01, params_02_5b$beta_matrix, logit_reverse)
+```
+
+Visualize the behavior of the hidden units associated with the `params_02_5a` parameters.  
+
+```{r, solution_02d_b, eval=TRUE}
+viz_hidden_trend_wrt_x(nnet_hidden_5a$A, 
+                       prob_01_df,
+                       "hidden linear predictors")
+
+viz_hidden_trend_wrt_x(nnet_hidden_5a$H, 
+                       prob_01_df,
+                       "hidden non-linear units")
+```
+
+Visualize the behavior of the hidden units associated with the `params_02_5b` parameters.  
+
+```{r, solution_02d_c, eval=TRUE}
+viz_hidden_trend_wrt_x(nnet_hidden_5b$A, 
+                       prob_01_df,
+                       "hidden linear predictors")
+
+viz_hidden_trend_wrt_x(nnet_hidden_5b$H, 
+                       prob_01_df,
+                       "hidden non-linear units")
+```
+
+What do you think?  
+
+For the first model, the 
+1.The trend of the linear predictor values for the fifth hidden unit is positive linear because of its positive parameters in beta. And the trend of the non-linear values is S-curve. The trend of linear includes negative part, but the non-linear is always positive.
+2.Since the value of beta parameters are negative in second model, the fifth linear predictor is negative linear. 
+3.When comparing the two models, the S-curve is not uniformly distributed in the nonlinear part because the linear part is relatively larger above zero in the first model. In contrast, the linear part in the second model is relatively more uniform in the parts greater than and less than zero, so the nonlinear part also looks more like a standard S-curve.
+
+### 2e)
+
+Let's now calculate the neural network response for both with 5 hidden units.  
+
+**Complete the first code chunk below by assigning the arguments correctly to the two `calc_nnet_response()` function calls. The first call is intended for the model associated with `params_02_5a` while the second call is intended for the model associated with `params_02_5b`.**  
+
+**The second code chunk is completed for you. How do the two models compare to each other and to the true sine wave?**  
+
+#### SOLUTION
+
+```{r, solution_02e_a, eval=TRUE}
+results_5hidden <- prob_01_df %>% 
+  mutate(nnet_fa = calc_nnet_response(nnet_hidden_5a$H, params_02_5a$alpha_vector),
+         nnet_fb = calc_nnet_response(nnet_hidden_5b$H, params_02_5b$alpha_vector))
+```
+
+Visualize the two neural network model predictions and compare with the true sine wave.  
+
+```{r, solution_02e_b, eval=TRUE}
+results_5hidden %>% 
+  pivot_longer(!c("x", "f")) %>% 
+  ggplot(mapping = aes(x = x)) +
+  geom_line(mapping = aes(y = value,
+                          group = name,
+                          linetype = name,
+                          color = name),
+            size = 1.15) +
+  geom_point(mapping = aes(y = f),
+             color = "red", size = 3, shape = 1) +
+  ggthemes::scale_color_colorblind("Model") +
+  scale_linetype_discrete("Model") +
+  labs(y = "f") +
+  theme_bw()
+```
+
+1.The two models are almost the same. except for the parts less than -1 and greater than 1.
+2.The two models both fit the true sin wave well, but the first is better, especially as the x is at left of the -1 and the right of the 1.
+
+### 2f)
+
+The code chunk below is completed for you. The 2 hidden unit and 5 hidden unit model predictions are compared side by side.  
+
+```{r, solution_02f_a, eval=TRUE}
+results_2hidden %>% 
+  mutate(num_hidden = 2) %>% 
+  bind_rows(results_5hidden %>% 
+              mutate(num_hidden = 5)) %>% 
+  pivot_longer(!c("x", "f", "num_hidden")) %>% 
+  tidyr::separate(name,
+                  c("nnet_word", "fparams"),
+                  sep = "_") %>% 
+  tidyr::separate(fparams,
+                  c("fltr", "paramset"),
+                  sep = 1) %>% 
+  ggplot(mapping = aes(x = x)) +
+  geom_line(mapping = aes(y = value,
+                          group = interaction(paramset,
+                                              num_hidden),
+                          linetype = paramset,
+                          color = paramset),
+            size = 1.15) +
+  geom_point(mapping = aes(y = f),
+             color = "red", size = 3, shape = 1) +
+  facet_grid( ~ num_hidden, labeller = "label_both") +
+  ggthemes::scale_color_colorblind("Params") +
+  scale_linetype_discrete("Params") +
+  labs(y = "f") +
+  theme_bw()
+```
+
+**Based on the figure above, which model, the 2 hidden units or 5 hidden units, performs better? What controls complexity within a neural network model and how could you go about "tuning" that complexity?**  
+
+#### SOLUTION
+
+What do you think?  
+
+The 5 hidden units perform better. The number of parameters will make the complexity changed. Also, weights and hidden units can also change a neural network model. We can tune this by changing the number of parameters, and changing the value of weights and hidden units. Or we can change the logistic function to tune it.
+
+### 2g)
+
+The toy data within Problem 1 and 2 comes from a simple sine wave:  
+
+$$ 
+f\left(x\right) = \mathrm{sin}\left(x\right)
+$$
+
+Let's see if a linear model, using the correct `sin()` basis can correctly identify that the "slope" acting on `sin(x)` is 1.  
+
+**Use the `lm()` function to a fit a linear model for the response `f` and the sine of the input, `sin(x)`. Use the `prob_01_df` data set as the `data` argument to the `lm()` call. Assign the result to the `lm_sine_mod` object.**  
+
+**Print the `summary()` of the `lm()` call to the screen. What is the estimate for the slope associated with the `sin(x)`?**  
+
+#### SOLUTION
+
+```{r, solution_02g, eval=TRUE}
+lm_sine_mod <- lm(f ~ sin(x), data = prob_01_df)
+
+### print the summary to the screen
+summary(lm_sine_mod)
+```
+
+What is the estimate to the slope acting on `sin(x)`?  
+
+It's 1, which means a vertical line.
+
+### 2h)
+
+**How many unknown parameters were there in the linear model with the sine wave basis function? How many unknown parameters existed in the neural network with 5 hidden units?**  
+
+#### SOLUTION
+
+What do you think?  
+
+1.There are two unknown parameters in the linear models.
+
+2.H(D + 1) + H + 1 = 5(1 + 1) + 5 + 1 =16
+
+### 2i)
+
+**It was really simple to fit the linear model. Why would we want to use a neural network when we can build the exact model in this application using `lm()`?**  
+
+#### SOLUTION
+
+What do you think?  
+
+Because there may be some limitation with linear model lm(). And the assignment just try to fit a sin wave, the things may be totally different if we need to fit something hard. The neural network will perfor better with more complex issues.
+
+## Problem 03
+
+In the previous problems, you focused on the predictions of a neural network. You will now work through fitting neural networks, on a slightly more realistic example. The code chunk below reads a data set consisting of 3 continuous inputs, `x1`, `x2`, and `x3`, and a continuous response, `y`. A glimpse of the data set is displayed to the screen for you.  
+
+```{r, read_prob_03_data, eval=TRUE}
+url_03_train <- 'https://raw.githubusercontent.com/jyurko/INFSCI_2595_Fall_2021/main/HW/11/hw_11_prob_03_train.csv'
+
+prob_03_df <- readr::read_csv( url_03_train, col_names = TRUE)
+
+prob_03_df %>% glimpse()
+```
+
+### 3a)
+
+The wide-format data set is converted into a long-format data set for you in the code chunk below. The glimpse displayed to the screen shows that the inputs have been "stacked" or "gathered" together into a column `name` with their values given in the `value` column.  
+
+```{r, make_03_longformat, eval=TRUE}
+prob_03_lf <- prob_03_df %>% 
+  tibble::rowid_to_column("obs_id") %>% 
+  pivot_longer(!c("obs_id", "y"))
+
+prob_03_lf %>% glimpse()
+```
+
+**Plot the noisy response, `y`, with respect to each input using the long-format data set. Using the `geom_point()` geom and create separate facets (subplots) for each input using `facet_wrap()`.**  
+
+**What trends do you see in the scatter plots?**  
+
+#### SOLUTION
+
+```{r, solution_03a, eval=TRUE}
+###
+prob_03_lf %>% 
+  ggplot(mapping = aes(y = y, x = value)) +
+  geom_point() +
+  facet_wrap(~name)
+
+```
+
+1.There is no evident trend in 'x1'
+2.There is a little linear positive correlation in 'x2'
+3.There is a little linear negative correlation in 'x3'
+
+### 3b)
+
+In the previous problems you used a logistic function as the non-linear function associated with each hidden unit. However, there are many different functions that could be used. To get exposure working with a different "activation" function, you will use the hyperbolic tangent function for this problem. Let's first get an idea about how the hyperbolic tangent compares with the logistic function.  
+
+**Complete the code chunk below by setting `x` to be 101 equally spaced points between -5.5 and 5.5. Calculate the the logistic function of `x` and assign the result to `logistic_result`. Calculate the hyperbolic tangent of `x` and assign the result to `tanh_result`. The result of the code chunk is completed for you. It visualizes the non-linear transformations with respect to the `x` variable.**  
+
+**Is the hyperbolic tangent function similiar to the logistic function? In what ways are the two different?**  
+
+*HINT*: The hyperbolic tangent function in `R` is `tanh()`.  
+
+```{r, solution_03b, eval=TRUE}
+tibble::tibble(
+  x = seq(-5.5, 5.5 , length.out = 101)
+) %>% 
+  mutate(logistic_result = logit_reverse(x),
+         tanh_result = tanh(x)) %>% 
+  # rest of the code here is completed for you
+  pivot_longer(!c("x")) %>% 
+  ggplot(mapping = aes(x = x, y = value)) + 
+  geom_hline(yintercept = c(-1, 0, 1),
+             color = 'grey50', linetype = 'dashed') +
+  geom_line(mapping = aes(y = value,
+                          color = name,
+                          linetype = name),
+            size = 1.15) +
+  ggthemes::scale_color_calc("") +
+  scale_linetype_discrete("") +
+  theme_bw() +
+  theme(legend.position = "top") 
+```
+
+They both are S-curve type function. But the thah() is between -1 and +1. It allows negative hidden unit responses, compared to the logistic function.
+
+
+### 3c)
+
+You will fit the neural network by minimizing the sum of squared errors (SSE). Thus, we will work with a non-probabilistic setting, even though we derived the linear and generalized linear model fitting with likelihoods and priors. Remember that minimizing the SSE is analogous to maximizing a Gaussian log-likelihood!  
+
+**Write the expression for the SSE using the observed response $y$ and the neural nework response $f$. You may write the SSE in either the summation or matrix/vector notation. If you use a summation notation use the subscript $n$ to denote a single observation. If you use matrix/vector notation denote the response vector as $\mathbf{y}$.**  
+
+#### SOLUTION
+
+Add as many equation blocks as you feel are necessary.  
+$$
+\mathbf{SSE} = (\mathbf{y}-f)^T(\mathbf{y}-f)
+$$
+
+### 3d)
+
+You will now program the error function we wish to minimize in the style of the log-posterior functions from earlier homework assignments. You will name your function `my_neuralnet_sse()`. It will consist of two input arguments, a vector of parameters to learn and a list of required information. Before defining the function, you will create the list of required information, which is started for you in the code chunk below. Notice that the structure is similar to the lists of information created for the generalized linear models. However, two pieces of information not associated with GLMs are required for the neural network. The variable `$num_hidden` specifies the number of hidden units and the variable `$transform_hidden` stores the non-linear transformation function to apply to each hidden unit.  
+
+You will start out with a small neural network consisting of 3 hidden units. You will use the hyperbolic tanget as the non-linear transformation function, instead of the logistic function that you worked with in the previous problems. You will therefore need to assign the `tanh()` function correctly to the `$transform_hidden` field in the list. Be careful about the `()` when assigning the function *object*!  
+
+You will need to specify the design matrix for your neural network based on the 3 inputs in the `prob_03_df` data set. Think carefully how the design matrix is structured in a neural network.  
+
+**Complete the list of required information by completing the code chunk below. You must create the design matrix based on the three inputs. Assign the design matrix to the `$design_matrix` variable in the list. Assign the observed responses to the `$yobs` variable in the list. Set the number of hidden units to be 3.**  
+
+**After specifying the `info_three_units` list, calculate the total number of parameters in the single hidden layer neural network with 3 hidden units and assign the result to the `info_three_units$num_params` variable.**  
+
+#### SOLUTION
+
+The code chunk is started for you below.  
+
+```{r, solution_03d, eval=TRUE}
+### design matrix
+Xmat_03 <- model.matrix(y ~ x1 + x2 + x3, data = prob_03_df)
+
+info_three_units <- list(
+  yobs = prob_03_df$y,
+  design_matrix = Xmat_03,
+  num_hidden = 3,
+  transform_hidden = tanh
+)
+
+info_three_units$num_params <- (info_three_units$num_hidden) * ncol(info_three_units$design_matrix) + info_three_units$num_hidden + 1
+```
+
+The total number of hidden units you calculated in the above code chunk are printed to the screen below.  
+
+```{r, solution_03d_b, eval=TRUE}
+info_three_units$num_params
+```
+
+
+### 3e)
+
+You will now define the $SSE$ objective in the `my_neuralnet_sse()` function below. As described previously, the function consists of two input arguments. The first argument, `theta`, contains all of the unknown parameters to learn. The vector is organized with all hidden unit parameters listed before the output layer parameters. The first part of the `my_neuralnet_sse()` function has several portions completed for you. **You are responsible for determining the number of hidden unit parameters (the betas) for each hidden unit.** You should **not** hard code `length_beta_per_unit`. You must then calculate the total number of hidden unit parameters and assign the result to `total_num_betas`. Again you should **not** hard code this number because later on you will try out more hidden units.  
+
+The hidden unit parameters are extracted from the `theta` vector and organized into the `Bmat` matrix with dimensions consistent with the $\mathbf{B}$ described in Problem 01 and 02.  
+
+The output layer parameters are extracted for you and assigned to the `a_all` vector. You must reorganize the output layer parameters by separating the bias, `a0`, and output layer weights, `aw`. The bias should be a scalar quantity and the output layer weights should be a "regular vector".  
+
+You must complete the function by performing the necessary matrix math calculations, transformations, and calculation of the $SSE$. The comments in the function describe what you must complete in each line.  
+
+After completing the function, test that it works using two separate guesses for the unknown parameters. First set all parameters to a value of 0, then set all parameters to a value of -1.25. If your function is specified correctly the $SSE$ should be `683.113` for the guess of all 0's and it should be `2238.39` for the guess -1.25 for all parameters.  
+
+**Complete the `my_neuralnet_sse()` function below and test it's operation with the two guesses specified in the problem statement.**  
+
+#### SOLUTION
+
+The `my_neuralnet_sse()` function is started for you in the code chunk below.  
+
+```{r, solution_03e, eval=TRUE}
+my_neuralnet_sse <- function(theta, my_info)
+{
+  # extract the hidden unit parameters
+  X <- my_info$design_matrix
+  length_beta_per_unit <- ncol(X) # how many betas are there???????
+  total_num_betas <- length_beta_per_unit * my_info$num_hidden # how many total betas are there???????
+    
+  beta_vec <- theta[1:total_num_betas]
+  
+  # reorganize the beta parameters into a matrix
+  Bmat <- matrix(beta_vec, nrow = length_beta_per_unit, byrow = FALSE)
+  
+  # extract the output layer parameters
+  a_all <- theta[(total_num_betas + 1):length(theta)]
+  
+  # reorganize the output layer parameters by extracting
+  # the output layer intercept (the bias)
+  a0 <- a_all[1] # output layer bias??????
+  aw <- a_all[c(-1)] # output layer weights?????
+  
+  # calculate the linear predictors associated with
+  # each hidden unit
+  A <- X %*% Bmat
+  
+  # pass through the non-linear transformation function
+  H <- my_info$transform_hidden(A)
+  
+  # calculate the response (the output layer)
+  f <- a0 + H %*% as.matrix(aw)
+  
+  # calculate the SSE
+  
+  return(t(my_info$yobs - f) %*% (my_info$yobs - f))
+  
+}
+```
+
+Test out your `my_neuralnet_sse()` function with values of 0 for all parameters.  
+
+```{r, solution_03e_b, eval=TRUE}
+my_neuralnet_sse(rep(0, info_three_units$num_params), info_three_units)
+```
+
+Test out your `my_neuralnet_sse()` function with values of -1.25 for all parameters.  
+
+```{r, solution_03e_c, eval=TRUE}
+my_neuralnet_sse(rep(-1.25, info_three_units$num_params), info_three_units)
+```
+
+### 3f)
+
+With the objective function completed, it's now time to fit the simple neural network with 3 hidden units. You will use the `optim()` function to perform the optimization, just as you have done in the previous assignments. Since we are focused on finding the estimates at the moment, you will work with `optim()` itself, rather than within the `my_laplace()` wrapper as in previous assignments.  
+
+You will fit two neural networks from two different starting guess values. The first starting guess will be a vector of 0's, and the second guess will be -1.25 for all parameters. Complete the two code chunks below by specifying the initial guesses correctly and completing the remaining input arguments to the `optim()` call. You must set the `gr` argument to `r NULL` so that `optim()` uses finite differences to estimate the gradient vector. Pass in the `info_three_units` list of required information to both `optim()` calls. Specify the `method` argument to be `"BFGS"` to use the quasi-Newton BFGS algorithm. Set the `hessian` argument to be `r FALSE` which forces the Hessian matrix to **NOT** be estimated at the end. We are simply interested in the point estimates at the moment and so we will not be concerned with the curvature of the error surface. The maximum number of iterations is set for you in both `optim()` calls already.  
+
+**Complete both code chunks below in order to fit the three hidden unit neural network with two different starting guesses. Follow the instructions in the problem statement to specify all the arguments to the `optim()` calls.**  
+
+**After fitting, print out the identified optimal parameters contained in the `$par` field of the `optim()` results for both cases. Are the identified optimal parameter values the same between the two starting guesses? Why would the results not be the same?**  
+
+#### SOLUTION
+
+Fit the neural network with the initial guess of 0's for all parameters.  
+
+```{r, solution_03f_a, eval=TRUE}
+optim_fit_3_a <- optim(rep(0, info_three_units$num_params),
+                       my_neuralnet_sse,
+                       gr = NULL,
+                       info_three_units,
+                       method = "BFGS",
+                       hessian = FALSE,
+                       control = list(maxit = 5001))
+```
+
+
+Fit the neural network with the initial guess of -1.25 for all parameters.  
+
+```{r, solution_03f_b, eval=TRUE}
+optim_fit_3_b <- optim(rep(-1.25, info_three_units$num_params) ,
+                       my_neuralnet_sse ,
+                       gr = NULL ,
+                       info_three_units ,
+                       method = "BFGS" ,
+                       hessian = FALSE ,
+                       control = list(maxit = 5001))
+```
+
+
+Compare the optimized parameter estimates.  
+
+```{r, solution_03f_c, eval=TRUE}
+###
+optim_fit_3_a
+```
+
+```{r, eval=TRUE}
+optim_fit_3_b
+```
+
+
+What do you think?  
+
+The identified optimal parameter values are not same. In the neural networks the initial guess will impact the optimization results because the neural network likilihood surface is multimodal. It has many local optima and maybe "stuck" at local optima.
+
+### 3g)
+
+Fit the neural network with 3 hidden units again, but this time use 2 randomly generated initial guess values. Use standard normals (mean 0 and standard deviation 1) to generate the initial guesses.  
+
+**Complete the two code chunks below by generating two random initial guess values. Assign the first random initial guess to `init_guess_03_c` and the second random initial guess to `init_guess_03_d`.**  
+**Complete the `optim()` calls following the same instructions as the previous question.**  
+
+**Check if the optimized parameter estimates are the same or not.**  
+
+#### SOLUTION
+
+Set the random initial guess values.  
+
+```{r, solution_03g_a, eval=TRUE}
+set.seed(25952021)
+init_guess_03_c <- rnorm(info_three_units$num_params)
+  
+set.seed(20212595)
+init_guess_03_d <- rnorm(info_three_units$num_params)
+```
+
+Run the optimization for the first random initial guess.  
+
+```{r, solution_03g_b, eval=TRUE}
+optim_fit_3_c <- optim(init_guess_03_c ,
+                       my_neuralnet_sse ,
+                       gr = NULL ,
+                       info_three_units,
+                       method =  "BFGS",
+                       hessian =  FALSE,
+                       control = list(maxit = 5001))
+```
+
+Run the optimization for the first random initial guess.  
+
+```{r, solution_03g_c, eval=TRUE}
+optim_fit_3_d <- optim(init_guess_03_d ,
+                       my_neuralnet_sse  ,
+                       gr = NULL ,
+                       info_three_units  ,
+                       method = "BFGS" ,
+                       hessian = FALSE  ,
+                       control = list(maxit = 5001))
+```
+
+Compare the parameter estimates.  
+
+```{r, solution_03g_d, eval=TRUE}
+###
+optim_fit_3_c$par
+```
+
+```{r, eval=TRUE}
+optim_fit_3_d$par
+```
+
+The results are not same.
+
+### 3h)
+
+The `optim()` results store the objective function value as the `$value` field in the returned list object.  
+
+**Compare the SSE for the 4 different starting guesses. Which model is better, as viewed by the training set?**  
+
+#### SOLUTION
+
+Use as many code chunks as you feel are necessary. 
+```{r, first, eval=TRUE}
+optim_fit_3_a$value
+optim_fit_3_b$value
+optim_fit_3_c$value
+optim_fit_3_d$value
+```
+
+From the results of SSE, the best model are the second and the fourth.
+
+## Problem 04
+
+You now have the major pieces in place for fitting neural networks! In this problem we will additional neural networks with more hidden units!  
+
+### 4a)
+
+Let's define a function which will generate a random initial guess for the appropriate number of unknown parameters and then execute the `optim()` call. The `train_1layer_nnet_sse()` function has 4 input arguments. The first argument, `num_hidden`, is the number of hidden units in the hidden layer, the second, `transform_func`, is the non-linear transformation (activation) function, the third `X`, is the design matrix, and the fourth, `y`, the response vector.  
+
+**Complete the code chunk below which assembles the list of required information and generates the random initial guess, for an arbitrary number of hidden units in the first hidden layer. Do not set the random seed inside the `train_1layer_nnet_sse()` function. We will set the seed before we fit the models.**  
+
+*HINT*: If your function below is setup correctly you should be able to replicate the previous results if the **SAME** random seed is used. The second code chunk below resets the random seed for you as a confirmation test.  
+
+#### SOLUTION
+
+```{r, solution_04a, eval=TRUE}
+train_1layer_nnet_sse <- function(num_hidden, transform_func, X, y)
+{
+  my_info_list <- list(
+    yobs = y,
+    design_matrix = X,
+    num_hidden = num_hidden,
+    transform_hidden = transform_func
+  )
+  
+  my_info_list$num_params <- my_info_list$num_hidden * (ncol(my_info_list$design_matrix)) + my_info_list$num_hidden + 1
+  # total number of hidden and output layer parameters
+  
+  # generate random initial guess
+  init_guess <- rnorm(my_info_list$num_params)
+  
+  # call optim to fit the neural network
+  optim( init_guess,
+         my_neuralnet_sse,
+         gr = NULL ,
+         my_info_list,
+         method = "BFGS" ,
+         hessian = FALSE ,
+         control = list(maxit = 10001))
+}
+```
+
+As a check fit the 3 hidden unit neural network again with the same random seed as used with `init_guess_03_c`. You should get the same parameters as `optim_fit_3_c`.  
+
+```{r, solution_04a_b, eval=TRUE}
+set.seed(25952021)
+check_optim_fit_3_c <- train_1layer_nnet_sse(info_three_units$num_hidden, info_three_units$transform_hidden, info_three_units$design_matrix, info_three_units$yobs)
+```
+
+Compare to the previous `optim_fit_3_c` results.  
+
+```{r, solution_04a_c, eval=TRUE}
+### 
+check_optim_fit_3_c
+```
+
+```{r, eval=TRUE}
+optim_fit_3_c
+```
+
+```{r, eval=TRUE}
+check_optim_fit_3_c$par == optim_fit_3_c$par
+check_optim_fit_3_c$value == optim_fit_3_c$value
+
+```
+
+The results are same as the same seed is used.
+
+### 4b)
+
+Let's now fit neural networks with 6, 12, and 24 hidden units instead of 3 hidden units. You will use two different initial guesses for each hidden layer size. The random seeds are set for you to make sure the results are reproducible.  
+
+**Complete the code chunk below by setting the input arguments to fit 2 pairs of 6, 12, and 24 hidden unit neural networks.**  
+
+#### SOLUTION
+
+```{r, solution_04b, eval=TRUE}
+set.seed(25952021)
+optim_fit_6_a <- train_1layer_nnet_sse(6, tanh, info_three_units$design_matrix, info_three_units$yobs)
+
+set.seed(20212595)
+optim_fit_6_b <- train_1layer_nnet_sse(6, tanh, info_three_units$design_matrix, info_three_units$yobs)
+
+set.seed(25952021)
+optim_fit_12_a <- train_1layer_nnet_sse(12, tanh, info_three_units$design_matrix, info_three_units$yobs)
+
+set.seed(20212595)
+optim_fit_12_b <- train_1layer_nnet_sse(12, tanh, info_three_units$design_matrix, info_three_units$yobs)
+
+set.seed(25952021)
+optim_fit_24_a <- train_1layer_nnet_sse(24, tanh, info_three_units$design_matrix, info_three_units$yobs)
+
+set.seed(20212595)
+optim_fit_24_b <- train_1layer_nnet_sse(24, tanh, info_three_units$design_matrix, info_three_units$yobs)
+```
+
+### 4c)
+
+Compare the training set SSE across all of the models you trained with random initial guesses (including the 3 hidden unit models). 
+
+**Which model was considered the best according to the training set?** 
+
+#### SOLUTION
+
+Add as many code chunks as you feel are necessary to answer this question. 
+```{r, eval=TRUE}
+optim_fit_6_a$value
+optim_fit_6_b$value
+optim_fit_12_a$value
+optim_fit_12_b$value
+optim_fit_24_a$value
+optim_fit_24_b$value
+```
+
+According to the training set, the best model is "optim_fit_24_a".
+
+## Problem 05
+
+We know that we should **not** compare models strictly based on the training set (unless we were using an information criterion metric). The code chunk below reads in a hold-out test set for you. This hold out test set will be used to compare the performance across the hidden layer sizes that you have fit so far.  
+
+```{r, read_holdout_set, eval=TRUE}
+url_03_test <- 'https://raw.githubusercontent.com/jyurko/INFSCI_2595_Fall_2021/main/HW/11/hw_11_prob_03_test.csv'
+
+prob_03_test_df <- readr::read_csv( url_03_test, col_names = TRUE)
+
+prob_03_test_df %>% glimpse()
+```
+
+### 5a)
+
+You will define a function which makes predictions for you and calculates the Mean Squared Error (MSE) on the test set. The function, `assess_nnet_mse()`, is started for you in the code chunk below. The first argument, `theta`, is a vector of all unknown parameters, the second argument, `num_hidden`, is the number of hidden unit parameters, the third argument, `transform_func`, is the non-linear transformation function, the fourth argument, `X`, is a design matrix, and the fifth argument, `y`, is the response vector.  
+
+**You have worked with the necessary pieces to complete this function several different ways in this assignment. You are free to decide how best to calculate the MSE for a given set of parameters. The only requirement is that `assess_nnet_mse()` should return a scalar number.**  
+
+#### SOLUTION
+
+```{r, solution_05a, eval=TRUE}
+assess_nnet_mse <- function(theta, num_hidden, transform_func, X, y)
+{
+  length_beta_per_unit <- ncol(X)
+  
+  total_num_betas <- length_beta_per_unit * num_hidden
+    
+  beta_vec <- theta[1:total_num_betas]
+  
+  Bmat <- matrix(beta_vec, nrow = length_beta_per_unit, byrow = FALSE)
+  
+  a_all <- theta[(total_num_betas + 1):length(theta)]
+  
+  a0 <- a_all[1]
+  aw <- a_all[c(-1)]
+  
+  A <- X %*% Bmat
+  
+  H <- transform_func(A)
+  
+  f <- a0 + H %*% as.matrix(aw)
+
+  return( (t(y - f) %*% (y - f)) / nrow(X))
+}
+```
+
+### 5b)
+
+Before you can calculate the MSE on the hold-out test set, you must create the test design matrix.  
+
+**Create the appropriate test design matrix associated with all 3 inputs, using the `prob_03_test_df` data set, and assign the result to `Xtest_03`.**  
+
+#### SOLUTION
+
+```{r, solution_05b, eval=TRUE}
+Xtest_03 <- model.matrix(y ~ x1 + x2 + x3, data = prob_03_test_df)
+```
+
+### 5c)
+
+**Calculate the MSE for each of the models trained with random initial guess values. You are free to decide how to execute this task.**  
+
+#### SOLUTION
+
+Add as many code chunks as you feel are necessary to complete the problem. 
+
+```{r, eval=TRUE}
+set.seed(25952021)
+mse_model3a <- assess_nnet_mse(optim_fit_3_a$par, 3, tanh, Xtest_03, prob_03_test_df$y)
+
+set.seed(20212595)
+mse_model3b <- assess_nnet_mse(optim_fit_3_b$par, 3, tanh, Xtest_03, prob_03_test_df$y)
+
+set.seed(25952021)
+mse_model3c <- assess_nnet_mse(optim_fit_3_c$par, 3, tanh, Xtest_03, prob_03_test_df$y)
+
+set.seed(20212595)
+mse_model3d <- assess_nnet_mse(optim_fit_3_d$par, 3, tanh, Xtest_03, prob_03_test_df$y)
+
+set.seed(25952021)
+mse_model6a <- assess_nnet_mse(optim_fit_6_a$par, 6, tanh, Xtest_03, prob_03_test_df$y)
+
+set.seed(20212595)
+mse_model6b <- assess_nnet_mse(optim_fit_6_b$par, 6, tanh, Xtest_03, prob_03_test_df$y)
+
+set.seed(25952021)
+mse_model12a <- assess_nnet_mse(optim_fit_12_a$par, 12, tanh, Xtest_03, prob_03_test_df$y)
+
+set.seed(20212595)
+mse_model12b <- assess_nnet_mse(optim_fit_12_b$par, 12, tanh, Xtest_03, prob_03_test_df$y)
+
+set.seed(25952021)
+mse_model24a <- assess_nnet_mse(optim_fit_24_a$par, 24, tanh, Xtest_03, prob_03_test_df$y)
+
+set.seed(20212595)
+mse_model24b <- assess_nnet_mse(optim_fit_24_b$par, 24, tanh, Xtest_03, prob_03_test_df$y)
+```
+
+
+```{r, eval=TRUE}
+mse_model3a
+mse_model3b
+mse_model3c
+mse_model3d
+mse_model6a
+mse_model6b
+mse_model12a
+mse_model12b
+mse_model24a
+mse_model24b
+```
+
+
+### 5d)
+
+**Which model is the best as viewed by the hold-out test set performance?**  
+
+#### SOLUTION
+
+What do you think?  
+
+According to the MSE, the best model is the model "mse_model12a".

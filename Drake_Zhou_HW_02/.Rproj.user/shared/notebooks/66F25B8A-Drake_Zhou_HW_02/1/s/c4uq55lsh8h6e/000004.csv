@@ -1,0 +1,3 @@
+"0","### your code here"
+"0","model_class_0.7 %>%"
+"0","  summarise(accuracy = sum(obs_class == pred_class) / n())"

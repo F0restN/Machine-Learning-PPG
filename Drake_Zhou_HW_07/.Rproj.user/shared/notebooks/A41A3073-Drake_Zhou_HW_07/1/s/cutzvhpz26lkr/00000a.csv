@@ -1,0 +1,8 @@
+"0","### error of the first posterior sample"
+"0","error_01_post_01 <- post_pred_samples_01$Umat[, 1] - train_01$y"
+"0",""
+"0","### error of the second posterior sample"
+"0","error_01_post_02 <- post_pred_samples_01$Umat[, 2] - train_01$y"
+"0",""
+"0","### error of the third posterior sample"
+"0","error_01_post_03 <- post_pred_samples_01$Umat[, 3] - train_01$y"

@@ -1,0 +1,2 @@
+"0","### add your code here"
+"0","Xtrips <- model.matrix(y ~ (.)^3, df)"

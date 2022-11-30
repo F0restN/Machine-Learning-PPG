@@ -1,0 +1,178 @@
+---
+title: "Final Project Spring 2022"
+subtitle: "Example: read data, save, reload model object"
+author: "Dr. Joseph P. Yurko"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Overview
+
+This RMarkdown shows how to read the final project data. It shows how to manipulate the outputs for a regression and classification tasks. It also demonstrates how to fit a simple model (with `lm()`), save that model, and load it back into the workspace. You may find these actions helpful as you work through the project.  
+
+## Load packages
+
+This example uses the `tidyverse` suite of packages.  
+
+```{r, load_packages}
+library(tidyverse)
+```
+
+## Read data
+
+Please download the final project data from Canvas. If this Rmarkdown file is located in the same directory as the downloaded CSV file, it will be able to load in the data for you. It is **highly** recommended that you use an RStudio RProject to more easily manage the working directory and file paths of the code and objects associated with the final project.
+
+The final project data are read in the code chunk below.  
+
+```{r, read_data_01}
+df_all <- readr::read_csv("final_project_train.csv", col_names = TRUE)
+```
+
+The code chunk output shows the printed summary information associated with the `readr::read_csv()` call. It tells us 677 rows and 38 columns have been read. Of those 38 columns, 3 are `chr` (string or character) data types and 35 are `dbl` (numeric) data types. The `glimpse()` function is a useful function for getting a "glimpse" or snap shot of the columns in the tibble.  
+
+```{r, read_data_02}
+df_all %>% glimpse()
+```
+
+The displayed "glimpse" reveals that there are many columns in `df_all` with names that start with `x`. The accompanying final project guidelines presentation discusses the input naming convention in detail. The naming convention was used to make it easy to select columns using tidy-select functionalities. For example, we can select all Bing lexicon derived features using:  
+
+```{r, read_data_03}
+df_all %>% 
+  select(starts_with('xb_')) %>% 
+  glimpse()
+```
+
+Or, we can select the `region` and all NRC and AFINN derived features as:  
+
+```{r, read_data_04}
+df_all %>% 
+  select(region, starts_with('xn_'), starts_with('xa_')) %>% 
+  glimpse()
+```
+
+## Regression task
+
+The continuous output, `response`, is the average hours spent per week on a product by the Sales Reps. However, as discussed in the final project guidelines presentation, you will **not** predict `response` directly. Instead, you should use the **log-transformed** `response`, because the output is lower bounded at zero. We are making this transformation because we want the **uncertainty** in the predicted `response` to satisfy the lower bound constraint as well. After all, no one can work negative hours! We would not want to say there's a 95% chance the `response` can be between -2 and 2 hours! Such a statement makes no sense! By log-transforming `response`, we will fully respect the lower bound of the output variable.  
+
+The code chunk below creates the data set that you should work with in the regression portions of the project. It creates the log-transformed output, `y`, and selects only the categorical inputs, `region` and `customer`, the sentiment derived continuous features, and the `y` output.  
+
+```{r, reg_01}
+dfii <- df_all %>% 
+  mutate(y = log(response)) %>% 
+  select(region, customer, starts_with('x'), y)
+
+
+dfii[-c(1,2)]
+```
+
+It is up to you as to whether further preprocessing is required before fitting the models.  
+
+### Simple model
+
+You are going to fit many models in this project. Rather than having a single large RMarkdown that fits all models, it can be useful to work in a modular fashion. You can have separate RMarkdowns for different portions of the project. You can fit/train models, save them, and then load them in other RMarkdowns as needed. This example RMarkdown shows how to fit a simple linear model just to show the process of saving and loading the model object back in.  
+
+I will not preprocess the inputs before fitting this model, but you should consider if preprocessing would be useful or not! The code chunk below fits a linear model with linear additive features from `xb_01` and `xn_01` and assigns the result to the `mod01` object.  
+
+```{r, fit_01}
+mod01 <- lm( y ~ xb_01 + xn_01, data = dfii )
+```
+
+The model fitting result is summarized via the `summary()` function below.  
+
+```{r, fit_02}
+mod01 %>% summary()
+```
+
+### Save the model
+
+Let’s go ahead and save `mod01`. There are multiple approaches for saving objects including `.Rda` and `.rds`. I prefer to use the `.rds` object because it’s more streamlined and makes it easier to save and reload a single object, which in our case is a model object. We can use the base R `saveRDS()` function or the `tidyverse` equivalent `write_rds()` function from the `readr` package. I prefer to use the `tidyverse` version.
+
+The code chunk below pipes the `mod01` object into `readr::write_rds()`. It saves the object to a file in the local working directory for simplicity. Notice that the `.rds` extension is included after the desired file name.  
+
+```{r, fit_save_01}
+mod01 %>% readr::write_rds('my_simple_example_model.rds')
+```
+
+If you ran the above code chunk, check your working directory with the Files tab. You should see the `my_simple_example_model.rds` in your current working directory.  
+
+### Reload the model
+
+Let’s now load in that model, but assign it to a different variable name. We can read in an `.rds` file with the `readr::read_rds()` function. The object is loaded in and assigned to the `re_load_mod01` object in the code chunk below.  
+
+```{r, reload_01}
+re_load_mod01 <- readr::read_rds('my_simple_example_model.rds')
+```
+
+We can now with the `re_load_mod01` object just like the original model we fit, `mod01`. So we can use `summary()` and any other function on the model object, like `predict()`, or `coef()`, or `broom::tidy()`. To confirm let’s print out the summary below. If you compare the summary results to that printed previously you will see that the two are identical.  
+
+```{r, reload_02}
+re_load_mod01 %>% summary()
+```
+
+Lastly, let's confirm the model objects are the same with the `all.equal()` function.  
+
+```{r, reload_03}
+all.equal(mod01, re_load_mod01)
+```
+
+## Classification task
+
+The binary output, `outcome`, has two levels (unique values). However, because `outcome` is a character data type, the information about the unique values is not "known" by the object. For example, the `summary()` function simply says `outcome` is a character.  
+
+```{r, class_01}
+df_all %>% 
+  select(outcome) %>% 
+  summary()
+```
+
+There are multiple ways to check the unique values of a variable within the `tidyverse`. I recommend reviewing the Introduction to R tutorials which shows one of my favorite simple `tidyverse` functions, `count()`. This function not only identifies the unique values of a variable but also counts the number of rows associated with each unique value. In this example RMarkdown however, I will show the unique values with the `distinct()` function, which identifies the distinct values:  
+
+```{r, class_02}
+df_all %>% 
+  distinct(outcome)
+```
+
+Part iiiA) of the project requires that you fit generalized linear models (GLMs) to classify the event. As discussed in the beginning of the semester, these models are not trying to classify the event directly. Instead, they are trying to predict the event probability. You can fit a non-Bayesian GLM using the `glm()` function from base R. When working with `glm()`, I find it easier to have the event of interested converted to the 0/1 encoding instead of the character string names. The code chunk below creates the data set associated with Part iiiA) of the project by selecting the categorical inputs, `region` and `customer`, the sentiment derived continuous features, and the 0/1 encoded binary outcome, `y` which is calculated using `ifelse()`.  
+
+```{r, class_03}
+dfiiiA <- df_all %>% 
+  mutate(y = ifelse(outcome == 'event', 1, 0)) %>% 
+  select(region, customer, starts_with('x'), y)
+
+dfiiiA %>% glimpse()
+```
+
+Part iiiD) of the project requires that you train and assess binary classifiers via resampling. The `caret` and `tidymodels` packages can be used to manage the resampling, tuning, and evaluation of the models. These two packages prefer to have the categorical output as a factor (R's data type for a categorical variable) with the first level associated with the event of interest. The code chunk below converts `outcome` to a factor and forces the level ordering in the correct format. The inputs and `outcome` are then selected to produce the data associated with Part iiiD) of the project.  
+
+```{r, class_04}
+dfiiiD <- df_all %>% 
+  mutate(outcome = factor(outcome, 
+                          levels = c("event", "non_event"))) %>% 
+  select(region, customer, starts_with('x'), outcome)
+
+dfiiiD %>% glimpse()
+```
+
+If you look closely at the above print out, you will see that the `outcome` variable is a `fct` or factor data type. The object now "knows" all unique values associated with the variable. The `summary()` function now summarizes the counts for each unique value, as shown below:  
+
+```{r, class_05}
+dfiiiD %>% 
+  select(outcome) %>% 
+  summary()
+```
+
+Alternatively, we can call the `levels()` function to display the levels (unique values) of the factor variable:  
+
+```{r, class_06}
+levels( dfiiiD$outcome )
+```
+
+Which could have been accomplished using "tidy" approaches as:  
+
+```{r, class_07}
+dfiiiD %>% pull(outcome) %>% levels()
+```
+

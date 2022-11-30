@@ -1,0 +1,6 @@
+"0","iris %>% "
+"0","  slice(1:10) %>% "
+"0","  select(starts_with(""Sepal""), Species) %>% "
+"0","  mutate(width_factor = ifelse(Sepal.Width > 3.5, "
+"0","                               ""greater than"", "
+"0","                               ""less than""))"

@@ -1,0 +1,2 @@
+"0","cor_info <- small_laplace_from_inform$var_matrix %>% cov2cor()"
+"0","corrplot(cor_info) "

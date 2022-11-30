@@ -1,0 +1,7 @@
+"0",""
+"0","### The prob that beta_01 is greater than zero"
+"0","mean(post_samples_01$beta_01 > 0)"
+"1","[1]"
+"1"," 0"
+"1","
+"

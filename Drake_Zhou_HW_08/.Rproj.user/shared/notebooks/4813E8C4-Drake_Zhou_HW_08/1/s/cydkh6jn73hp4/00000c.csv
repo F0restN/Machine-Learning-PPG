@@ -1,0 +1,4 @@
+"0","### add more code chunks if you like"
+"0","mod01 <- lm(y ~ x1+x2,  data = df)"
+"0",""
+"0","coefplot(model = mod01)"

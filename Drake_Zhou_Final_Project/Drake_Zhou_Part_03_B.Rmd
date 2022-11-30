@@ -1,0 +1,171 @@
+---
+title: "Drake_Zhou_Part_03_B"
+author: "Drake Zhou"
+date: "4/26/2022"
+output: 
+  html_document: 
+    toc: true
+    toc_float:
+      collapsed: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview & Initialization
+
+## Package Import
+
+This part is mainly focus on fitting the model with Bayesian function, specifically use rstanarm’sstan_lm() or stan_glm()function to fit full Bayesian linear models with syntax like R’s lm().
+
+```{r, init, message=FALSE}
+library(tidyverse)
+library(caret)
+library(coefplot)
+library(rstanarm)
+library(splines)
+```
+
+## Data Import
+
+Before I fit into linear models, I want transform the response to log-response and standardized the inputs and outputs especially those continuous inputs.
+
+```{r, eval=TRUE}
+df_all <- readr::read_csv("final_project_train.csv", col_names = TRUE)
+
+standard_df_all <- df_all %>% 
+  select(starts_with("x")) %>%
+  scale(center = TRUE, scale = TRUE) %>% 
+  as.data.frame() %>% 
+  tibble::as_tibble() %>% 
+  mutate(obs = if_else(df_all$outcome == 'event',1,0),
+         region = df_all$region, 
+         customer = df_all$customer)
+
+train_id <- sample(1:nrow(standard_df_all), size = floor(0.8 * nrow(standard_df_all)))
+
+train_ready <- standard_df_all %>% slice(train_id)
+
+test_ready <- standard_df_all %>% slice(-train_id)
+```
+
+# Model Fitting
+
+## Fit model
+
+```{r, warning=FALSE, message=FALSE}
+rstanarm_cat_mod3 <- stan_glm(obs ~ ., 
+                         data = train_ready[c(-36, -35)],
+                         family = binomial(link = "logit"),
+                         prior_intercept = NULL,
+                         refresh = 0,
+                         seed = 1024,
+                         chains = 2, 
+                         iter = 200)
+```
+
+```{r, message=FALSE, warning=FALSE}
+formula_cat_mod9 <- obs ~ ns(xb_01, 3)+ns(xb_03, 3)+ ns(xb_03,3)+ns(xn_01,3)+ns(xn_03,3)+ns(xn_03,3)+ns(xa_01,3)+ns(xa_03,3)+ns(xa_03,3)+ns(xb_04,3)+ns(xb_05,3)+ns(xb_06,3)+ns(xb_07,3)+ns(xb_08,3)+ns(xn_04,3)+ns(xn_05,3)+ns(xn_06,3)+ns(xn_07,3)+ns(xn_08,3)+ns(xa_04,3)+ns(xa_05,3)+ns(xa_06,3)+ns(xa_07,3)+ns(xa_08,3)+ns(xw_01,3)+ns(xw_03,3)+ns(xw_03,3)+ns(xs_01,3)+ns(xs_03,3)+ns(xs_03,3)+ns(xs_04,3)+ns(xs_05,3)+ns(xs_06,3)+region+customer
+
+rstanarm_cat_mod9 <- stan_glm(formula_cat_mod9, 
+                              data = train_ready,
+                              family = binomial(link = "logit"),
+                              prior_intercept = NULL,
+                              refresh = 0,
+                              seed = 1024,
+                              chains = 2, 
+                              iter = 200)
+```
+
+## Export model
+
+```{r}
+rstanarm_cat_mod3 %>% readr::write_rds('models/rstanarm_cat_mod3.rds')
+rstanarm_cat_mod9 %>% readr::write_rds('models/rstanarm_cat_mod9.rds')
+```
+
+# Model Evaluation
+
+## WAIC information criterion
+
+According to the result, model 3 is better than model 9
+
+```{r}
+# Calculate performance based on WAIC 
+rstanarm_cat_mod3$waic <- waic(rstanarm_cat_mod3)
+rstanarm_cat_mod9$waic <- waic(rstanarm_cat_mod9)
+
+# Form data
+waic_models_perf <- stanreg_list(rstanarm_cat_mod9, rstanarm_cat_mod3,
+                          model_names = c("Model 9", "Model 3"))
+
+# Print it out
+loo_compare(waic_models_perf, criterion = "waic")
+
+```
+
+## K-fold Cross Validation
+
+```{r, message=FALSE, warning=FALSE}
+k6 <- kfold(rstanarm_cat_mod3)
+k9 <- kfold(rstanarm_cat_mod9)
+```
+
+# Conclusion
+
+```{text}
+Model 3 is our best model
+```
+
+
+# Model Visualization
+
+## Coefficient significance
+
+Extract data.
+
+```{r, eval=TRUE}
+df_model_03 <- as.data.frame(rstanarm_cat_mod3) %>% 
+  tibble::as_tibble() %>% 
+  select(all_of(names(rstanarm_cat_mod3$coefficients)))
+```
+
+With so many features, we can't draw them all that's meaningless. But we can review several features that we considered important in our previous work. They are not statistically important anymore.
+
+```{r}
+plot(rstanarm_cat_mod3,  pars = names(rstanarm_cat_mod3$coefficients)) +
+  geom_vline(xintercept = 0, color = "grey", linetype = "dashed", size = 1.) +
+  theme_bw()
+```
+
+## Coefficient relation
+
+```{r, message=FALSE, warning=FALSE}
+df_model_03 %>%
+  cor() %>% 
+  corrplot::corrplot(method = "square", type = "upper", tl.col = "black", tl.cex = 0.6, tl.srt = 45, cl.lim = c(0, 1))
+```
+
+## Variables distribution
+
+Again, since we have too many features, the figure was really messed up. But if we open this figure in a separete windows, which allows us zoom in, we would see most of figures are pretty normal distributed which means is Gaussian distribution.
+
+```{r}
+df_model_03 %>%
+  tibble::rowid_to_column("post_id") %>% 
+  pivot_longer(!c("post_id")) %>% 
+  ggplot(mapping = aes(x = value)) +
+  geom_histogram(bins = 55) +
+  facet_wrap(~name, scales = "free") +
+  theme_bw() +
+  theme(axis.text.y = element_blank())
+```
+
+# Export Model
+
+```{r}
+rstanarm_cat_mod9 %>% readr::write_rds('models/rstanarm_cat_mod9.rds')
+rstanarm_cat_mod3 %>% readr::write_rds('models/rstanarm_cat_mod3.rds')
+```
+

@@ -1,0 +1,5 @@
+"0","tibble::tibble("
+"0","  x = seq(from = -(5 * pi / 8), to = (9 * pi /8), length.out = 1001)"
+"0",") %>% "
+"0","  ggplot(mapping = aes(x = x, y = sin(x))) +"
+"0","  geom_line()"

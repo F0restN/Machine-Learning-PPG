@@ -1,0 +1,218 @@
+---
+title: "Drake_Zhou_Part_01"
+author: "Drake Zhou"
+date: "4/21/2022"
+output:
+  html_document:
+    toc: yes
+    number_sections: yes
+    toc_float:
+      collapsed: no
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview & Preparation
+
+The purpose of this part is to visualize all the data and assess them to help me prepare for model fitting, which is also responsible for the 1st part of final project requirements.
+
+## Package import
+
+```{r, initial, message=FALSE}
+library(tidyverse)
+library(visdat)
+```
+## Data Import
+
+```{r, message=FALSE}
+df_all <- readr::read_csv("final_project_train.csv", col_names = TRUE)
+
+df_all %>% glimpse()
+```
+
+# Exploratory Data Analysis (EDA)
+
+## General Inspection
+
+No missing data
+
+```{r, message=FALSE, warning=FALSE}
+visdat::vis_miss(df_all)
+```
+
+```{r}
+df_all %>% purrr::map_dbl(n_distinct)
+```
+
+## Distributions of variables.
+
+### Categorical variables
+
+Q: Counts for categorical variables.
+
+A: From the figure, it looks like very imbalanced.
+
+```{r, solution_01_01}
+df_all %>%
+  count(outcome) %>%
+  ggplot(mapping = aes(x = outcome, y = n))+
+  geom_col()
+```
+
+### Continuous variables
+
+Q: Distributions for continuous variables. Are the distributions Gaussian like?
+
+A: Most of them looks Gaussian like
+
+```{r, solution_01_02}
+df_con_all <- select(df_all, starts_with("x"))
+
+df_con_all %>% 
+  select(all_of(colnames(df_con_all))) %>% 
+  tibble::rowid_to_column() %>% 
+  pivot_longer(!c("rowid")) %>%
+  ggplot()+
+  geom_density(mapping = aes(x = value), adjust = 1.35, size = 0.5)+
+  facet_wrap(~name, scales = "free")+
+  theme_bw()+
+  theme(axis.text.y = element_blank(), axis.text.x.bottom = element_blank())
+```
+
+### Log-response
+
+```{r}
+df_all %>% 
+  ggplot(mapping = aes(x = log(response)))+
+  geom_histogram(bins = 35)+
+  geom_rug(alpha = 0.2) +
+  theme_bw()
+```
+
+## Affection of variables
+
+Q: Are there differences in continuous variable distributions and continuous variable summary statistics based on region or customer?
+
+A: Yes, if we zoom in, we do observe some differences, but not very significant.
+
+```{r, solution_02_01}
+df_trans_02 <- df_all %>%
+  subset(select = -c(rowid, outcome, response)) %>% 
+  pivot_longer(!c("region", "customer"))
+  
+df_trans_02 %>%
+  ggplot(mapping = aes(x = name, color = as.factor(region)))+
+  geom_density()+
+  facet_wrap( ~ name, scales = "free_y")+
+  theme_bw()+
+  theme(axis.text.y = element_blank(), axis.text.x.bottom = element_blank())
+```
+
+Again, through this figure, we can see the different median of continuous variables between different region.
+
+```{r}
+df_trans_02 %>%
+  ggplot(mapping = aes(y = as.factor(name), x = value))+
+  geom_boxplot(mapping = aes(fill = as.factor(region), color = as.factor(region)),
+               alpha = 0.35, size = 0.1)+
+  facet_wrap(~ name, scales = "free")+
+  scale_fill_viridis_d("Region") +
+  scale_color_viridis_d("Region") +
+  theme_bw()+
+  theme(axis.text.y = element_blank(), axis.text.x.bottom = element_blank())
+```
+
+Q: Are there differences in continuous variable distributions and continuous variable summary statistics based on the binary outcome?
+
+A: Yes, if we zoom in, the differences are relative obviously
+
+```{r, solution_02_02}
+df_trans_02 %>% 
+  ggplot(mapping = aes(x = name, color = customer))+
+  geom_density()+
+  facet_wrap( ~ name, scales = "free_y")+
+  theme_bw()+
+  theme(axis.text.y = element_blank(), axis.text.x.bottom = element_blank())
+```
+
+```{r}
+df_trans_02 %>%
+  ggplot(mapping = aes(x = as.factor(name), y = value))+
+  geom_boxplot(mapping = aes(fill = as.factor(customer), color = as.factor(customer)),
+               alpha = 0.35, outlier.size = 0.1)+
+  facet_wrap(~ name, scales = "free")+
+  theme_bw()+
+  theme(axis.text.y = element_blank(), axis.text.x.bottom = element_blank())
+```
+
+# Correlation and Relationshio diagnosis 
+
+## Continuous Inputs & Inputs
+
+Q: Visualize the relationships between the continuous inputs, are they correlated?
+
+A: Some of inputs are highly correlated to each other
+
+```{r, solution_03}
+df_con_all %>%
+  cor() %>%
+  corrplot::corrplot(type = "upper")
+```
+
+## Continuous Inputs & Log-response
+
+Q: Visualize the relationships between the continuous outputs (response and the log-transformed response) with respect to the continuous inputs. Can you identify any clear trends? Do the trends depend on the categorical inputs?
+
+A: The input increase as the some of output parameters increase, like xa_01, xa_02 and xa_03. But some of them are not, and as we can see, the categorical input does have impact on the output prediction.
+
+```{r, solution_04}
+df_trans_04 <- df_all %>%
+  mutate(log_response = log(response)) %>%
+  select(starts_with('x'), log_response, response, customer, region) %>%
+  pivot_longer(!c(log_response, response, customer, region))
+
+df_trans_04 %>% count()
+```
+
+```{r, solution_04_01}
+df_trans_04 %>% 
+  ggplot(mapping = aes(x = value, y = log_response, color = region))+
+  geom_smooth(method = 'loess', formula = y ~ x, size = 0.4)+
+  facet_wrap(~name, scales = "free")+
+  theme_bw()+
+  scale_color_viridis_d(option = 'plasma') +
+  theme(axis.text.y = element_blank(), axis.text.x.bottom = element_blank())
+```
+
+```{r, solution_04_02}
+df_trans_04 %>% 
+  ggplot(mapping = aes(x = value, y = log_response, color = customer))+
+  geom_smooth(method = 'loess', formula = y ~ x, size = 0.4)+
+  facet_wrap(~name, scales = "free")+
+  theme_bw()+
+  theme(axis.text.y = element_blank(), axis.text.x.bottom = element_blank())
+```
+
+## Continuous Inputs & Binary outcome
+
+Q:How can you visualize the behavior of the binary outcome with respect to the
+continuous inputs?
+
+A: As shown below, we can't just draw a vertical line to divide them.
+
+```{r, solution_05}
+df_all %>%
+  mutate(log_response = log(response)) %>%
+  select(starts_with('x'), outcome) %>%
+  pivot_longer(!c(outcome)) %>%
+  ggplot(mapping = aes(x = value, y = outcome))+
+  geom_point(mapping = aes(color = outcome),size = 0.1)+
+  facet_wrap(~name, scales = "free")+
+  theme_bw()+
+  theme(axis.text.y = element_blank(), axis.text.x.bottom = element_blank())
+```
+

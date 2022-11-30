@@ -1,0 +1,4 @@
+"0","### make the posterior coefficient visualization for model 6"
+"0","post_means <- laplace_06_weak$mode[1:ncol(X06)]"
+"0","post_sd <- sqrt(diag(laplace_06_weak$var_matrix)[1:ncol(X06)])"
+"0","viz_post_coefs(post_means, post_sd, colnames(X06))"

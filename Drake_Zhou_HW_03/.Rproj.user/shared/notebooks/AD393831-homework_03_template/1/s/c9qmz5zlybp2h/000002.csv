@@ -1,0 +1,3 @@
+"0","test_df_3 <- df_test %>% bind_cols(pred_test_3)"
+"0",""
+"0","test_df_8 <- df_test %>% bind_cols(pred_test_8)"

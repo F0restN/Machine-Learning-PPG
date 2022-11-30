@@ -1,0 +1,4 @@
+"0","log_post_result <- purrr::map2_dbl(param_grid$mu, param_grid$sigma,"
+"0","                                   eval_logpost,"
+"0","                                   logpost_func = my_logpost,"
+"0","                                   logpost_info = hw06_info)"

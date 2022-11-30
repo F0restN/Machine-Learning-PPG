@@ -1,0 +1,5 @@
+"0","summary_post_df_focus_from_vague %>% "
+"0","  ggplot(mapping = aes(x = as.factor(num_trials)))+"
+"0","  geom_linerange(aes(ymin = post_q05, ymax = post_q95, group = player_id), position = position_dodge(0.2))+"
+"0","  geom_point(mapping = aes(y = post_avg, color = ""AVG""),position = position_dodge(0.2))+"
+"0","  geom_point(mapping = aes(y = num_events / num_trials, color = ""MLE""), position = position_dodge(0.2))"

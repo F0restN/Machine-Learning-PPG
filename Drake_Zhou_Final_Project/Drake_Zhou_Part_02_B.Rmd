@@ -1,0 +1,256 @@
+---
+title: "Drake_Zhou_Part_02_B"
+author: "Drake Zhou"
+date: "4/24/2022"
+output: 
+  html_document: 
+    toc: true
+    toc_float:
+      collapsed: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview & Preparation
+
+## Package Import
+
+This part is mainly focus on fitting the model with Bayesian function, specifically use rstanarm’sstan_lm() or stan_glm()function to fit full Bayesian linear models with syntax like R’s lm().
+
+```{r, init, message=FALSE}
+library(tidyverse)
+library(caret)
+library(coefplot)
+library(rstanarm)
+library(splines)
+```
+
+## Data Import
+
+Before I fit into linear models, I want transform the response to log-response and standardized the inputs and outputs especially those continuous inputs.
+
+```{r, eval=TRUE}
+# Read data
+df_all <- readr::read_csv("final_project_train.csv", col_names = TRUE)
+
+# Formate data
+standard_df_all <- df_all %>% 
+  select(starts_with("x")) %>%
+  scale(center = TRUE, scale = TRUE) %>% 
+  as.data.frame() %>% 
+  tibble::as_tibble() %>% 
+  mutate(y = log(df_all$response), 
+         region = factor(df_all$region, levels = c("XX", "YY", "ZZ")), 
+         customer = factor(df_all$customer, levels = c("A", "B", "D", "E", "G", "Other", "Q", "M", "K")))
+```
+
+# Model fitting
+
+Why choose these models? 
+
+Model 9 is our best performance model and model 3 is the 2nd That's why I choose these two. Whatsmore, model 3 have all variables and model 9 uses natural spline for continuous variables and then add categorical variables, which provides more flexibilities.
+
+```{r}
+formula_mod9 <- y ~ ns(xb_01, 3)+ns(xb_03, 3)+ ns(xb_03,3)+ns(xn_01,3)+ns(xn_03,3)+ns(xn_03,3)+ns(xa_01,3)+ns(xa_03,3)+ns(xa_03,3)+ns(xb_04,3)+ns(xb_05,3)+ns(xb_06,3)+ns(xb_07,3)+ns(xb_08,3)+ns(xn_04,3)+ns(xn_05,3)+ns(xn_06,3)+ns(xn_07,3)+ns(xn_08,3)+ns(xa_04,3)+ns(xa_05,3)+ns(xa_06,3)+ns(xa_07,3)+ns(xa_08,3)+ns(xw_01,3)+ns(xw_03,3)+ns(xw_03,3)+ns(xs_01,3)+ns(xs_03,3)+ns(xs_03,3)+ns(xs_04,3)+ns(xs_05,3)+ns(xs_06,3)+region+customer
+
+rstanarm_mod9 <- stan_lm(formula_mod9, 
+                         data = standard_df_all, 
+                         prior = R2(location = 0.5), 
+                         seed = 432123,
+                         refresh = 0)
+```
+
+```{r}
+rstanarm_mod3 <- stan_lm(y ~ ., 
+                         data = standard_df_all[c(-36, -35)],
+                         prior = R2(location = 0.5),
+                         seed = 432123,
+                         refresh = 0)
+```
+
+# Model Evaluation
+
+## Model #9
+
+```{r}
+rstanarm_mod9 %>% summary()
+```
+
+```{r}
+posterior_interval(rstanarm_mod9)
+```
+
+Since we have too many features. to better view the r squared of this model, we can then run code. And the result shows that R2 has 90% probability between 0.47 and 0.53. 
+
+```{r}
+rstanarm::bayes_R2(rstanarm_mod9) %>% quantile(c(0.05, 0.5, 0.95))
+```
+
+## Model #3
+
+The result shows that R2 has 90% probability between 0.6 and 0.67. 
+
+```{r}
+rstanarm_mod3 %>% summary()
+```
+
+```{r}
+posterior_interval(rstanarm_mod3)
+```
+
+Again since we have too many features. to better view the r squared of this model, we can then run code. And the result shows that R2 has 90% probability between 0.62 and 0.68.
+
+```{r}
+rstanarm::bayes_R2(rstanarm_mod3) %>% quantile(c(0.05, 0.5, 0.95))
+```
+
+# Model Selection
+
+### R-squared evaluation
+
+The closer r-squared value to 1 represent the better the model is, according to follow data, model 9 is better than model 6
+
+```{r}
+purrr::map2_dfr(list(rstanarm_mod9, rstanarm_mod3),
+                as.character(c("9","3")),
+                function(mod, mod_name){tibble::tibble(rsquared = bayes_R2(mod)) %>% 
+                    mutate(model_name = mod_name)}) %>% 
+  ggplot(mapping = aes(x = rsquared)) +
+  geom_freqpoly(bins = 55,
+                 mapping = aes(color = model_name),
+                 size = 1.1) +
+  coord_cartesian(xlim = c(0, 1)) +
+  ggthemes::scale_color_colorblind("Model") +
+  theme_bw()
+```
+
+### WAIC information criterion
+
+According to the WAIC information criterion model 9 is better than model 3
+
+```{r}
+# Calculate performance based on WAIC 
+rstanarm_mod9$waic <- waic(rstanarm_mod9)
+rstanarm_mod3$waic <- waic(rstanarm_mod3)
+
+# Form data
+waic_models_perf <- stanreg_list(rstanarm_mod3, rstanarm_mod9,
+                          model_names = c("Model 3", "Model 9"))
+
+# Print it out
+loo_compare(waic_models_perf, criterion = "waic")
+```
+
+### LOOCV
+
+```{r, message=FALSE, warning=FALSE}
+loo_mod9 <- loo(rstanarm_mod9)
+plot(loo_mod9, label_points = TRUE)
+```
+
+
+```{r}
+loo_mod3 <- loo(rstanarm_mod3)
+plot(loo_mod3, label_points = TRUE)
+```
+
+Through the result, model 9 is better than model 3
+
+```{r}
+loo_compare(loo_mod9, loo_mod3)
+```
+
+# Model Inspection
+
+## Coefficient significance
+
+Extract data.
+
+```{r, eval=TRUE}
+df_model_09 <- as.data.frame(rstanarm_mod9) %>% 
+  tibble::as_tibble() %>% 
+  select(all_of(names(rstanarm_mod9$coefficients)))
+```
+
+With so many features, we can't draw them all that's meaningless. But we can review several features that we considered important in our previous work. They are not statistically important anymore.
+
+```{r}
+plot(rstanarm_mod9,  pars = names(rstanarm_mod9$coefficients)) +
+  geom_vline(xintercept = 0, color = "grey", linetype = "dashed", size = 1.) +
+  theme_bw()
+```
+
+## Coefficient relation
+
+```{r, message=FALSE, warning=FALSE}
+df_model_09 %>%
+  cor() %>% 
+  corrplot::corrplot(method = "square", type = "upper", tl.col = "black", tl.cex = 0.5, tl.srt = 45, cl.lim = c(0, 1))
+```
+
+## Variables distribution
+
+Again, since we have too many features, the figure was really messed up. But if we open this figure in a separete windows, which allows us zoom in, we would see all the figure are pretty normal distributed which means is Gaussian distribution.
+
+```{r}
+df_model_09[1:49] %>%
+  tibble::rowid_to_column("post_id") %>% 
+  pivot_longer(!c("post_id")) %>% 
+  ggplot(mapping = aes(x = value)) +
+  geom_histogram(bins = 55) +
+  facet_wrap(~name, scales = "free") +
+  theme_bw() +
+  theme(axis.text.y = element_blank())
+```
+
+## Sigma uncertainty 
+
+And the uncertainty of sigma, with 90% probability that its value is between 0.29 and 0.32, which is relatively very precise sigma.
+
+```{r}
+as.data.frame(rstanarm_mod9) %>% tibble::as_tibble() %>% 
+  select(sigma) %>% 
+  pull() %>% 
+  quantile(c(0.05, 0.5, 0.95))
+```
+
+Visualize the distribution of sigma
+
+```{r}
+purrr::map2_dfr(list(rstanarm_mod9),
+                as.character(1),
+                function(mod, mod_name){as.data.frame(mod) %>% tibble::as_tibble() %>% 
+                    select(sigma) %>% 
+                    mutate(model_name = mod_name)}) %>% 
+  ggplot(mapping = aes(x = sigma)) +
+  geom_freqpoly(bins = 55,
+                 mapping = aes(color = model_name),
+                 size = 1.1) +
+  ggthemes::scale_color_colorblind("Model") +
+  theme_bw()
+```
+
+## Compare to MLE
+
+The relationship between Bayesian and non-bayesian, as we can see, Bayesian model has a higher prediction on value of sigma compared to non-bayesian.
+
+```{r}
+lm_mod9 <- readr::read_rds('models/lm_mod9.rds')
+
+as.data.frame(rstanarm_mod9) %>% tibble::as_tibble() %>% 
+  ggplot(mapping = aes(x = sigma)) +
+  geom_histogram(bins = 55) +
+  geom_vline(xintercept = stats::sigma(lm_mod9),
+             color = "darkorange", linetype = "dashed", size = 1.1) +
+  theme_bw()
+```
+
+# Export Models
+
+```{r}
+rstanarm_mod9 %>% readr::write_rds('models/rstanarm_mod9.rds')
+rstanarm_mod3 %>% readr::write_rds('models/rstanarm_mod3.rds')
+```
+

@@ -1,0 +1,6 @@
+"0","prior_for_viz <- tibble::tibble("
+"0","  x = seq(from = min(df_24$num_events / df_24$num_trials), to = max(df_24$num_events / df_24$num_trials), length.out = 1001)"
+"0",") %>% "
+"0","  mutate(beta_pdf = dbeta(x, ab_emp_bayes[1], ab_emp_bayes[2]))"
+"0",""
+"0","prior_for_viz"

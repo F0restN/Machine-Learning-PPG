@@ -1,0 +1,3 @@
+"0","summary_post_df_focus_empbayes %>% "
+"0","  ggplot()+"
+"0","  geom_point(mapping = aes(x = num_trials, y = post_q95 - post_q05))"

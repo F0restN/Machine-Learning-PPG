@@ -1,0 +1,28 @@
+{
+    "id": "95FD575D",
+    "path": null,
+    "project_path": null,
+    "type": "object_explorer",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1649885953871.0,
+    "source_on_save": false,
+    "relative_order": 4,
+    "properties": {
+        "id": "3382c19e9d764d1ab98ba99f1d73d8ee",
+        "name": "info_three_units",
+        "title": "info_three_units",
+        "language": "R",
+        "source_window_id": "",
+        "Source": "Source"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 4312138264,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1649885953871,
+    "read_only": false,
+    "read_only_alternatives": []
+}

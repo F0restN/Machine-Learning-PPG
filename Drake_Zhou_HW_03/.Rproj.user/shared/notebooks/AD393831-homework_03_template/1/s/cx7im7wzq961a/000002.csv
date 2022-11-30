@@ -1,0 +1,8 @@
+"0","### model 3"
+"0","set.seed(2021)"
+"0","mod_3_roc <- train(  "
+"0","  y~x1+x2+I(x1^2)+I(x2^2),"
+"0","  data = df,"
+"0","  method = ""glm"","
+"0","  metric = metric_roc,"
+"0","  trControl = ctrl_roc)"

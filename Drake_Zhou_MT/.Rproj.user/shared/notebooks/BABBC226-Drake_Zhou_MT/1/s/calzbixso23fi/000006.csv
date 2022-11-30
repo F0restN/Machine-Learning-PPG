@@ -1,0 +1,5 @@
+"0","post_df_focus_from_vague <- "
+"0","  df_focus %>%"
+"0","  mutate(anew=0.5+num_events, bnew=0.5+num_trials-num_events)"
+"0",""
+"0","post_df_focus_from_vague"

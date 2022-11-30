@@ -1,0 +1,5 @@
+"0","### set input arguments !!!"
+"0","log_post_sigma_unnorm <- function(sigma, N, v, lambda)"
+"0","{"
+"0","  return(N * log(1 / sigma) - (N * v) / (2 * sigma^2) - lambda * sigma)"
+"0","}"

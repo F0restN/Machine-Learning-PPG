@@ -1,0 +1,6 @@
+"0","### add as many code chunks as you'd like"
+"0","SSmat <- t(Xtrips) %*% Xtrips;"
+"0","matrix01f <- SSmat %>% "
+"0","  solve() %>% "
+"0","  cov2cor() %>% "
+"0","  corrplot(type = 'upper', method = 'square')"

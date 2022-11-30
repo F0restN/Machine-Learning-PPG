@@ -1,0 +1,6 @@
+"0","tibble::tibble("
+"0","  sigma = seq(0.5, 4.5, length.out=101)"
+"0",") %>% "
+"0","  mutate(log_post = log_post_sigma_unnorm(sigma = sigma, N = N, v = v, lambda = 0.75)) %>%"
+"0","  ggplot(mapping = aes(x = sigma, y = log_post)) +"
+"0","  geom_line() "

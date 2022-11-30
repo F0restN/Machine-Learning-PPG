@@ -1,0 +1,4 @@
+"0","### your code here"
+"0","library(coefplot)"
+"0",""
+"0","multiplot(mod_high_4$finalModel, mod_high_5$finalModel, mod_high_6$finalModel)"

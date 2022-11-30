@@ -1,0 +1,4 @@
+"0","log_post_cv_result <- purrr::map2_dbl(cv_param_grid$mu, cv_param_grid$varphi,"
+"0","                                      eval_logpost,"
+"0","                                      logpost_func = my_cv_logpost,"
+"0","                                      logpost_info = hw06_info)"

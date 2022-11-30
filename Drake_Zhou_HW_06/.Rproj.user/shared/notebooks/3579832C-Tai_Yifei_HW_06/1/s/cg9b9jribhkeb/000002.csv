@@ -1,0 +1,5 @@
+"0","param_grid <- expand.grid(mu = seq(from = mu_grid_lwr, to = mu_grid_upr, length.out = 251),"
+"0","                          sigma = seq(from = sigma_grid_lwr, to = sigma_grid_upr, length.out = 251),"
+"0","                          KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE) %>% "
+"0","  as.data.frame() %>% tibble::as_tibble()"
+"0","param_grid"

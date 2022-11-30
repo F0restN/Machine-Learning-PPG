@@ -1,0 +1,3 @@
+"0","The dot in figure of noisy_data is more dispersed while the clean_data has more converged dots. So it is easily to feel like the truth fits polynomial that has high degree compared to what we feel through noisy_data plot. Let alone nosiy data actually interrupt the performance of models or which model should we choose. As we can see, the best three model of noisy_data is #4,5,6 while the best three models of clean_data is #5,6,7."
+"2","/bin/sh: text: command not found
+"

@@ -1,0 +1,307 @@
+---
+title: "Drake_Zhou_Part_02_C"
+author: "Drake Zhou"
+date: "4/25/2022"
+output: 
+  html_document: 
+    toc: true
+    toc_float:
+      collapsed: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview & Preparation
+
+## Package Import
+
+This part is mainly focus on making prediction, I will import top 2 Bayesian models and then make predictions. Then test the impact of different variables, and evluate the model. Finally I will select the best model.
+
+```{r, init, message=FALSE}
+library(tidyverse)
+library(caret)
+library(coefplot)
+library(rstanarm)
+library(splines)
+```
+
+## Data Import
+
+```{r}
+df_all <- readr::read_csv("final_project_train.csv", col_names = TRUE)
+df_all <- df_all %>% 
+  mutate(y = log(response)) %>% 
+  select(region, customer, starts_with('x'), y)
+```
+# Predictive Trends
+
+## Input grid prepare
+
+The make_test_input_list() function therefore creates a grid of 25 evenly spaced points between the training set min and max bounds for the top 2 ranked inputs. The third and fourth ranked inputs are given 5 unique values, based on specific quantiles of the training set. All other inputs are set to constant values equal to their training set medians.
+
+```{r, make_input_grid_01, eval=TRUE}
+make_test_input_list <- function(var_name, top_4_inputs, all_data)
+{
+  xvar <- all_data %>% select(all_of(var_name)) %>% pull()
+  
+  if (var_name %in% top_4_inputs[1]){
+    # use 25 unique values between the min/max values
+    xgrid <- seq(min(xvar), max(xvar), length.out = 25)
+  } else if (var_name %in% top_4_inputs[2]){
+    # specify quantiles to use
+    xgrid <- quantile(xvar, probs = c(0.05, 0.25, 0.5, 0.75, 0.95), na.rm = TRUE)
+    xgrid <- as.vector(xgrid)
+  } else {
+    # set to their median values
+    xgrid <- median(xvar, na.rm = TRUE)
+  }
+  
+  return(xgrid)
+}
+```
+
+The second function, make_test_input_grid(), is a wrapper function. It iteratively applies the make_test_input_list() function to all inputs and then uses the expand.grid() function to create full factorial grid based on the list of unique input values.
+
+```{r, make_input_grid_02, eval=TRUE}
+make_test_input_grid <- function(all_input_names, top_4_inputs, all_data)
+{
+  test_list <- purrr::map(all_input_names, 
+                          make_test_input_list,
+                          top_4_inputs = top_4_inputs,
+                          all_data = all_data)
+  
+  expand.grid(test_list, 
+              KEEP.OUT.ATTRS = FALSE,
+              stringsAsFactors = FALSE) %>% 
+    purrr::set_names(all_input_names)
+}
+```
+
+Manually select the top 4 inputs
+
+```{r, make_input_grid_03, eval=TRUE}
+my_input_names <- df_all %>% dplyr::select(-y) %>% names()
+my_top_ranked_inputs <- c("xb_04","xw_01")
+viz_input_grid <- make_test_input_grid(my_input_names, my_top_ranked_inputs, df_all)
+```
+
+## Import models
+
+```{r, message=FALSE}
+rstanarm_mod3 <- readr::read_rds('models/rstanarm_mod3.rds')
+rstanarm_mod9 <- readr::read_rds('models/rstanarm_mod9.rds')
+```
+
+## Model 3
+
+```{r}
+post_pred_mod3 <- posterior_predict(rstanarm_mod3, newdata = viz_input_grid)
+```
+
+```{r}
+post_pred_mod3 %>%
+  as.data.frame() %>% tibble::as_tibble() %>%
+  tibble::rowid_to_column("post_id") %>%
+  tidyr::gather(key = "pred_id", value = "value", -post_id) %>%
+  mutate_at(c("pred_id"), as.numeric) %>%
+  group_by(pred_id) %>%
+  summarise(num_post = n(),
+            trend_avg = mean(value),
+            trend_lwr = quantile(value, 0.05),
+            trend_upr = quantile(value, 0.95)) %>%
+  ungroup() %>%
+  left_join(viz_input_grid %>% tibble::rowid_to_column("pred_id"),
+            by = "pred_id") %>%
+  ggplot(mapping = aes(x = xb_04)) +
+  geom_ribbon(mapping = aes(ymin = trend_lwr,
+                            ymax = trend_upr,
+                            group = xw_01,
+                            fill = as.factor(xw_01)),
+              alpha = 0.5) +
+  geom_line(mapping = aes(y = trend_avg,
+                          group = xw_01,
+                          color = as.factor(xw_01)),
+            size = 1.) +
+  scale_fill_viridis_d("xw_01") +
+  scale_color_viridis_d("xw_01") +
+  labs(y = "mean trend") +
+  theme_bw() +
+  theme(legend.position = "top")
+```
+
+
+```{r}
+post_pred_mod3 %>% 
+  as.data.frame() %>% tibble::as_tibble() %>% 
+  tibble::rowid_to_column("post_id") %>% 
+  tidyr::gather(key = "pred_id", value = "value", -post_id) %>% 
+  mutate_at(c("pred_id"), as.numeric) %>% 
+  group_by(pred_id) %>% 
+  summarise(y_avg = mean(value),
+            y_lwr = quantile(value, 0.05),
+            y_upr = quantile(value, 0.95)) %>% 
+  ungroup() %>% 
+  left_join(posterior_linpred(rstanarm_mod3, newdata = viz_input_grid) %>% 
+              as.data.frame() %>% tibble::as_tibble() %>% 
+              tibble::rowid_to_column("post_id") %>% 
+              tidyr::gather(key = "pred_id", value = "value", -post_id) %>% 
+              mutate_at(c("pred_id"), as.numeric) %>% 
+              group_by(pred_id) %>% 
+              summarise(trend_avg = mean(value),
+                        trend_lwr = quantile(value, 0.05),
+                        trend_upr = quantile(value, 0.95)) %>% 
+              ungroup(),
+            by = "pred_id") %>% 
+  left_join(viz_input_grid %>% tibble::rowid_to_column("pred_id"),
+            by = "pred_id") %>% 
+  ggplot(mapping = aes(x = xb_04)) +
+  geom_ribbon(mapping = aes(ymin = y_lwr, ymax = y_upr,
+                            group = xw_01), 
+              fill = "darkorange") +
+  geom_ribbon(mapping = aes(ymin = trend_lwr, ymax = trend_upr,
+                            group = xw_01),
+              fill = "grey") +
+  geom_line(mapping = aes(y = trend_avg,
+                          group = xw_01),
+            color = "black", size = 0.85) +
+  facet_wrap(~xw_01, labeller = "label_both", scales = 'free') +
+  labs(y = "y") +
+  theme_bw()
+```
+
+```{r}
+posterior_predict(rstanarm_mod3, newdata = viz_input_grid) %>%
+  as.data.frame() %>% tibble::as_tibble() %>%
+  tibble::rowid_to_column("post_id") %>%
+  tidyr::gather(key = "pred_id", value = "value", -post_id) %>%
+  mutate_at(c("pred_id"), as.numeric) %>%
+  group_by(pred_id) %>%
+  summarise(num_post = n(),
+            y_avg = mean(value),
+            y_lwr = quantile(value, 0.05),
+            y_upr = quantile(value, 0.95),
+            prob_grt_0 = mean(value > 0)) %>%
+  ungroup() %>%
+  left_join(viz_input_grid %>% tibble::rowid_to_column("pred_id"),
+            by = "pred_id") %>%
+  ggplot(mapping = aes(x = xb_04, y = prob_grt_0)) +
+  geom_line(mapping = aes(group = xw_01,
+                          color = as.factor(xw_01)),
+            size = 1.) +
+  scale_fill_viridis_d("xw_01") +
+  scale_color_viridis_d("xw_01") +
+  labs(y = "Probability response is greater than 0") +
+  theme_bw() +
+  theme(legend.position = "top")
+```
+
+## Model 9
+
+```{r}
+posterior_predict(rstanarm_mod9, newdata = viz_input_grid) %>% dim()
+```
+
+```{r}
+posterior_predict(rstanarm_mod9, newdata = viz_input_grid) %>% 
+  as.data.frame() %>% tibble::as_tibble() %>% 
+  tibble::rowid_to_column("post_id") %>% 
+  tidyr::gather(key = "pred_id", value = "value", -post_id) %>% 
+  mutate_at(c("pred_id"), as.numeric) %>% 
+  group_by(pred_id) %>% 
+  summarise(num_post = n(),
+            trend_avg = mean(value),
+            trend_lwr = quantile(value, 0.05),
+            trend_upr = quantile(value, 0.95)) %>% 
+  ungroup() %>% 
+  left_join(viz_input_grid %>% tibble::rowid_to_column("pred_id"),
+            by = "pred_id") %>% 
+  ggplot(mapping = aes(x = xb_04)) +
+  geom_ribbon(mapping = aes(ymin = trend_lwr,
+                            ymax = trend_upr,
+                            group = xw_01,
+                            fill = as.factor(xw_01)),
+              alpha = 0.5) +
+  geom_line(mapping = aes(y = trend_avg,
+                          group = xw_01,
+                          color = as.factor(xw_01)),
+            size = 1.) +
+  scale_fill_viridis_d("xw_01") +
+  scale_color_viridis_d("xw_01") +
+  labs(y = "mean trend") +
+  theme_bw() +
+  theme(legend.position = "top")
+```
+
+
+```{r}
+posterior_predict(rstanarm_mod9, newdata = viz_input_grid) %>% 
+  as.data.frame() %>% tibble::as_tibble() %>% 
+  tibble::rowid_to_column("post_id") %>% 
+  tidyr::gather(key = "pred_id", value = "value", -post_id) %>% 
+  mutate_at(c("pred_id"), as.numeric) %>% 
+  group_by(pred_id) %>% 
+  summarise(y_avg = mean(value),
+            y_lwr = quantile(value, 0.05),
+            y_upr = quantile(value, 0.95)) %>% 
+  ungroup() %>% 
+  left_join(posterior_linpred(rstanarm_mod9, newdata = viz_input_grid) %>% 
+              as.data.frame() %>% tibble::as_tibble() %>% 
+              tibble::rowid_to_column("post_id") %>% 
+              tidyr::gather(key = "pred_id", value = "value", -post_id) %>% 
+              mutate_at(c("pred_id"), as.numeric) %>% 
+              group_by(pred_id) %>% 
+              summarise(trend_avg = mean(value),
+                        trend_lwr = quantile(value, 0.05),
+                        trend_upr = quantile(value, 0.95)) %>% 
+              ungroup(),
+            by = "pred_id") %>% 
+  left_join(viz_input_grid %>% tibble::rowid_to_column("pred_id"),
+            by = "pred_id") %>% 
+  ggplot(mapping = aes(x = xb_04)) +
+  geom_ribbon(mapping = aes(ymin = y_lwr, ymax = y_upr,
+                            group = xw_01), 
+              fill = "darkorange") +
+  geom_ribbon(mapping = aes(ymin = trend_lwr, ymax = trend_upr,
+                            group = xw_01),
+              fill = "grey") +
+  geom_line(mapping = aes(y = trend_avg,
+                          group = xw_01),
+            color = "black", size = 0.85) +
+  facet_wrap(~xw_01, labeller = "label_both", scales = 'free') +
+  labs(y = "y") +
+  theme_bw()
+```
+
+```{r}
+posterior_predict(rstanarm_mod9, newdata = viz_input_grid) %>% 
+  as.data.frame() %>% tibble::as_tibble() %>% 
+  tibble::rowid_to_column("post_id") %>% 
+  tidyr::gather(key = "pred_id", value = "value", -post_id) %>% 
+  mutate_at(c("pred_id"), as.numeric) %>% 
+  group_by(pred_id) %>% 
+  summarise(num_post = n(),
+            y_avg = mean(value),
+            y_lwr = quantile(value, 0.05),
+            y_upr = quantile(value, 0.95),
+            prob_grt_0 = mean(value > 0)) %>% 
+  ungroup() %>% 
+  left_join(viz_input_grid %>% tibble::rowid_to_column("pred_id"),
+            by = "pred_id") %>% 
+  ggplot(mapping = aes(x = xb_04, y = prob_grt_0)) +
+  geom_line(mapping = aes(group = xw_01,
+                          color = as.factor(xw_01)),
+            size = 1.) +
+  scale_fill_viridis_d("xw_01") +
+  scale_color_viridis_d("xw_01") +
+  labs(y = "Probability response is greater than 0") +
+  theme_bw() +
+  theme(legend.position = "top")
+```
+
+# Conclusion
+
+```{text}
+Clearly, they are not consistent with each other.
+```

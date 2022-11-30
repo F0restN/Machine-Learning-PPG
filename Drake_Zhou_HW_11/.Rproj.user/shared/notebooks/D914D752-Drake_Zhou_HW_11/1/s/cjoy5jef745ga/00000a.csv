@@ -1,0 +1,18 @@
+"0","### Initialize parameters"
+"0","my_input_name <- colnames(Sonar)[-61]"
+"0","my_top_ranked_inputs <- c(""V50"",""V57"",""V31"",""V22"")"
+"0",""
+"0","### Excecute function"
+"0","viz_input_grid <- make_test_input_grid(my_input_name, my_top_ranked_inputs, Sonar)"
+"1","Note: Using an external vector in selections is ambiguous.
+[34mℹ[39m Use `all_of(var_name)` instead of `var_name` to silence this message.
+[34mℹ[39m See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>.
+[90mThis message is displayed once per session.[39m
+"
+"0","### Display result"
+"0","dim(viz_input_grid)"
+"1","[1]"
+"1"," 15625"
+"1","    60"
+"1","
+"

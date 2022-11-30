@@ -1,0 +1,7 @@
+"0","model_class_0.5 <- "
+"0","  mutate("
+"0","    model_pred_df, "
+"0","    pred_class = ifelse(pred_prob>0.5, ""event"", ""non_event"")"
+"0","  )"
+"0",""
+"0","model_class_0.5"

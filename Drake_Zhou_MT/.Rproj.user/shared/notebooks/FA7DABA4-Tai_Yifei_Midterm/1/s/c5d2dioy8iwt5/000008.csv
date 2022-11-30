@@ -1,0 +1,3 @@
+"0","post_df_focus_pooled <- df_focus %>% "
+"0","  mutate(anew = a + (mean(df_focus$num_events)*J), bnew = b + (mean(df_focus$num_trials)*J) - (mean(df_focus$num_events)*J))"
+"0","post_df_focus_pooled"

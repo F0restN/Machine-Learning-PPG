@@ -1,0 +1,2 @@
+"0","set.seed(412412)"
+"0","check_optim_fit_3_c <- train_1layer_nnet_sse(3, tanh, Xmat_03, prob_03_df$y)"

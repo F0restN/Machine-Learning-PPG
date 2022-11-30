@@ -1,0 +1,7 @@
+"0","sonar_roc_compare <- resamples(list(GLM = fit_glm_sonar,"
+"0","                                    GLMNET = fit_glmnet_sonar,"
+"0","                                    NNET = fit_nnet_sonar,"
+"0","                                    RF = fit_rf_sonar,"
+"0","                                    XGB = fit_xgb_sonar))"
+"0",""
+"0","dotplot(sonar_roc_compare)"

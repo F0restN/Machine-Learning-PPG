@@ -1,0 +1,4 @@
+"0","spline_matrices <- purrr::map_dfr(seq(1, 50, by = 2), "
+"0","                                  make_spline_basis_mats,"
+"0","                                  train_data = train_02, "
+"0","                                  test_data = test_02)"

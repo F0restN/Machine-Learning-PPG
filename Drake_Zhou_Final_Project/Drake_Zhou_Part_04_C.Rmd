@@ -1,0 +1,281 @@
+---
+title: "Drake_Zhou_Part_04_C"
+author: "Drake Zhou"
+date: "4/27/2022"
+output: 
+  html_document: 
+    toc: true
+    number_sections: true
+    toc_float:
+      collapsed: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview & Preparation
+
+You must visualize the trends associated with the hardest to predict customer with respect to the most important sentiment derived feature. 
+You are free to select whether you wish to visualize the regression model trends (log-transformed response) or the classification model trends (event probability).• Predictions should be made using the best performing model.
+
+You must visualize your predictive trends using the following style: 
+The primary input should be used as the x-aesthetic in a graphic. 
+The secondary input should be used as a facet variable –it is recommended to use 4 to 6 unique values if your secondary input is a continuous variable. 
+You must decide what values to use for the remaining inputs. 
+What conclusions can you draw from the predictive trends?
+
+## Package Import
+
+```{r, message=FALSE}
+library(caret)
+library(yardstick)
+library(tidyverse)
+```
+
+## Data Import
+
+```{r, message=FALSE}
+holdout <- readr::read_csv('final_project_holdout_inputs.csv', col_names = TRUE)
+holdout_inputs <- holdout %>% 
+  select(-rowid)
+
+df_all <- readr::read_csv("final_project_train.csv", col_names = TRUE)
+# standard_df_all <- df_all %>%
+#   select(starts_with("x"), region, customer) %>%
+#   mutate(outcome = factor(df_all$outcome, levels = c("event", "non_event")),
+#          region = df_all$region,
+#          customer = df_all$customer)
+df_all <- df_all %>%
+  select(-rowid) %>%
+  mutate(outcome = factor(outcome, levels = c("event", "non_event")))
+
+# Resampling
+train_id <- sample(1:nrow(df_all), size = floor(0.7 * nrow(df_all)))
+
+train_ready <- df_all %>% slice(train_id)
+test_ready <- df_all %>% slice(-train_id)
+# test_ready <- df_all %>% slice(-train_id) %>% select(c(-response, -outcome, -rowid))
+
+```
+
+## Model Import
+
+```{r}
+best_reg_mod <- readr::read_rds('models/fit_reg_enet_pair.rds')
+best_cls_mod <- readr::read_rds('models/fit_acc_cat_nnet_tune.rds')
+```
+
+You must visualize the trends associated with the hardest to predict customer with respect to the most important sentiment derived feature.
+
+You are free to select whether you wish to visualize the regression model trends (log-transformed response) or the classification model trends (event probability).
+
+Predictions should be made using the best performing model.
+
+# Interpretation from Hold-out
+
+## Customer & sentiment derived feature
+
+```{r, eval=TRUE}
+df_format <- function(mod, test_data){
+  my_conclu <- tibble::tibble(
+  y = predict(mod, newdata = test_data),
+  pred_outcome = predict(best_cls_mod, newdata = test_data)
+  ) %>% 
+    bind_cols(
+      predict(best_cls_mod, newdata = test_data, type = 'prob') %>% 
+        select(probability = event)
+    ) %>% 
+  tibble::rowid_to_column('id')
+  
+  my_conclu_all <- test_data %>%
+    mutate(pred_response = my_conclu$y,
+           pred_outcome = factor(my_conclu$pred_outcome, levels = c("event", "non_event")),
+           pred_prob = my_conclu$probability)
+}
+
+my_conclu_all_reg <- df_format(best_reg_mod, holdout_inputs)
+my_conclu_all_cls <- df_format(best_cls_mod, holdout_inputs)
+
+```
+
+```{r, message=FALSE, warning=FALSE}
+my_conclu_all_reg %>%
+  filter(customer == c("A","E","D", "Other"))
+  
+  # ggplot(mapping = aes(x = xw_02, y = pred_response, color = xw_01)) +
+  # geom_point() +
+  # geom_smooth() +
+  # geom_line()+
+  # facet_wrap(~customer , labeller = "label_both", scales = "free")  +
+  # ggthemes::scale_fill_colorblind() +
+  # theme_bw()
+```
+
+Above is the relationship of xw_01 & xw_02 to prediction response in terms of customer. 
+
+```{r, message=FALSE, warning=FALSE}
+my_conclu_all_cls %>%
+  filter(customer %in% list("A","E","D", "Other")) %>%
+  ggplot(mapping = aes(x = xn_05, y = pred_prob, color = xn_01)) +
+  geom_point() +
+  geom_smooth() +
+  # geom_line()+
+  facet_wrap(~customer , labeller = "label_both", scales = "free")  +
+  ggthemes::scale_fill_colorblind() +
+  theme_bw()
+```
+
+# Predict trends
+
+You must visualize your predictive trends using the following style:
+• The primary input should be used as the x-aesthetic in a graphic.
+• The secondary input should be used as a facet variable –it is recommended to use 4 to 6 unique values if your secondary input is a continuous variable.
+• You must decide what values to use for the remaining inputs.
+• What conclusions can you draw from the predictive trends?
+
+## Input grid prepare
+
+The make_test_input_list() function therefore creates a grid of 25 evenly spaced points between the training set min and max bounds for the top 2 ranked inputs. The third and fourth ranked inputs are given 5 unique values, based on specific quantiles of the training set. All other inputs are set to constant values equal to their training set medians.
+
+```{r, make_input_grid_01, eval=TRUE}
+make_test_input_list <- function(var_name, top_4_inputs, all_data)
+{
+  xvar <- all_data %>% select(all_of(var_name)) %>% pull()
+  
+  if (var_name %in% top_4_inputs[1]){
+    # use 25 unique values between the min/max values
+    xgrid <- seq(min(xvar), max(xvar), length.out = 25)
+  } else if (var_name %in% top_4_inputs[2]){
+    # specify quantiles to use
+    xgrid <- quantile(xvar, probs = c(0.05, 0.25, 0.5, 0.75, 0.95), na.rm = TRUE)
+    xgrid <- as.vector(xgrid)
+  } else if (var_name == "customer") {
+    # keep the same data if its customer data
+    xgrid <- xvar
+  } else {
+    # set to their median values
+    xgrid <- median(xvar, na.rm = TRUE)
+  }
+  
+  return(xgrid)
+}
+```
+
+The second function, make_test_input_grid(), is a wrapper function. It iteratively applies the make_test_input_list() function to all inputs and then uses the expand.grid() function to create full factorial grid based on the list of unique input values.
+
+```{r, make_input_grid_02, eval=TRUE}
+make_test_input_grid <- function(all_input_names, top_4_inputs, all_data)
+{
+  test_list <- purrr::map(all_input_names, 
+                          make_test_input_list,
+                          top_4_inputs = top_4_inputs,
+                          all_data = all_data)
+  
+  expand.grid(test_list, 
+              KEEP.OUT.ATTRS = FALSE,
+              stringsAsFactors = FALSE) %>% 
+    purrr::set_names(all_input_names)
+}
+```
+
+Manually select the top 4 inputs
+
+```{r, make_input_grid_03, eval=TRUE}
+my_input_names <- holdout_inputs %>% names()
+my_top_ranked_inputs <- c("xn_05","xn_01")
+
+viz_input_grid_cls <- make_test_input_grid(my_input_names, c("xn_05","xn_01"), holdout_inputs)
+viz_input_grid_reg <- make_test_input_grid(my_input_names, c("xw_02","xw_01"), holdout_inputs)
+```
+
+## Making prediction
+
+```{r}
+my_pred_all_reg <- df_format(best_reg_mod, viz_input_grid_reg)
+my_pred_all_cls <- df_format(best_cls_mod, viz_input_grid_cls)
+```
+
+## Visualize trends
+
+### Classification Model
+
+```{r}
+my_pred_all_cls %>%
+  filter(customer %in% list("A","E","D", "Other")) %>%
+  ggplot(mapping = aes(x = xn_05, y = pred_prob, color = xn_01)) +
+  geom_point(size = 0.1, alpha = 0.2) +
+  geom_line()+
+  # geom_smooth() +
+  facet_grid(xn_01 ~ customer, labeller = "label_both", scales = "fix")  +
+  ggthemes::scale_fill_colorblind() +
+  theme_bw()
+```
+
+Through the figure, we can see the classification posterior probability decrease when xn_05 increase, it also decrease with increase of xn_01. Customer A and E have higher probability than D and E
+
+```{r, message=FALSE, warning=FALSE}
+library(ggridges)
+my_pred_all_cls %>%
+  filter(customer %in% list("A","E", "Other")) %>%
+  ggplot(aes(x = pred_prob, y = xn_05, group = xn_05)) +
+  geom_density_ridges(scale = 2)+
+  facet_grid(xn_01 ~ customer, labeller = "label_both", scales = "free")  +
+  ggthemes::scale_fill_colorblind() +
+  theme_bw()
+```
+Through this figure, we can see that the confidence interval of posterior probability of classification is shrinking. And it narrows to a relative smaller interval with the increase of xn_01. I didn't apply bound on this plot function, thus, probability below. Also, the posterior probability of classification decrease as xn_05 increase. The posterior mode is always above 0.
+
+```{r}
+my_pred_all_cls %>%
+  filter(customer == "D") %>%
+  ggplot(aes(x = pred_prob, y = xn_05, group = xn_05)) +
+  geom_density_ridges(scale = 5)+
+  # facet_grid(~ xn_01, labeller = "label_both", scales = "free")  +
+  ggthemes::scale_fill_colorblind() +
+  theme_bw()
+```
+
+This figure we take a close look to customer D, as we can see, the model turns into multi peak model, that could be a reason why this customer is hard to predict.
+
+### Regression Model
+
+```{r}
+my_pred_all_reg %>%
+  filter(customer %in% list("A","E","D", "Other")) %>%
+  ggplot(mapping = aes(x = xw_02, y = pred_response, color = xw_02)) +
+  geom_point(size = 0.1, alpha = 0.2) +
+  geom_line()+
+  # geom_smooth() +
+  facet_grid(customer ~ xw_01, labeller = "label_both", scales = "fix")  +
+  ggthemes::scale_fill_colorblind() +
+  theme_bw()
+```
+
+As we can see, no matter which customer, the posterior response increase as xw_01 and xw_02 increase. The difference is the start point.
+
+```{r, message=FALSE, warning=FALSE}
+library(ggridges)
+my_pred_all_reg %>%
+  filter(customer %in% list("A","E","Other")) %>%
+  ggplot(aes(x = pred_response, y = xw_02, group = xw_02)) +
+  geom_density_ridges(scale = 2)+
+  facet_grid(xw_01 ~ customer, labeller = "label_both", scales = "free")  +
+  ggthemes::scale_fill_colorblind() +
+  theme_bw()
+```
+In regression model, the posterior confidence interval seems not change as xw_01 increase. The posterior mode has slight shifts as xw_02 increase.
+
+```{r}
+my_pred_all_reg %>%
+  filter(customer == "D") %>%
+  ggplot(aes(x = pred_prob, y = xw_02, group = xw_02)) +
+  geom_density_ridges(scale = 3)+
+  # facet_grid(xw_01 ~ ., labeller = "label_both", scales = "free")  +
+  ggthemes::scale_fill_colorblind() +
+  theme_bw()
+```
+
+Again, lets dive into customer D, this model is also turns into multi-peak model, it explains why customer D is hard to predict.
+
+

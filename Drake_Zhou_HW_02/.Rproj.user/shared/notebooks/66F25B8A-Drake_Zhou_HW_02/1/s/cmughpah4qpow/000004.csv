@@ -1,0 +1,4 @@
+"0","### your code here"
+"0","prob_high_noise %>% "
+"0","  ggplot() + "
+"0","  geom_point(mapping = aes(x = x, y = y))"

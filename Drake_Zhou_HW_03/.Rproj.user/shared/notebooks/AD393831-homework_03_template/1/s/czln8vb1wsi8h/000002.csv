@@ -1,0 +1,5 @@
+"0","### add more code chunks if you like"
+"0","pred_test_3 <- predict(mod_3_acc, df_test, type = ""prob"")"
+"0","pred_test_8 <- predict(mod_8_acc, df_test, type = ""prob"")"
+"0",""
+"0","pred_test_3"

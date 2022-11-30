@@ -1,0 +1,26 @@
+"0","train_data_url <- 'https://raw.githubusercontent.com/jyurko/INFSCI_2595_Spring_2022/main/HW/09/hw09_binary_01.csv'"
+"0","train_df <- readr::read_csv(train_data_url, col_names = TRUE)"
+"1","[1mRows: [22m[34m125[39m [1mColumns: [22m[34m2[39m
+"
+"1","[36m──[39m [1mColumn specification[22m [36m───────────────────────────────────────────────────────────────[39m
+[1mDelimiter:[22m "",""
+[32mdbl[39m (2): x, y
+"
+"1","
+[36mℹ[39m Use [38;5;235m[48;5;253m[38;5;235m[48;5;253m`spec()`[48;5;253m[38;5;235m[49m[39m to retrieve the full column specification for this data.
+[36mℹ[39m Specify the column types or set [38;5;235m[48;5;253m[38;5;235m[48;5;253m`show_col_types = FALSE`[48;5;253m[38;5;235m[49m[39m to quiet this message.
+"
+"0","train_df %>% glimpse()"
+"1","Rows: 125"
+"1",""
+"1","
+"
+"1","Columns: 2"
+"1",""
+"1","
+"
+"1","$ x [3m[38;5;246m<dbl>[39m[23m 0.10370553, 1.15482613, 0.97787213, 0.16832326, -1.82060499, 2.36128761, -1…
+$ y [3m[38;5;246m<dbl>[39m[23m 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, …"
+"1",""
+"1","
+"

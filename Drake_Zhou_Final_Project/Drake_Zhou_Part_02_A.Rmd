@@ -1,0 +1,328 @@
+---
+title: "Drake_Zhou_Part_02_A"
+author: "Drake Zhou"
+date: "4/22/2022"
+output: 
+  html_document: 
+    toc: true
+    number_sections: true
+    toc_float:
+      collapsed: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview & Preparation
+
+Before using advanced methods, you need to develop a baseline understanding of the log-transformed response as a function of the inputs using linear modeling techniques.
+
+## Package Import
+
+```{r, init, message=FALSE}
+library(tidyverse)
+library(caret)
+library(coefplot)
+library(splines)
+library(yardstick)
+```
+
+## Data Import
+
+Before I fit into linear models, I want transform the response to log-response and standardized the inputs and outputs especially those continuous inputs and resampling.
+
+```{r}
+# Read CSV
+df_all <- readr::read_csv("final_project_train.csv", col_names = TRUE)
+
+# Standardize data
+standard_df_all <- df_all %>% 
+  select(starts_with("x")) %>%
+  scale(center = TRUE, scale = TRUE) %>% 
+  as.data.frame() %>% 
+  tibble::as_tibble() %>% 
+  mutate(y = log(df_all$response), 
+         region = factor(df_all$region, levels = c("XX", "YY", "ZZ")), 
+         customer = factor(df_all$customer, levels = c("A", "B", "D", "E", "G", "Other", "Q", "M", "K")))
+
+# Resampling validation
+train_id <- sample(1:nrow(standard_df_all), size = floor(0.8 * nrow(standard_df_all)))
+train_ready <- standard_df_all %>% slice(train_id)
+test_ready <- standard_df_all %>% slice(-train_id)
+
+```
+
+# Model Fitting
+
+Use lm() to fit the following linear models:
+  • Categorical variables only – linear additive
+  • Continuous variables only – linear additive
+  • All categorical and continuous variables – linear additive
+  • Interact region with continuous inputs, do not include customer
+  • Interact customer with continuous inputs, do not include region
+  • All pairwise interactions of continuous inputs, do not include categorical inputs
+  • 3 models with basis functions of your choice
+  • Can include interactions of the basis functions with other basis functions and with the categorical inputs!
+
+```{r, solution_01, eval=TRUE}
+# Model for categorical variables
+mod1 = lm(y ~ region + customer, data = standard_df_all)
+
+# Model for continuous variables only additively & 
+mod2 = lm(y ~ ., data = standard_df_all[c(-36, -35)])
+
+# All categorical and continuous variables
+mod3 <- lm(y ~ ., data = standard_df_all)
+
+# Interact region with continuous inputs, do not include customer
+mod4 <- lm(y ~ region * ., data = standard_df_all[-36])
+
+# Interact customer with continuous inputs, do not include region
+mod5 <- lm(y ~ customer * ., data = standard_df_all[-35])
+
+# All pairwise interactions of continuous inputs
+mod6 = lm(y ~ (.)^2, data = standard_df_all[c(-36, -35)])
+
+# Model with polynomial
+mod7 <- lm(y ~ poly(xb_01, 2)+poly(xb_02, 2)+ poly(xb_03,2)+poly(xn_01,2)+poly(xn_02,2)+poly(xn_03,2)+poly(xa_01,2)+poly(xa_02,2)+poly(xa_03,2)+poly(xb_04,2)+poly(xb_05,2)+poly(xb_06,2)+poly(xb_07,2)+poly(xb_08,2)+poly(xn_04,2)+poly(xn_05,2)+poly(xn_06,2)+poly(xn_07,2)+poly(xn_08,2)+poly(xa_04,2)+poly(xa_05,2)+poly(xa_06,2)+poly(xa_07,2)+poly(xa_08,2)+poly(xw_01,2)+poly(xw_02,2)+poly(xw_03,2)+poly(xs_01,2)+poly(xs_02,2)+poly(xs_03,2)+poly(xs_04,2)+poly(xs_05,2)+poly(xs_06,2)*region*customer, data = standard_df_all)
+
+# Model with natural spline on continuous variables
+mod8 <- lm(y ~ ns(xb_01, 2)+ns(xb_02, 2)+ ns(xb_03,2)+ns(xn_01,2)+ns(xn_02,2)+ns(xn_03,2)+ns(xa_01,2)+ns(xa_02,2)+ns(xa_03,2)+ns(xb_04,2)+ns(xb_05,2)+ns(xb_06,2)+ns(xb_07,2)+ns(xb_08,2)+ns(xn_04,2)+ns(xn_05,2)+ns(xn_06,2)+ns(xn_07,2)+ns(xn_08,2)+ns(xa_04,2)+ns(xa_05,2)+ns(xa_06,2)+ns(xa_07,2)+ns(xa_08,2)+ns(xw_01,2)+ns(xw_02,2)+ns(xw_03,2)+ns(xs_01,2)+ns(xs_02,2)+ns(xs_03,2)+ns(xs_04,2)+ns(xs_05,2)+ns(xs_06,2), data = standard_df_all)
+
+# Model with natural spline with higher degree of freedom
+mod9 <- lm(y ~ ns(xb_01, 3)+ns(xb_03, 3)+ ns(xb_03,3)+ns(xn_01,3)+ns(xn_03,3)+ns(xn_03,3)+ns(xa_01,3)+ns(xa_03,3)+ns(xa_03,3)+ns(xb_04,3)+ns(xb_05,3)+ns(xb_06,3)+ns(xb_07,3)+ns(xb_08,3)+ns(xn_04,3)+ns(xn_05,3)+ns(xn_06,3)+ns(xn_07,3)+ns(xn_08,3)+ns(xa_04,3)+ns(xa_05,3)+ns(xa_06,3)+ns(xa_07,3)+ns(xa_08,3)+ns(xw_01,3)+ns(xw_03,3)+ns(xw_03,3)+ns(xs_01,3)+ns(xs_03,3)+ns(xs_03,3)+ns(xs_04,3)+ns(xs_05,3)+ns(xs_06,3)+region+customer, data = standard_df_all)
+
+```
+
+# Model Evaluation
+
+## Binding data together
+
+```{r}
+p1 <- broom::glance(mod1)
+p2 <- broom::glance(mod2)
+p3 <- broom::glance(mod3)
+p4 <- broom::glance(mod4)
+p5 <- broom::glance(mod5)
+p6 <- broom::glance(mod6)
+p7 <- broom::glance(mod7)
+p8 <- broom::glance(mod8)
+p9 <- broom::glance(mod9)
+
+p_all <- rbind(p1,p2,p3,p4,p5,p6,p7,p8,p9) %>%
+  tibble::rowid_to_column()
+```
+
+## R-squared perspective
+
+The closer r-squared value is close to one, the better the model is.
+
+```{r}
+p_all %>%
+  select(r.squared, rowid) %>% 
+  pivot_longer(-c("rowid")) %>%
+  mutate(model_id = stringr::str_extract(rowid, "\\d+")) %>% 
+  ggplot(mapping = aes(x = model_id, y = value, group = 1))+
+  geom_path()+
+  geom_point(size = 2.0)+
+  facet_grid(~name, scales = "free")+
+  labs(x = '')+
+  theme_bw()
+```
+
+## AIC & BIC
+
+AIC and BIC are information criterion metrics, hence we want to minimize them which represent a better model.
+
+```{r}
+p_all %>%
+  select(AIC, BIC, rowid) %>% 
+  pivot_longer(-c("rowid")) %>%
+  mutate(model_id = stringr::str_extract(rowid, "\\d+")) %>% 
+  ggplot(mapping = aes(x = model_id, y = value, group = 1))+
+  geom_path()+
+  geom_point(size = 2.0)+
+  facet_grid(~name, scales = "free")+
+  labs(x = '')+
+  theme_bw()
+```
+
+## Compare models
+
+Which of the 9 models is the best? What performance metric did you use to make your selection?
+
+```{text}
+According to r-squared performance metric, model 6 is the best. According to AIC, model 3 or 4 maybe the best. But BIC disagrees with that, which rather indicate that model 6 is the worst. To better illustrate which one is the best, we need use these model to predict on test dataset. However now, I choose model 6 as the best one. Top 3 are mod6, mod5 and mod9
+```
+
+# Train-test split
+
+## Train and assess models
+
+```{r}
+fit_and_assess <- function(a_formula, model_name, train_data, test_data, y_name)
+{
+  mod <- lm( a_formula, data = train_data)
+  
+  pred_train <- as.vector(mod$fitted.values)
+  
+  y_train <- train_data %>% dplyr::select(all_of(y_name)) %>% pull()
+  
+  train_metrics <- tibble::tibble(
+    rmse_value = rmse_vec(y_train, pred_train),
+    mae_value = mae_vec(y_train, pred_train),
+    r2_value = rsq_vec(y_train, pred_train)
+  )
+  
+  pred_test <- as.vector(predict(mod, newdata = test_data))
+  
+  y_test <- test_data %>% dplyr::select(all_of(y_name)) %>% pull()
+  
+  test_metrics <- tibble::tibble(
+    rmse_value = rmse_vec(y_test, pred_test),
+    mae_value = mae_vec(y_test, pred_test),
+    r2_value = rsq_vec(y_test, pred_test)
+  )
+  
+  train_metrics %>% mutate(on_set = "train") %>% 
+    bind_rows(test_metrics %>% mutate(on_set = "test")) %>% 
+    mutate(model_name = model_name)
+}
+```
+
+
+```{r}
+one_split_results <- purrr::map2_dfr(list(formula(mod1), formula(mod2), formula(mod3),
+                                         formula(mod4), formula(mod5), formula(mod6),
+                                         formula(mod7), formula(mod8), formula(mod9)),
+                                     sprintf("mod%2d", 1:9),
+                                     fit_and_assess,
+                                     train_data = train_ready,
+                                     test_data = test_ready,
+                                     y_name = "y")
+```
+## RMSE performance on Train and Test sets
+
+```{r}
+one_split_results %>% 
+  mutate(model_id = stringr::str_extract(model_name, "\\d+")) %>% 
+  ggplot(mapping = aes(x = model_id, y = rmse_value)) +
+  geom_line(mapping = aes(color = on_set,
+                          group = on_set),
+            size = 1.1) +
+  geom_point(mapping = aes(color = on_set),
+             size = 2.5) +
+  scale_color_brewer("", palette = "Set1") +
+  labs(x = 'model') +
+  theme_bw()
+```
+
+## R-Squared performance on Train and Test sets
+
+```{r}
+one_split_results %>% 
+  mutate(model_id = stringr::str_extract(model_name, "\\d+")) %>% 
+  ggplot(mapping = aes(x = model_id, y = r2_value)) +
+  geom_line(mapping = aes(color = on_set,
+                          group = on_set),
+            size = 1.1) +
+  geom_point(mapping = aes(color = on_set),
+             size = 2.5) +
+  scale_color_brewer("", palette = "Set1") +
+  labs(x = 'model') +
+  theme_bw()
+```
+
+# Conclusion
+
+```{text}
+Through the performance of data split we can see that model 5 and 6, even though perform very well on training set, have great variance between training set and test set. They might be overfitted, hence its not advised to choose them as my best models. Thus, through all figures and data above, we choose model 9, 3, 4 as our top 3 models.
+```
+
+# Coefficient inspection
+
+Visualize the coefficient summaries for your top 3 models. How do the coefficient summaries compare between the top 3?
+
+## Function
+
+```{r, eval=TRUE}
+sig_input_inspect <- function(mod){
+  df <- mod %>%
+        coefplot(sort = "magnitude", plot = FALSE) %>%
+        tibble::as_tibble() %>%
+        filter((HighOuter > 0 & LowOuter > 0) | (HighOuter < 0 & LowOuter < 0))
+  return(df)
+}
+```
+
+## Model #9
+
+```{r}
+summary(mod9)
+```
+
+
+```{r}
+mod9 %>%
+  coefplot(scales = "free", sort = "magnitude", pointSize = 1, innerCI = 0.5)+
+  geom_vline(xintercept = 0, color = "red")+
+  theme_bw()+
+  theme(legend.position = 'none')
+```
+```{r}
+sig_input_inspect(mod9) %>% head()
+```
+
+xb_04, xa_03, xn_08, xb_04 etc are important features
+
+## Model #3
+
+```{r}
+summary(mod3)
+```
+
+```{r}
+mod3 %>%
+  coefplot(scales = "free", sort = "magnitude", pointSize = 1, innerCI = 0.5)+
+  geom_vline(xintercept = 0, color = "red")+
+  theme_bw()+
+  theme(legend.position = 'none')
+```
+
+```{r}
+sig_input_inspect(mod3) %>% head()
+```
+
+xb_04, customerQ, regionZZ etc. are important features
+
+## Model #4
+
+```{r}
+summary(mod4)
+```
+
+
+```{r}
+mod4 %>%
+  coefplot(scales = "free", sort = "magnitude", pointSize = 1, innerCI = 0.5)+
+  geom_vline(xintercept = 0, color = "red")+
+  theme_bw()+
+  theme(legend.position = 'none')
+```
+
+```{r}
+sig_input_inspect(mod4) %>% head()
+```
+
+regionZZ, regionYY interact with xb_07 region YY, etc. xn_04 are important features
+
+# Model Export
+
+```{r}
+mod9 %>% readr::write_rds('models/lm_mod9.rds')
+mod3 %>% readr::write_rds('models/lm_mod3.rds')
+mod4 %>% readr::write_rds('models/lm_mod4.rds')
+```
+
+

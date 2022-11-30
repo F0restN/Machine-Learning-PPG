@@ -1,0 +1,2 @@
+"0","### add your code here"
+"0","mod_1_roc$pred %>% roc_curve(obs, event) %>% autoplot()"

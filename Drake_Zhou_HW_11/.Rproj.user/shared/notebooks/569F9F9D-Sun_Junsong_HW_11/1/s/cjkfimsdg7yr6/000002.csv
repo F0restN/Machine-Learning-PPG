@@ -1,0 +1,4 @@
+"0","bind_cols(viz_input_grid, pred_prob_nnet) %>% ggplot(mapping = aes(x=V41,y=V31))+"
+"0","  geom_raster(mapping = aes(fill=M))+"
+"0","  facet_grid(vars(V27),vars(V17))+"
+"0","  scale_fill_gradient2(limits = c(0,1), low = 'blue', high = 'red', mid = 'white', midpoint = 0.5)"

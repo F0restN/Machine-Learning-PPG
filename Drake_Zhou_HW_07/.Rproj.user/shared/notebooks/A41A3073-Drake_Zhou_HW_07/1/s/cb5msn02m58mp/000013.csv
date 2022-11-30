@@ -1,0 +1,7 @@
+"0","###"
+"0","train_01 %>% "
+"0","  ggplot(mapping = aes(x = x, y = y))+"
+"0","  geom_point()+"
+"0","  geom_smooth(method = 'lm')"
+"2","`geom_smooth()` using formula 'y ~ x'
+"

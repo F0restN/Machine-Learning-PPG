@@ -1,0 +1,360 @@
+---
+title: "Drake_Zhou_Part_03_D_02"
+author: "Drake Zhou"
+date: "4/26/2022"
+output: 
+  html_document: 
+    toc: true
+    toc_float:
+      collapsed: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview & Initialization
+
+You must make predictions with your 2 selected generalized linear models in order to visualize the trends of the event probability with respect to the inputs.
+
+## Package Import
+
+```{r, init, message=FALSE}
+library(tidyverse)
+library(caret)
+library(coefplot)
+library(rstanarm)
+library(splines)
+```
+
+## Data Import
+
+Before I fit into linear models, I want transform the response to log-response and standardized the inputs and outputs especially those continuous inputs.
+
+```{r, eval=TRUE}
+df_all <- readr::read_csv("final_project_train.csv", col_names = TRUE)
+
+# Input standarize
+standard_df_all <- df_all %>% 
+  select(starts_with("x")) %>%
+  # scale(center = TRUE, scale = TRUE) %>% 
+  # as.data.frame() %>% 
+  # tibble::as_tibble() %>% 
+  mutate(obs = factor(df_all$outcome, levels = c("event", "non_event")),
+         region = df_all$region, 
+         customer = df_all$customer)
+
+# Resampling
+train_id <- sample(1:nrow(standard_df_all), size = floor(0.8 * nrow(standard_df_all)))
+train_ready <- standard_df_all %>% slice(train_id)
+test_ready <- standard_df_all %>% slice(-train_id)
+
+```
+
+# Model Training
+
+You must train, evaluate, tune, and compare simple to complex models via resampling.• You may use either caret or tidymodels to handle the preprocessing, training, testing, and evaluation. You must decide the resampling scheme, what kind of preprocessing options you should consider.
+
+## Training parameter
+
+```{r, eval=TRUE}
+my_ctrl <- trainControl(method = "repeatedcv",
+                        number = 5,
+                        repeats = 3,
+                        summaryFunction = twoClassSummary,
+                        classProbs = TRUE,
+                        savePredictions = TRUE)
+
+my_metric <- "ROC"
+```
+
+You must train and tune the following models:
+• Generalized linear models:
+  • All categorical and continuous inputs - linear additive features
+  • All pairwise interactions of continuous inputs, include additive categorical features
+  • The 2 models selected from iiiA)
+
+## Linear models
+  
+```{r}
+set.seed(1024)
+fit_roc_cat_lm_add <- train(obs ~ .,
+                  data = standard_df_all,
+                  method = "glm",
+                  metric = my_metric,
+                  preProcess = c("center", "scale"),
+                  trControl = my_ctrl)
+
+fit_roc_cat_lm_add
+```
+
+```{r, message=FALSE, warning=FALSE}
+set.seed(1024)
+fit_roc_cat_lm_pair <- train(obs ~ region + customer + (.)^2,
+                  data = standard_df_all,
+                  method = "glm",
+                  metric = my_metric,
+                  preProcess = c("center", "scale"),
+                  trControl = my_ctrl)
+
+fit_roc_cat_lm_pair
+```
+
+```{r}
+set.seed(1024)
+fit_roc_cat_lm_mod1 <- train(obs ~ region + customer,
+                  data = standard_df_all,
+                  method = "glm",
+                  metric = my_metric,
+                  preProcess = c("center", "scale"),
+                  trControl = my_ctrl)
+
+fit_roc_cat_lm_mod1
+```
+
+```{r}
+set.seed(1024)
+fit_roc_cat_lm_mod2 <- train(obs ~ .,
+                  data = standard_df_all[c(-36, -35)],
+                  method = "glm",
+                  metric = my_metric,
+                  preProcess = c("center", "scale"),
+                  trControl = my_ctrl)
+
+fit_roc_cat_lm_mod2
+```
+
+## Elastic Net models
+
+• Regularized logistic regression with Elastic net
+  • All pairwise interactions of continuous inputs, include additive categorical features
+  • The more complex of the 2 models selected from iiA)
+
+```{r, message=FALSE, warning=FALSE}
+set.seed(1024)
+fit_roc_cat_enet_pair <- train(obs ~ region + customer + (.)^2,
+                               data = standard_df_all,
+                               method = "glmnet",
+                               metric = my_metric,
+                               preProcess = c("center", "scale"),
+                               trControl = my_ctrl)
+
+fit_roc_cat_enet_pair
+```
+
+```{r, warning=FALSE, message=FALSE}
+
+formula_mod7 <- obs ~ poly(xb_01, 2)+poly(xb_02, 2)+ poly(xb_03,2)+poly(xn_01,2)+poly(xn_02,2)+poly(xn_03,2)+poly(xa_01,2)+poly(xa_02,2)+poly(xa_03,2)+poly(xb_04,2)+poly(xb_05,2)+poly(xb_06,2)+poly(xb_07,2)+poly(xb_08,2)+poly(xn_04,2)+poly(xn_05,2)+poly(xn_06,2)+poly(xn_07,2)+poly(xn_08,2)+poly(xa_04,2)+poly(xa_05,2)+poly(xa_06,2)+poly(xa_07,2)+poly(xa_08,2)+poly(xw_01,2)+poly(xw_02,2)+poly(xw_03,2)+poly(xs_01,2)+poly(xs_02,2)+poly(xs_03,2)+poly(xs_04,2)+poly(xs_05,2)+poly(xs_06,2)+region+customer
+
+set.seed(1024)
+fit_roc_cat_enet_mod7 <- train(formula_mod7,
+                       data = standard_df_all,
+                       method = "glmnet",
+                       metric = my_metric,
+                       preProcess = c("center", "scale"),
+                       trControl = my_ctrl)
+
+fit_roc_cat_enet_mod7
+
+```
+
+```{r, warning=FALSE, message=FALSE}
+formula_mod9 <- obs ~ ns(xb_01, 3)+ns(xb_03, 3)+ ns(xb_03,3)+ns(xn_01,3)+ns(xn_03,3)+ns(xn_03,3)+ns(xa_01,3)+ns(xa_03,3)+ns(xa_03,3)+ns(xb_04,3)+ns(xb_05,3)+ns(xb_06,3)+ns(xb_07,3)+ns(xb_08,3)+ns(xn_04,3)+ns(xn_05,3)+ns(xn_06,3)+ns(xn_07,3)+ns(xn_08,3)+ns(xa_04,3)+ns(xa_05,3)+ns(xa_06,3)+ns(xa_07,3)+ns(xa_08,3)+ns(xw_01,3)+ns(xw_03,3)+ns(xw_03,3)+ns(xs_01,3)+ns(xs_03,3)+ns(xs_03,3)+ns(xs_04,3)+ns(xs_05,3)+ns(xs_06,3)+region+customer
+
+set.seed(1024)
+fit_roc_cat_enet_mod9 <- train(formula_mod9,
+                       data = standard_df_all,
+                       method = "glmnet",
+                       metric = my_metric,
+                       preProcess = c("center", "scale"),
+                       trControl = my_ctrl)
+
+fit_roc_cat_enet_mod9
+
+```
+
+## Neural network
+
+Fit the model as a warmup, then use parameters to further tune this model.
+
+```{r}
+set.seed(1024)
+
+fit_roc_cat_nnet_warmup <- train(obs ~ .,
+                    data = standard_df_all,
+                    method = "nnet",
+                    metric = my_metric,
+                    preProcess = c("center", "scale"),
+                    trControl = my_ctrl,
+                    trace = FALSE)
+
+fit_roc_cat_nnet_warmup
+```
+
+Visualize the result and find tuning parameters
+
+```{r}
+plot(fit_roc_cat_nnet_warmup, xTrans = log)
+```
+
+```{r}
+tune_grid_neural <- expand.grid(size = c(1:5, 10),
+                                decay = c(0, 0.05, 0.1, 1, 2))
+
+fit_roc_cat_nnet_tune <- train(obs ~ .,
+                    data = standard_df_all,
+                    method = "nnet",
+                    metric = my_metric,
+                    tuneGrid = tune_grid_neural,
+                    preProcess = c("center", "scale"),
+                    trControl = my_ctrl,
+                    trace = FALSE)
+```
+
+Check the result
+
+```{r}
+fit_roc_cat_nnet_tune
+plot(fit_roc_cat_nnet_tune, xTrans = log)
+```
+
+## Random forest
+
+```{r}
+set.seed(12341)
+fit_roc_cat_rf_tune <- train(obs ~ .,
+                     data = standard_df_all,
+                     method = "rf",
+                     metric = my_metric,
+                     trControl = my_ctrl,
+                     tuneGrid = expand.grid(mtry = seq(2, 8, by = 1)),
+                     importance = TRUE)
+
+fit_roc_cat_rf_tune
+```
+
+
+## Gradient boosted tree
+
+```{r}
+set.seed(12341)
+fit_roc_cat_gbm_warmup <- train(obs ~ .,
+                      data = standard_df_all,
+                      method = "gbm",
+                      metric = my_metric,
+                      trControl = my_ctrl,
+                      verbose = FALSE)
+
+fit_roc_cat_gbm_warmup
+```
+
+Visualize the result and finding best tuning parameters
+
+```{r}
+plot(fit_roc_cat_gbm_warmup)
+```
+
+Tuning GBM model
+
+```{r}
+gbm_grid <- expand.grid(n.trees = c(100, 150, 300, 500, 750, 1000),
+                        shrinkage = c(0.01, 0.1),
+                        interaction.depth = fit_roc_cat_gbm_warmup$bestTune$interaction.depth,
+                        n.minobsinnode = fit_roc_cat_gbm_warmup$bestTune$n.minobsinnode)
+
+set.seed(12341)
+fit_roc_cat_gbm_tune <- train(obs ~ .,
+                      data = standard_df_all,
+                      method = "gbm",
+                      metric = my_metric,
+                      tuneGrid = gbm_grid,
+                      trControl = my_ctrl,
+                      verbose=FALSE)
+```
+
+Check the result
+
+```{r}
+fit_roc_cat_gbm_tune
+plot(fit_roc_cat_gbm_tune)
+```
+
+## PLS
+
+```{r, warning=FALSE, message=FALSE}
+pls_grid <- expand.grid(ncomp = 1:5)
+set.seed(1024)
+fit_roc_cat_cls_pls <- train(
+  obs ~ .,
+  data = standard_df_all,
+  method = "pls",
+  metric = my_metric,
+  trControl = my_ctrl,
+  tuneGrid = pls_grid,
+  preProcess = c('center', 'scale')
+)
+```
+
+## SVM
+
+• 2 methods of your choice that we did not explicitly discuss in lecture
+
+```{r}
+set.seed(1024)
+fit_roc_cat_svm_tune <- train(obs ~ .,
+                 data = standard_df_all,
+                 method = "svmRadial",
+                 metric = my_metric,
+                 preProcess = c("center", "scale"),
+                 trControl = my_ctrl)
+
+fit_roc_cat_svm_tune
+```
+
+# Model Evaluation
+
+•You must identify the best model.
+
+## Comparasion
+
+```{r}
+my_performance <- resamples(list(LM_1 = fit_roc_cat_lm_add,
+                                 #LM_2 = fit_roc_cat_lm_pair,
+                                 LM_MOD1 = fit_roc_cat_lm_mod1,
+                                 LM_MOD2 = fit_roc_cat_lm_mod2,
+                                 ENET_PAIR = fit_roc_cat_enet_pair,
+                                 ENET_MOD7 = fit_roc_cat_enet_mod7,
+                                 ENET_MOD9 = fit_roc_cat_enet_mod9,
+                                 GBM_W = fit_roc_cat_gbm_warmup,
+                                 GBN_T = fit_roc_cat_gbm_tune,
+                                 NNET_W = fit_roc_cat_nnet_warmup,
+                                 NNET_T = fit_roc_cat_nnet_tune,
+                                 RF = fit_roc_cat_rf_tune,
+                                 SVM = fit_roc_cat_svm_tune,
+                                 PLS = fit_roc_cat_cls_pls
+                                 )
+                            )
+```
+
+```{r}
+dotplot(my_performance, metric = "ROC")
+```
+
+## Export model
+
+```{r}
+fit_roc_cat_lm_add %>% readr::write_rds('models/fit_roc_cat_lm_add.rds')
+fit_roc_cat_lm_pair %>% readr::write_rds('models/fit_roc_cat_lm_pair.rds')
+fit_roc_cat_lm_mod1 %>% readr::write_rds('models/fit_roc_cat_lm_mod1.rds')
+fit_roc_cat_lm_mod2 %>% readr::write_rds('models/fit_roc_cat_lm_mod2.rds')
+fit_roc_cat_enet_pair %>% readr::write_rds('models/fit_roc_cat_enet_pair.rds')
+fit_roc_cat_enet_mod7 %>% readr::write_rds('models/fit_roc_cat_enet_mod7.rds')
+fit_roc_cat_enet_mod9 %>% readr::write_rds('models/fit_roc_cat_enet_mod9.rds')
+fit_roc_cat_gbm_warmup %>% readr::write_rds('models/fit_roc_cat_gbm_warmup.rds')
+fit_roc_cat_gbm_tune %>% readr::write_rds('models/fit_roc_cat_gbm_tune.rds')
+fit_roc_cat_nnet_warmup %>% readr::write_rds('models/fit_roc_cat_nnet_warmup.rds')
+fit_roc_cat_nnet_tune %>% readr::write_rds('models/fit_roc_cat_nnet_tune.rds')
+fit_roc_cat_rf_tune %>% readr::write_rds('models/fit_roc_cat_rf_tune.rds')
+fit_roc_cat_svm_tune %>% readr::write_rds('models/fit_roc_cat_svm_tune.rds')
+fit_roc_cat_cls_pls %>% readr::write_rds('models/fit_roc_cat_cls_pls.rds')
+```

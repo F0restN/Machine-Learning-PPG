@@ -1,0 +1,7 @@
+"0","pred_prob_nnet <- predict(fit_nnet_sonar, viz_input_grid, type = 'prob')"
+"0","typeof(pred_prob_nnet)"
+"1","[1]"
+"1"," ""list"""
+"1","
+"
+"0","head(pred_prob_nnet)"

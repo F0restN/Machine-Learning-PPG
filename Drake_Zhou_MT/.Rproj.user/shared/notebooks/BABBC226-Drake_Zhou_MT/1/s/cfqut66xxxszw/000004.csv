@@ -1,0 +1,3 @@
+"0","df_all %>%"
+"0","  ggplot()+"
+"0","  geom_histogram(mapping = aes(x = num_events / num_trials), binwidth = 0.05)"

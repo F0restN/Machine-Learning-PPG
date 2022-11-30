@@ -1,0 +1,6 @@
+"0","tibble::tibble("
+"0","  x = seq(-0.5, 2, length.out = 501)"
+"0",") %>% "
+"0","  ggplot(mapping = aes(x = x, y = my_func(x,my_constants))) +"
+"0","  geom_line() +"
+"0","  geom_vline(xintercept = opt_result$par, color = ""red"")"

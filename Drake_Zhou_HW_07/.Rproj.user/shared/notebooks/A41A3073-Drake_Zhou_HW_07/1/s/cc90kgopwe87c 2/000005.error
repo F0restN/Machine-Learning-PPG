@@ -1,0 +1,1 @@
+{"frames":[{"func":"matrix(post_pred_samples_01$Umat, nrow = nrow(Umat), byrow = TRUE)","file":"","line_number":0,"end_line_number":0,"character_number":0,"end_character_number":0},{"func":"nrow(Umat)","file":"","line_number":0,"end_line_number":0,"character_number":0,"end_character_number":0}],"message":"Error in nrow(Umat) : object 'Umat' not found\n"}

@@ -1,0 +1,8 @@
+"0","### add more code chunks if you'd like"
+"0","enet_tune <- train(y ~ (.)^3,"
+"0","                   data = df,"
+"0","                   method = ""glmnet"","
+"0","                   metric = my_metric,"
+"0","                   preProcess = c(""center"", ""scale""),"
+"0","                   trControl = my_ctrl,"
+"0","                   tuneGrid = enet_grid)"

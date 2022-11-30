@@ -1,0 +1,2313 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\title{INFSCI 2595 Spring 2022: Homework 11}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{% add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{Assigned April 14, 2022; Due: April 21, 2022}
+\author{Drake Zhou}
+\date{Submission time: April 21, 2022 at 11:00PM EST}
+
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={INFSCI 2595 Spring 2022: Homework 11},
+  pdfauthor={Drake Zhou},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\begin{document}
+\maketitle
+
+\hypertarget{collaborators}{%
+\paragraph{Collaborators}\label{collaborators}}
+
+Include the names of your collaborators here.
+
+\hypertarget{overview}{%
+\subsection{Overview}\label{overview}}
+
+This is an applied assignment focused on training binary classifiers.
+You will try out several models discussed in lecture this semester
+including: logistic regression, elastic net, neural network, random
+forest, and gradient boosted trees. You will tune the models using
+\texttt{caret} and then make predictions to study the trends.
+
+\textbf{IMPORTANT}: code chunks are created for you. Each code chunk has
+\texttt{eval=FALSE} set in the chunk options. You \textbf{MUST} change
+it to be \texttt{eval=TRUE} in order for the code chunks to be evaluated
+when rendering the document.
+
+You are allowed to add as many code chunks as you see fit to answer the
+questions.
+
+\hypertarget{load-packages}{%
+\subsection{Load packages}\label{load-packages}}
+
+This assignment will use packages from the \texttt{tidyverse} suite and
+\texttt{caret}. The models that you will train require their own set of
+packages. The \texttt{caret::train()} function will prompt you to
+download the necessary packages. Thus, when you run those code portions
+please look at the R Console for the prompt that you must respond to.
+The assignment also requires the \texttt{mlbench}, \texttt{corrplot},
+and \texttt{yardstick} packages.
+
+The \texttt{tidyverse} and \texttt{caret} packages are loaded for you
+below. If you do not have \texttt{caret} please download and install
+now.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tidyverse)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## -- Attaching packages --------------------------------------- tidyverse 1.3.1 --
+\end{verbatim}
+
+\begin{verbatim}
+## v ggplot2 3.3.5     v purrr   0.3.4
+## v tibble  3.1.6     v dplyr   1.0.7
+## v tidyr   1.1.4     v stringr 1.4.0
+## v readr   2.1.1     v forcats 0.5.1
+\end{verbatim}
+
+\begin{verbatim}
+## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(caret)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Loading required package: lattice
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'caret'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:purrr':
+## 
+##     lift
+\end{verbatim}
+
+\hypertarget{read-in-data}{%
+\subsection{Read in data}\label{read-in-data}}
+
+You will work with the \texttt{Sonar} data set in this assignment. The
+Sonar data set has become a classic data set for training binary
+classifiers. The data are available in the \texttt{mlbench} package. If
+you do not have \texttt{mlbench} please download and install it before
+proceeding.
+
+The code chunk below reads in the \texttt{Sonar} data for you and
+displays the number of rows and columns to screen.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{data}\NormalTok{(}\StringTok{"Sonar"}\NormalTok{, }\AttributeTok{package =} \StringTok{\textquotesingle{}mlbench\textquotesingle{}}\NormalTok{)}
+
+\NormalTok{Sonar }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{dim}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 208  61
+\end{verbatim}
+
+As you can see above this a fairly high dimensional problem, especially
+relative to the number of observations. The input features of the Sonar
+data set correspond to features extracted from sonar signals (hence the
+data name). Your task is to classify the binary outcome, \texttt{Class},
+as either \texttt{"M"} for metal or \texttt{"R"} for rock.
+
+\hypertarget{problem-01}{%
+\subsection{Problem 01}\label{problem-01}}
+
+We will perform a short exploration of the features in this data set.
+First, let's look at summary statistics for each of the input variables.
+The code chunk below creates a long-format dataset for you by gathering
+the input features into a single column via the \texttt{pivot\_longer()}
+function. The input variable ID is extracted for you and assigned to the
+\texttt{input\_id} column.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lf\_sonar }\OtherTok{\textless{}{-}}\NormalTok{ Sonar }\SpecialCharTok{\%\textgreater{}\%} 
+\NormalTok{  tibble}\SpecialCharTok{::}\FunctionTok{rowid\_to\_column}\NormalTok{(}\StringTok{"obs\_id"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{pivot\_longer}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{c}\NormalTok{(}\StringTok{"obs\_id"}\NormalTok{, }\StringTok{"Class"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{input\_id =} \FunctionTok{as.numeric}\NormalTok{(stringr}\SpecialCharTok{::}\FunctionTok{str\_extract}\NormalTok{(name, }\StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{d+"}\NormalTok{)))}
+
+\NormalTok{lf\_sonar }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{glimpse}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Rows: 12,480
+## Columns: 5
+## $ obs_id   <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1~
+## $ Class    <fct> R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R~
+## $ name     <chr> "V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9", "V10", ~
+## $ value    <dbl> 0.0200, 0.0371, 0.0428, 0.0207, 0.0954, 0.0986, 0.1539, 0.160~
+## $ input_id <dbl> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18~
+\end{verbatim}
+
+The above long-format data set will help with a few of the
+visualizations we will use to explore the data.
+
+\hypertarget{a}{%
+\subsubsection{1a)}\label{a}}
+
+You will start out by visualizing the summary statistics for each input
+feature via boxplots.
+
+\textbf{Pipe the \texttt{lf\_sonar} object into \texttt{ggplot()}. Map
+the \texttt{x} aesthetic to \texttt{input\_id} and map the \texttt{y}
+aesthetic to \texttt{value}. Include a \texttt{geom\_boxplot()} geom
+where the \texttt{group} aesthetic is mapped to \texttt{input\_id}.}
+
+\textbf{Describe the bounds on the input features. Do the inputs have
+very different scales?}
+
+\hypertarget{solution}{%
+\paragraph{SOLUTION}\label{solution}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\#}
+\NormalTok{lf\_sonar }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ input\_id, }\AttributeTok{y =}\NormalTok{ value, }\AttributeTok{group =}\NormalTok{ input\_id))}\SpecialCharTok{+}
+  \FunctionTok{geom\_boxplot}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_11_files/figure-latex/solution_01a-1.pdf}
+
+What do you think?
+
+It looks like inputs have huge variance, but the value of figure is
+between 0 and 1, which is relative small. Except from those outliers,
+they looks like similar scales
+
+\hypertarget{b}{%
+\subsubsection{1b)}\label{b}}
+
+Boxplots are useful for visualizing summary statistics. However, we are
+unable to visualize the shape of the distributions with boxplots. In
+this problem, you will use frequency polygons (a type of histogram) to
+visualize the distributional shapes for each input.
+
+\textbf{Pipe the \texttt{lf\_sonar} object into \texttt{ggplot()} and
+map the \texttt{x} aesthetic to \texttt{value}. Include a
+\texttt{geom\_freqpoly()} geom with the \texttt{group} aesthetic mapped
+to \texttt{input\_id}. Set the number bins equal to 21 by setting
+\texttt{bins=21} in the \texttt{geom\_freqpoly()} call. Break up your
+visualizations by groups of 5 inputs by including \texttt{facet\_wrap()}
+where the facet variable is:}
+
+\texttt{cut(input\_id,\ breaks=seq(1,\ 60,\ length.out\ =\ 12),\ include.lowest\ =\ TRUE)}
+
+\textbf{Set the \texttt{scales} argument in \texttt{facet\_wrap()} to be
+\texttt{scales=\textquotesingle{}free\_y\textquotesingle{}} so it's
+easier to see the shapes for each group of inputs.}
+
+\textbf{NOTE}: If your facet variable is created correctly, the facet
+strips will show you the input IDs associated with each facet. For
+example, the first facet will display \texttt{{[}1,6.36{]}} and the last
+facet will be display \texttt{(54.6,60{]}}. Although decimal values are
+shown, \texttt{input\_id} contains whole number integers. The decimals
+are fine for now. It's just a simple way to break up the variables.
+
+\hypertarget{solution-1}{%
+\paragraph{SOLUTION}\label{solution-1}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lf\_sonar }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ value))}\SpecialCharTok{+}
+  \FunctionTok{geom\_freqpoly}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{group =}\NormalTok{ input\_id), }\AttributeTok{bins =} \DecValTok{21}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\FunctionTok{vars}\NormalTok{(}\FunctionTok{cut}\NormalTok{(input\_id, }\AttributeTok{breaks=}\FunctionTok{seq}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{60}\NormalTok{, }\AttributeTok{length.out =} \DecValTok{12}\NormalTok{), }\AttributeTok{include.lowest =} \ConstantTok{TRUE}\NormalTok{)), }
+             \AttributeTok{scales =} \StringTok{\textquotesingle{}free\_y\textquotesingle{}}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_11_files/figure-latex/solution_01b-1.pdf}
+
+\hypertarget{c}{%
+\subsubsection{1c)}\label{c}}
+
+\textbf{Based on your visualizations, do you think the input features
+should be pre-processed? If so, what processing technique should be
+considered?}
+
+\hypertarget{solution-2}{%
+\paragraph{SOLUTION}\label{solution-2}}
+
+What do you think?
+
+Yes, according to the figure, some of values are extreme. We should
+apply some pre-processing process. For example, z-score normalization.
+
+\hypertarget{d}{%
+\subsubsection{1d)}\label{d}}
+
+Let's now consider the correlation structure of the inputs. Use the
+\texttt{corrplot::corrplot()} function to create the correlation plot
+matrix associated with all 60 input features. However, rather than using
+the default ordering, instruct \texttt{corrplot()} to reorder inputs
+such that all highly correlated inputs are grouped together.
+\texttt{corrplot()} will use a hierarchical clustering method and group
+all inputs for you.
+
+\textbf{Pipe the original wide-format \texttt{Sonar} data into the
+\texttt{dplyr::select()} function and select all except the
+\texttt{Class} variable. Pipe the result into \texttt{cor()} and pipe
+the result into \texttt{corrplot::corrplot()}. Set the \texttt{method}
+argument equal to \texttt{"square"}, the \texttt{order} argument equal
+to \texttt{"hclust"}, and the
+`hclust.method\texttt{equal\ to}'ward.D2'`.}
+
+\textbf{Is there a correlation structure between the inputs?}
+
+\hypertarget{solution-3}{%
+\paragraph{SOLUTION}\label{solution-3}}
+
+Is there a correlation structure between the inputs?
+
+Yes, there are a lot of correlated features
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Sonar }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{Class) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{cor}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  corrplot}\SpecialCharTok{::}\FunctionTok{corrplot}\NormalTok{(}\AttributeTok{method =} \StringTok{"square"}\NormalTok{, }\AttributeTok{order =} \StringTok{"hclust"}\NormalTok{, }\AttributeTok{hclust.method =} \StringTok{\textquotesingle{}ward.D2\textquotesingle{}}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_11_files/figure-latex/solution_01d-1.pdf}
+
+\hypertarget{e}{%
+\subsubsection{1e)}\label{e}}
+
+The last visualization you will make as part of a quick exploratry data
+analysis (EDA) is to count the number of observations per level of the
+binary outcome \texttt{Class}. This is important to do before training
+any binary classification model, in order to check if there is a severe
+imbalance between either of the two classes.
+
+\textbf{Pipe the \texttt{Sonar} data set into \texttt{ggplot()} and set
+the \texttt{x} aesthetic equal to \texttt{Class}. Use the
+\texttt{goem\_bar()} function to show a bar chart giving the number of
+observations per level of \texttt{Class}.}
+
+\textbf{Do you think we should be concerned about an imbalance between
+the \texttt{"M"} and \texttt{"R"} levels?}
+
+\hypertarget{solution-4}{%
+\paragraph{SOLUTION}\label{solution-4}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Sonar }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Class))}\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_11_files/figure-latex/solution_01e-1.pdf}
+
+What do you think?
+
+No we shouldn't concerned about that, they are not exactly 50 to 50 but
+still balanced.
+
+\hypertarget{problem-02}{%
+\subsection{Problem 02}\label{problem-02}}
+
+You will train several models to predict the binary outcome
+\texttt{Class}. You will try logistic regression, logistic regression
+with the elastic net penalty, and more complex non-linear methods. As
+stated at the beginning of the assignment, you will use \texttt{caret}
+for the training, tuning, and model selection process.
+
+\hypertarget{a-1}{%
+\subsubsection{2a)}\label{a-1}}
+
+You must start, by specifying the resampling scheme and the primary
+performance metric. You will use 5-fold cross-validation, and you will
+compare models by maximizing the Area Under the ROC Curve (ROC AUC). You
+must specify the metric to be \texttt{"ROC"} in order to tell
+\texttt{caret} to maximize the AUC (the naming convention is a little
+confusing). The code chunk below is started for you, and provides some
+arguments to the \texttt{trainControl()} function which are required in
+order to use \texttt{"ROC"} as the primary performance metric.
+
+\textbf{Complete the code chunk below. Finish the
+\texttt{trainControl()} call such that you will use 5-fold
+cross-validation. Assign \texttt{"ROC"} to the \texttt{metric\_sonar}
+variable.}
+
+\hypertarget{solution-5}{%
+\paragraph{SOLUTION}\label{solution-5}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ctrl\_k05\_roc }\OtherTok{\textless{}{-}} \FunctionTok{trainControl}\NormalTok{(}\AttributeTok{method =} \StringTok{\textquotesingle{}cv\textquotesingle{}}\NormalTok{,}
+                             \AttributeTok{number =} \DecValTok{5}\NormalTok{,}
+                             \AttributeTok{summaryFunction =}\NormalTok{ twoClassSummary,}
+                             \AttributeTok{classProbs =} \ConstantTok{TRUE}\NormalTok{,}
+                             \AttributeTok{savePredictions =} \ConstantTok{TRUE}\NormalTok{)}
+
+\NormalTok{metric\_sonar }\OtherTok{\textless{}{-}} \StringTok{"ROC"}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{b-1}{%
+\subsubsection{2b)}\label{b-1}}
+
+You will start with a logistic regression model using linear additive
+terms for all input features. Remember that the short cut operator
+\texttt{.} denotes using ``everything in the data set''. So you do not
+have to type out all 60 input variable names in the formula interface.
+The formula requires the name of the response variable, and so remember
+that the outcome is the \texttt{Class} variable, not \texttt{y} as in
+other assignments and lecture examples.
+
+You will use the \texttt{train()} function to train the logistic
+regression model. You must specify the formula interface, and specify
+the \texttt{data} to be \texttt{Sonar}. To use the base \texttt{R}
+logistic regression method in \texttt{glm()}, you must set the
+\texttt{method} argument equal to \texttt{"glm"}. You must also specify
+the \texttt{metric} argument to be the \texttt{metric\_sonar} variable
+you assigned Problem 2a) in order for \texttt{caret} to identify the
+best model by maximizing the area under the ROC curve. You must also
+specify the \texttt{trControl} argument to be the
+\texttt{ctrl\_k05\_roc}.
+
+You must set the \texttt{preProcess} argument based on your answer to
+Problem 1c). If you do not feel you need to pre-process the inputs then
+you do not need to include the \texttt{preProcess} argument. If you feel
+you should, then you should set the \texttt{preProcess} argument to your
+desired pre-processing operation.
+
+\textbf{Specify the arguments to the \texttt{train()} function in order
+to train a logistic regression model for the \texttt{Sonar} data set
+with 5-fold cross-validation and calculate the area under the ROC
+curve.}
+
+\textbf{The area under the ROC curve is referred to by \texttt{caret} as
+\texttt{"ROC"}. The cross-validation averaged performance merics are
+printed to the screen for you. What is the area under the ROC curve for
+your logistic regression model?}
+
+\emph{HINT}: You can ignore warnings displayed during the training of
+the logistic regression model.
+
+\hypertarget{solution-6}{%
+\paragraph{SOLUTION}\label{solution-6}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{4321}\NormalTok{)}
+\NormalTok{fit\_glm\_sonar }\OtherTok{\textless{}{-}} \FunctionTok{train}\NormalTok{(Class }\SpecialCharTok{\textasciitilde{}}\NormalTok{ (.),}
+                       \AttributeTok{data =}\NormalTok{ Sonar,}
+                       \AttributeTok{method =} \StringTok{"glm"}\NormalTok{,}
+                       \AttributeTok{metric =}\NormalTok{ metric\_sonar,}
+                       \AttributeTok{preProcess =} \FunctionTok{c}\NormalTok{(}\StringTok{"center"}\NormalTok{, }\StringTok{"scale"}\NormalTok{),}
+                       \AttributeTok{trControl =}\NormalTok{ ctrl\_k05\_roc)}
+
+\NormalTok{fit\_glm\_sonar}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Generalized Linear Model 
+## 
+## 208 samples
+##  60 predictor
+##   2 classes: 'M', 'R' 
+## 
+## Pre-processing: centered (60), scaled (60) 
+## Resampling: Cross-Validated (5 fold) 
+## Summary of sample sizes: 166, 167, 165, 167, 167 
+## Resampling results:
+## 
+##   ROC        Sens       Spec     
+##   0.7690207  0.7747036  0.7036842
+\end{verbatim}
+
+What is the area under the ROC curve for your logistic regression model?
+
+As we can see through the data, the area under ROC curve is 0.7690207
+
+\hypertarget{c-1}{%
+\subsubsection{2c)}\label{c-1}}
+
+Since there are relatively few observations based on the number of
+inputs in \texttt{Sonar}, let's apply regularization to the linear
+additive features. Because you are using linear additive terms you may
+use the shortcut operator \texttt{.} in the formula. The \texttt{glmnet}
+package will fit a logistic regression model with the elastic net
+penalty term. You need to set \texttt{method} to \texttt{"glmnet"}. The
+remaining arguments should be consistent to your arguments used in
+Problem 2b).
+
+\textbf{Train an elastic net model and tune the hyperparameters with
+5-fold cross-validation to maximize the area under the ROC curve. You
+can use the default tuning grid from \texttt{caret} and so you do NOT
+need to set the \texttt{tuneGrid} argument.}
+
+\textbf{Should you consider applying preprocessing with the regularized
+model?}
+
+\textbf{Based on the training results, does the elastic net model favor
+LASSO or RIDGE more?}
+
+\hypertarget{solution-7}{%
+\paragraph{SOLUTION}\label{solution-7}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{4321}\NormalTok{)}
+\NormalTok{fit\_glmnet\_sonar }\OtherTok{\textless{}{-}} \FunctionTok{train}\NormalTok{(Class }\SpecialCharTok{\textasciitilde{}}\NormalTok{ .,}
+                       \AttributeTok{data =}\NormalTok{ Sonar,}
+                       \AttributeTok{method =} \StringTok{"glmnet"}\NormalTok{,}
+                       \AttributeTok{metric =}\NormalTok{ metric\_sonar,}
+                       \AttributeTok{preProcess =} \FunctionTok{c}\NormalTok{(}\StringTok{"center"}\NormalTok{, }\StringTok{"scale"}\NormalTok{),}
+                       \AttributeTok{trControl =}\NormalTok{ ctrl\_k05\_roc)}
+\NormalTok{fit\_glmnet\_sonar}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## glmnet 
+## 
+## 208 samples
+##  60 predictor
+##   2 classes: 'M', 'R' 
+## 
+## Pre-processing: centered (60), scaled (60) 
+## Resampling: Cross-Validated (5 fold) 
+## Summary of sample sizes: 166, 167, 165, 167, 167 
+## Resampling results across tuning parameters:
+## 
+##   alpha  lambda        ROC        Sens       Spec     
+##   0.10   0.0004318733  0.8381527  0.8019763  0.7221053
+##   0.10   0.0043187332  0.8567839  0.8118577  0.7526316
+##   0.10   0.0431873324  0.8528271  0.7762846  0.7531579
+##   0.55   0.0004318733  0.8345278  0.7928854  0.7026316
+##   0.55   0.0043187332  0.8543437  0.8118577  0.7426316
+##   0.55   0.0431873324  0.8367568  0.8027668  0.7226316
+##   1.00   0.0004318733  0.8250947  0.7837945  0.6931579
+##   1.00   0.0043187332  0.8511889  0.7940711  0.7321053
+##   1.00   0.0431873324  0.8319097  0.8027668  0.7226316
+## 
+## ROC was used to select the optimal model using the largest value.
+## The final values used for the model were alpha = 0.1 and lambda = 0.004318733.
+\end{verbatim}
+
+Should you consider applying preprocessing with the regularized model?
+Based on the training results, does the elastic net model favor LASSO or
+RIDGE more?
+
+Yes, we should. If alpha = 1, the elastic net will equvalent to LASSO,
+since the final value of alpha for the model is 0.1, we can we the
+elastic net is more favor of RIDGE.
+
+\hypertarget{d-1}{%
+\subsubsection{2d)}\label{d-1}}
+
+Let's now try a neural network model with the \texttt{nnet} package. You
+must specify the \texttt{method} argument equal to \texttt{"nnet"}.
+Non-linear models will attempt to find non-linear relationships between
+the inputs and the response even if the simple formula
+\texttt{Class\ \textasciitilde{}\ .} is provided. Thus, you do not need
+to type in all input names to the formula object. The \texttt{.}
+shortcut of ``everything else'' is instructing the formula to use
+``everything else'' as an input. You can use the default tuning grid,
+and so you do not need to specify the \texttt{tuneGrid} argument to
+\texttt{train()}.
+
+\textbf{Train a neural network binary classifier using the
+\texttt{"nnet"} package with \texttt{caret}. Does the neural network
+model achieve a higher area under the ROC curve compared to the elastic
+net model?}
+
+\textbf{Should you preprocess the inputs before training the neural
+network?}
+
+\textbf{NOTE}: The \texttt{trace} argument is set to \texttt{FALSE} for
+you already. Otherwise the iteration results are printed. We are focused
+on the model performance results in this assignment, and so we do not
+need the iteration results printed to the screen.
+
+\hypertarget{solution-8}{%
+\paragraph{SOLUTION}\label{solution-8}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{4321}\NormalTok{)}
+\NormalTok{fit\_nnet\_sonar }\OtherTok{\textless{}{-}} \FunctionTok{train}\NormalTok{(Class }\SpecialCharTok{\textasciitilde{}}\NormalTok{ .,}
+                        \AttributeTok{data =}\NormalTok{ Sonar,}
+                        \AttributeTok{method =} \StringTok{\textquotesingle{}nnet\textquotesingle{}}\NormalTok{,}
+                        \AttributeTok{metric =}\NormalTok{ metric\_sonar,}
+                        \AttributeTok{preProcess =} \FunctionTok{c}\NormalTok{(}\StringTok{"center"}\NormalTok{, }\StringTok{"scale"}\NormalTok{),}
+                        \AttributeTok{trControl =}\NormalTok{ ctrl\_k05\_roc,}
+                        \AttributeTok{trace =} \ConstantTok{FALSE}\NormalTok{)}
+
+\NormalTok{fit\_nnet\_sonar}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Neural Network 
+## 
+## 208 samples
+##  60 predictor
+##   2 classes: 'M', 'R' 
+## 
+## Pre-processing: centered (60), scaled (60) 
+## Resampling: Cross-Validated (5 fold) 
+## Summary of sample sizes: 166, 167, 165, 167, 167 
+## Resampling results across tuning parameters:
+## 
+##   size  decay  ROC        Sens       Spec     
+##   1     0e+00  0.7778292  0.7316206  0.7547368
+##   1     1e-04  0.8122769  0.7403162  0.7547368
+##   1     1e-01  0.8423237  0.7675889  0.7226316
+##   3     0e+00  0.7711421  0.7584980  0.7226316
+##   3     1e-04  0.8440862  0.8035573  0.7521053
+##   3     1e-01  0.8659455  0.7948617  0.7115789
+##   5     0e+00  0.8004421  0.7494071  0.7631579
+##   5     1e-04  0.8361234  0.7675889  0.7310526
+##   5     1e-01  0.8859871  0.8122530  0.7736842
+## 
+## ROC was used to select the optimal model using the largest value.
+## The final values used for the model were size = 5 and decay = 0.1.
+\end{verbatim}
+
+Does the neural network model achieve a higher area under the ROC curve
+compared to the elastic net model?
+
+Yes, according to the data, the value of ROC column is bigger than
+before, which represent the area under ROC curve is bigger.
+
+Should you preprocess the inputs before training the neural network?
+
+Yes, in order to standardize the inputs to avoid some problem like
+exploding gradients.
+
+\hypertarget{e-1}{%
+\subsubsection{2e)}\label{e-1}}
+
+Neural networks are challenging to interpret. Several methods have been
+devised to try and provide interpretibility by providing ways to rank
+the input variable importance using the weights associated with all
+hidden units and the output layer.\\
+\textbf{You may use the default \texttt{caret} provided method for
+ranking variable importance for the neural network. Plot the variable
+importances using the default plot method. Then plot the variable
+importances a second time but set the \texttt{top} argument equal to 20
+in the \texttt{plot()} method call. This will limit to the plot to just
+the top 20 ranked inputs.}
+
+\textbf{What are the top 4 ranked input features as viewed by the neural
+network?}
+
+\hypertarget{solution-9}{%
+\paragraph{SOLUTION}\label{solution-9}}
+
+Plot all variable importances.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\#}
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{varImp}\NormalTok{(fit\_nnet\_sonar))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_11_files/figure-latex/solution_02e-1.pdf}
+
+Plot just the top 20 variable importances.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\#}
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{varImp}\NormalTok{(fit\_nnet\_sonar), }\AttributeTok{top =} \DecValTok{20}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_11_files/figure-latex/solution_02e_b-1.pdf}
+
+What do you think?
+
+V50, V57, V31 and V22
+
+\hypertarget{f}{%
+\subsubsection{2f)}\label{f}}
+
+You will use predictions to help gain further understanding of the
+influence of the top ranked input features. Two functions are provided
+for you below which you will use to construct an input grid to make
+predictions. The first function, \texttt{make\_test\_input\_list()} is
+defined in the code chunk below. The first argument to
+\texttt{make\_test\_input\_list()} is a variable name. The second input
+argument, \texttt{top\_4\_inputs}, is a character vector. The second
+input argument will hold the names associated with the top 4 ranked
+input features. The last input argument, \texttt{all\_data}, is a tibble
+or data.frame. The last input argument is intended to hold the training
+data set.
+
+The \texttt{make\_test\_input\_list()} function therefore creates a grid
+of 25 evenly spaced points between the training set min and max bounds
+for the top 2 ranked inputs. The third and fourth ranked inputs are
+given 5 unique values, based on specific quantiles of the training set.
+All other inputs are set to constant values equal to their training set
+medians.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{make\_test\_input\_list }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(var\_name, top\_4\_inputs, all\_data)}
+\NormalTok{\{}
+\NormalTok{  xvar }\OtherTok{\textless{}{-}}\NormalTok{ all\_data }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(var\_name) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{pull}\NormalTok{()}
+  
+  \ControlFlowTok{if}\NormalTok{ (var\_name }\SpecialCharTok{\%in\%}\NormalTok{ top\_4\_inputs[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{])\{}
+    \CommentTok{\# use 25 unique values between the min/max values}
+\NormalTok{    xgrid }\OtherTok{\textless{}{-}} \FunctionTok{seq}\NormalTok{(}\FunctionTok{min}\NormalTok{(xvar), }\FunctionTok{max}\NormalTok{(xvar), }\AttributeTok{length.out =} \DecValTok{25}\NormalTok{)}
+\NormalTok{  \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (var\_name }\SpecialCharTok{\%in\%}\NormalTok{ top\_4\_inputs[}\DecValTok{3}\SpecialCharTok{:}\DecValTok{4}\NormalTok{])\{}
+    \CommentTok{\# specify quantiles to use}
+\NormalTok{    xgrid }\OtherTok{\textless{}{-}} \FunctionTok{quantile}\NormalTok{(xvar, }\AttributeTok{probs =} \FunctionTok{c}\NormalTok{(}\FloatTok{0.05}\NormalTok{, }\FloatTok{0.25}\NormalTok{, }\FloatTok{0.5}\NormalTok{, }\FloatTok{0.75}\NormalTok{, }\FloatTok{0.95}\NormalTok{), }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{    xgrid }\OtherTok{\textless{}{-}} \FunctionTok{as.vector}\NormalTok{(xgrid)}
+\NormalTok{  \} }\ControlFlowTok{else}\NormalTok{ \{}
+    \CommentTok{\# set to their median values}
+\NormalTok{    xgrid }\OtherTok{\textless{}{-}} \FunctionTok{median}\NormalTok{(xvar, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{  \}}
+  
+  \FunctionTok{return}\NormalTok{(xgrid)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+The second function, \texttt{make\_test\_input\_grid()}, is a wrapper
+function. It iteratively applies the \texttt{make\_test\_input\_list()}
+function to all inputs and then uses the \texttt{expand.grid()} function
+to create full factorial grid based on the list of unique input values.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{make\_test\_input\_grid }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(all\_input\_names, top\_4\_inputs, all\_data)}
+\NormalTok{\{}
+\NormalTok{  test\_list }\OtherTok{\textless{}{-}}\NormalTok{ purrr}\SpecialCharTok{::}\FunctionTok{map}\NormalTok{(all\_input\_names, }
+\NormalTok{                          make\_test\_input\_list,}
+                          \AttributeTok{top\_4\_inputs =}\NormalTok{ top\_4\_inputs,}
+                          \AttributeTok{all\_data =}\NormalTok{ all\_data)}
+  
+  \FunctionTok{expand.grid}\NormalTok{(test\_list, }
+              \AttributeTok{KEEP.OUT.ATTRS =} \ConstantTok{FALSE}\NormalTok{,}
+              \AttributeTok{stringsAsFactors =} \ConstantTok{FALSE}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+\NormalTok{    purrr}\SpecialCharTok{::}\FunctionTok{set\_names}\NormalTok{(all\_input\_names)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{You will use the \texttt{make\_test\_input\_grid()} function to
+create a grid of input values based on the top 4 ranked inputs, as
+viewed by your tuned neural network model.}
+
+\textbf{Complete the code chunk below by creating two vectors. The
+first, \texttt{my\_input\_names}, is a regular vector for the names of
+the input variables in the \texttt{Sonar} data set. The second,
+\texttt{my\_top\_ranked\_inputs}, is a regular vector for the names of
+the top 4 ranked inputs based on your neural network model.}
+
+\textbf{Call the \texttt{make\_test\_input\_grid()} function and assign
+the result to \texttt{viz\_input\_grid}. Display the number of rows and
+columns in \texttt{viz\_input\_grid} to the screen.}
+
+\hypertarget{solution-10}{%
+\paragraph{SOLUTION}\label{solution-10}}
+
+Add as many code chunk as you feel necessary to complete this problem.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\# Initialize parameters}
+\NormalTok{my\_input\_name }\OtherTok{\textless{}{-}} \FunctionTok{colnames}\NormalTok{(Sonar)[}\SpecialCharTok{{-}}\DecValTok{61}\NormalTok{]}
+\NormalTok{my\_top\_ranked\_inputs }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"V50"}\NormalTok{,}\StringTok{"V57"}\NormalTok{,}\StringTok{"V31"}\NormalTok{,}\StringTok{"V22"}\NormalTok{)}
+
+\DocumentationTok{\#\#\# Excecute function}
+\NormalTok{viz\_input\_grid }\OtherTok{\textless{}{-}} \FunctionTok{make\_test\_input\_grid}\NormalTok{(my\_input\_name, my\_top\_ranked\_inputs, Sonar)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Note: Using an external vector in selections is ambiguous.
+## i Use `all_of(var_name)` instead of `var_name` to silence this message.
+## i See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>.
+## This message is displayed once per session.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\# Display result}
+\FunctionTok{dim}\NormalTok{(viz\_input\_grid)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 15625    60
+\end{verbatim}
+
+\hypertarget{problem-03}{%
+\subsection{Problem 03}\label{problem-03}}
+
+We now have everything necessary to make predictions and study behavior.
+We have a test or visualization grid and we have several models that we
+can use to consider the influence between the inputs and the response.
+Since we are working with a binary classification problem, we can view
+the response two ways. First, we can consider the classification.
+Second, we can visualize the predicted event probability.
+
+\hypertarget{a-2}{%
+\subsubsection{3a)}\label{a-2}}
+
+We will first classify using the neural network model, and then
+visualize those classifications as a surface plot. Predictions are made
+with the \texttt{predict()} function. The first argument is the model
+object and the second argument is the data set we wish to make
+predictions with.
+
+When we are working with binary classification models, the default
+result of the \texttt{predict()} function is the class assuming a 50\%
+threshold value.
+
+\textbf{Make classifications on the test visualization grid using the
+neural network model and assign the result to the
+\texttt{pred\_class\_nnet} object. Check the data type of
+\texttt{pred\_class\_nnet} and look at the first few classifications
+with the \texttt{head()} function.}
+
+\hypertarget{solution-11}{%
+\paragraph{SOLUTION}\label{solution-11}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pred\_class\_nnet }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(fit\_nnet\_sonar, viz\_input\_grid)}
+\FunctionTok{typeof}\NormalTok{(pred\_class\_nnet)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "integer"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{head}\NormalTok{(pred\_class\_nnet)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] M M M M M M
+## Levels: M R
+\end{verbatim}
+
+\hypertarget{b-2}{%
+\subsubsection{3b)}\label{b-2}}
+
+You will now visualize the classification surface based on your neural
+network model, over your defined test grid.
+
+\textbf{Pipe \texttt{viz\_input\_grid} into a \texttt{mutate()} call and
+assign the \texttt{pred\_class} variable equal to
+\texttt{pred\_class\_nnet}. Pipe the result into \texttt{ggplot()} where
+the \texttt{x} aesthetic is your top ranked input and the \texttt{y}
+aesthetic is your second ranked input. Use a \texttt{geom\_raster()}
+geom to visualize the surface by mapping the \texttt{fill} aesthetic to
+\texttt{pred\_class}. Include \texttt{facet\_grid()} to break up the
+prediction surfaces based on the third and fourth ranked inputs by
+assigning the vertical facets to the 4th ranked input and the horizontal
+facets to the 3rd ranked input. Specify the fill by including the
+\texttt{scale\_fill\_brewer()} with the \texttt{palette} argument equal
+to \texttt{\textquotesingle{}Set1\textquotesingle{}}.}
+
+\hypertarget{solution-12}{%
+\paragraph{SOLUTION}\label{solution-12}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\#}
+\NormalTok{viz\_input\_grid }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{pred\_class =}\NormalTok{ pred\_class\_nnet) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ V50, }\AttributeTok{y =}\NormalTok{ V57))}\SpecialCharTok{+}
+  \FunctionTok{geom\_raster}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{fill =}\NormalTok{ pred\_class))}\SpecialCharTok{+}
+  \FunctionTok{facet\_grid}\NormalTok{(}\AttributeTok{cols =} \FunctionTok{vars}\NormalTok{(V22), }\AttributeTok{rows =} \FunctionTok{vars}\NormalTok{(V31))}\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_brewer}\NormalTok{(}\AttributeTok{palette =} \StringTok{\textquotesingle{}Set1\textquotesingle{}}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_11_files/figure-latex/solution_03b-1.pdf}
+
+\hypertarget{c-2}{%
+\subsubsection{3c)}\label{c-2}}
+
+You will now make classifications with the elastic net model on the test
+input grid.
+
+\textbf{Predict the classifications with the elastic net model and
+assign the result to the \texttt{pred\_class\_enet} object.}
+
+\hypertarget{solution-13}{%
+\paragraph{SOLUTION}\label{solution-13}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\#}
+\NormalTok{pred\_class\_enet }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(fit\_glmnet\_sonar, viz\_input\_grid)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{d-2}{%
+\subsubsection{3d)}\label{d-2}}
+
+Visualize the classification surface based on the elastic net model.
+Follow the same steps you used to make the surface with the neural
+network classifications.
+
+\textbf{How do the visualizations of the classification surface compare
+with the neural network?}
+
+\hypertarget{solution-14}{%
+\paragraph{SOLUTION}\label{solution-14}}
+
+Classification of elastic net model gives more M result compare to
+neural network, which means elastic net model is more sensitive, at
+least for these two parameters.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{viz\_input\_grid }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{pred\_class =}\NormalTok{ pred\_class\_enet) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ V50, }\AttributeTok{y =}\NormalTok{ V57))}\SpecialCharTok{+}
+  \FunctionTok{geom\_raster}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{fill =}\NormalTok{ pred\_class))}\SpecialCharTok{+}
+  \FunctionTok{facet\_grid}\NormalTok{(}\AttributeTok{cols =} \FunctionTok{vars}\NormalTok{(V22), }\AttributeTok{rows =} \FunctionTok{vars}\NormalTok{(V31))}\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_brewer}\NormalTok{(}\AttributeTok{palette =} \StringTok{\textquotesingle{}Set1\textquotesingle{}}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_11_files/figure-latex/solution_03d-1.pdf}
+
+\hypertarget{e-2}{%
+\subsubsection{3e)}\label{e-2}}
+
+In addition to visualizing the classifications, we can also predict the
+class probabilities. This allows us to test out our classification
+threshold, if we would like. It also helps us understand if the
+predictions are near the threshold boundary.
+
+Class probability predictions are also made with the \texttt{predict()}
+function. The first argument is still the model object, and the second
+argument is still the data set we wish to predict. We must include a
+third argument, \texttt{type}, which instructs the model the ``type'' of
+prediction to make. Setting the \texttt{type} argument equal to
+\texttt{\textquotesingle{}prob\textquotesingle{}} will return the class
+probabilities, instead of the classification label.
+
+\textbf{Predict the class probabilities with the neural network model.
+Assign the result to the \texttt{pred\_prob\_nnet} object. Display the
+data type of \texttt{pred\_prob\_nnet} to the screen, as well as the
+result of the \texttt{head()} function applied to
+\texttt{pred\_prob\_nnet}. How do you know how to access the probability
+of the \texttt{\textquotesingle{}M\textquotesingle{}} class?}
+
+\hypertarget{solution-15}{%
+\paragraph{SOLUTION}\label{solution-15}}
+
+How do you know how to access the probability of the
+\texttt{\textquotesingle{}M\textquotesingle{}} class?
+
+By pred\_prob\_nnet\$M
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pred\_prob\_nnet }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(fit\_nnet\_sonar, viz\_input\_grid, }\AttributeTok{type =} \StringTok{\textquotesingle{}prob\textquotesingle{}}\NormalTok{)}
+\FunctionTok{typeof}\NormalTok{(pred\_prob\_nnet)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "list"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{head}\NormalTok{(pred\_prob\_nnet)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##           M           R
+## 1 0.9863185 0.013681453
+## 2 0.9952580 0.004742048
+## 3 0.9981842 0.001815811
+## 4 0.9988205 0.001179527
+## 5 0.9991026 0.000897417
+## 6 0.9748333 0.025166724
+\end{verbatim}
+
+\hypertarget{f-1}{%
+\subsubsection{3f)}\label{f-1}}
+
+You will now visualize the predicted probability surface for the
+\texttt{M} class.
+
+\textbf{Bind the columns of \texttt{viz\_input\_grid} to the columns in
+\texttt{pred\_prob\_nnet} using \texttt{bind\_cols()}. Pipe the result
+into \texttt{ggplot()}. Map the \texttt{x} aesthetic to the top ranked
+input and the \texttt{y} aesthetic to the second ranked input. Use a
+\texttt{geom\_raster()} geom to visualize the predicted \texttt{M} class
+surface by mapping the \texttt{fill} aesthetic to \texttt{M}. Include
+\texttt{facet\_grid()} to break up the prediction surfaces based on the
+third and fourth ranked inputs by assigning the vertical facets to the
+4th ranked input and the horizontal facets to the 3rd ranked input.}
+
+\textbf{Specify the fill to be a diverging fill scale by including
+\texttt{scale\_fill\_gradient2()}. Set the \texttt{limits} argument to
+\texttt{c(0,1)}. Set the \texttt{low} argument to
+\texttt{\textquotesingle{}blue\textquotesingle{}}, the \texttt{high}
+argument to \texttt{\textquotesingle{}red\textquotesingle{}}, and the
+\texttt{mid} argument to
+\texttt{\textquotesingle{}white\textquotesingle{}}. Set the
+\texttt{midpoint} equal to \texttt{0.5}. These choices will give you
+high predicted probabilities that are bright red, with low predicted
+probabilities as bright blue and 50\% probabilities as white. You will
+therefore be able to clearly see the 50\% threshold decision boundary!}
+
+\hypertarget{solution-16}{%
+\paragraph{SOLUTION}\label{solution-16}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{viz\_input\_grid }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{bind\_cols}\NormalTok{(pred\_prob\_nnet) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ V50, }\AttributeTok{y =}\NormalTok{ V57))}\SpecialCharTok{+}
+  \FunctionTok{geom\_raster}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{fill =}\NormalTok{ M))}\SpecialCharTok{+}
+  \FunctionTok{facet\_grid}\NormalTok{(}\AttributeTok{rows =} \FunctionTok{vars}\NormalTok{(V31), }\AttributeTok{cols =} \FunctionTok{vars}\NormalTok{(V22))}\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_gradient2}\NormalTok{(}\AttributeTok{limits =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{), }
+                       \AttributeTok{low =} \StringTok{\textquotesingle{}blue\textquotesingle{}}\NormalTok{, }
+                       \AttributeTok{high =} \StringTok{\textquotesingle{}red\textquotesingle{}}\NormalTok{, }
+                       \AttributeTok{mid =} \StringTok{\textquotesingle{}white\textquotesingle{}}\NormalTok{, }
+                       \AttributeTok{midpoint =} \FloatTok{0.5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_11_files/figure-latex/solution_03f-1.pdf}
+
+\hypertarget{problem-04}{%
+\subsection{Problem 04}\label{problem-04}}
+
+Let's now try out tree-based methods and compare their performance with
+the elastic net and neural network models.
+
+\hypertarget{a-3}{%
+\subsubsection{4a)}\label{a-3}}
+
+We could start with a standard decision tree with CART, but instead we
+will jump straight to the random forest. To train a random forest model,
+you must specify \texttt{method} equal to \texttt{"rf"}.\\
+You can use the default tuning grid to the \texttt{mtry} tuning
+parameter.
+
+\textbf{Do you need to consider preprocessing the inputs for a random
+forest?}
+
+\textbf{Train a random forest binary classifier by setting the
+\texttt{method} argument equal to \texttt{"rf"}. The code chunk below
+includes the \texttt{importance=TRUE} argument for you.}
+
+\textbf{What value of \texttt{mtry} was selected as the best, based on
+the cross-validation results? Why do you think that value was selected?}
+
+\hypertarget{solution-17}{%
+\paragraph{SOLUTION}\label{solution-17}}
+
+Do you need to consider preprocessing the inputs for a random forest?
+
+No.~Because tree based model has nothing to do with preprocessing.
+
+What value of \texttt{mtry} was selected as the best, based on the
+cross-validation results? Why do you think that value was selected?
+
+2 which lead to the highest score of ROC, Sens and Spec.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{4321}\NormalTok{)}
+\NormalTok{fit\_rf\_sonar }\OtherTok{\textless{}{-}} \FunctionTok{train}\NormalTok{(Class }\SpecialCharTok{\textasciitilde{}}\NormalTok{ ., }
+                      \AttributeTok{data =}\NormalTok{ Sonar,}
+                      \AttributeTok{method =} \StringTok{"rf"}\NormalTok{,}
+                      \AttributeTok{metric =}\NormalTok{ metric\_sonar,}
+                      \AttributeTok{trControl =}\NormalTok{ ctrl\_k05\_roc,}
+                      \AttributeTok{importance =} \ConstantTok{TRUE}\NormalTok{)}
+
+\NormalTok{fit\_rf\_sonar}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Random Forest 
+## 
+## 208 samples
+##  60 predictor
+##   2 classes: 'M', 'R' 
+## 
+## No pre-processing
+## Resampling: Cross-Validated (5 fold) 
+## Summary of sample sizes: 166, 167, 165, 167, 167 
+## Resampling results across tuning parameters:
+## 
+##   mtry  ROC        Sens       Spec     
+##    2    0.9374724  0.9193676  0.7636842
+##   31    0.9045808  0.8557312  0.7326316
+##   60    0.8909954  0.8557312  0.6705263
+## 
+## ROC was used to select the optimal model using the largest value.
+## The final value used for the model was mtry = 2.
+\end{verbatim}
+
+\hypertarget{b-3}{%
+\subsubsection{4b)}\label{b-3}}
+
+Now try training a boosted tree model with \texttt{xgboost}. You must
+set the \texttt{method} argument to \texttt{xgbTree} in order to tell
+\texttt{caret} to use the XGBoost implementation of the boosted tree
+algorithm. By default, many different tuning parameters are considered,
+so instead of printing out the results, the best tuning parameters are
+printed out for you. Then, the performance results are plotted for you.
+
+\textbf{Train the XGBoost model with 5-fold cross-validation to maximize
+the area under the ROC curve.}
+
+\emph{NOTE}: The following code may take a few minutes to complete.
+
+\hypertarget{solution-18}{%
+\paragraph{SOLUTION}\label{solution-18}}
+
+Train the model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{4321}\NormalTok{)}
+\NormalTok{fit\_xgb\_sonar }\OtherTok{\textless{}{-}} \FunctionTok{train}\NormalTok{(Class }\SpecialCharTok{\textasciitilde{}}\NormalTok{.,}
+                       \AttributeTok{data =}\NormalTok{ Sonar,}
+                       \AttributeTok{method =} \StringTok{"xgbTree"}\NormalTok{,}
+                       \AttributeTok{metric =}\NormalTok{ metric\_sonar,}
+                       \AttributeTok{trControl =}\NormalTok{ ctrl\_k05\_roc)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:23] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:24] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:25] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:26] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:27] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:28] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+## [23:12:29] WARNING: amalgamation/../src/c_api/c_api.cc:785: `ntree_limit` is deprecated, use `iteration_range` instead.
+\end{verbatim}
+
+Print out the best tuning parameters.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fit\_xgb\_sonar}\SpecialCharTok{$}\NormalTok{bestTune}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    nrounds max_depth eta gamma colsample_bytree min_child_weight subsample
+## 29     100         2 0.3     0              0.8                1       0.5
+\end{verbatim}
+
+Plot the cross-validation results.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{plot}\NormalTok{(fit\_xgb\_sonar)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_11_files/figure-latex/solution_04f_c-1.pdf}
+\includegraphics{Drake_Zhou_HW_11_files/figure-latex/solution_04f_c-2.pdf}
+
+\hypertarget{c-3}{%
+\subsubsection{4c)}\label{c-3}}
+
+\textbf{Use the \texttt{caret} variable importance method and plot the
+top 20 variable importances for the random forest model and the XGBoost
+model.}
+
+\textbf{Are the top 4 ranked inputs the same as those identified by the
+neural network?}
+
+\hypertarget{solution-19}{%
+\paragraph{SOLUTION}\label{solution-19}}
+
+Plot the top 20 ranked inputs based on the random forest.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\#}
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{varImp}\NormalTok{(fit\_rf\_sonar), }\AttributeTok{top =} \DecValTok{20}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_11_files/figure-latex/solution_04c_c-1.pdf}
+
+Plot the top 20 ranked inputs based on XGBoost.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\#}
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{varImp}\NormalTok{(fit\_xgb\_sonar), }\AttributeTok{top =} \DecValTok{20}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_11_files/figure-latex/solution_04c_b-1.pdf}
+
+Are the top 4 ranked inputs the same as those identified by the neural
+network?
+
+No, according to figures above, they are not the same.
+
+\hypertarget{d-3}{%
+\subsubsection{4d)}\label{d-3}}
+
+\textbf{Create an input test grid based on the top ranked inputs from
+the random forest model.}
+
+\textbf{Assign the result to the \texttt{viz\_input\_grid\_rf} object.}
+
+\hypertarget{solution-20}{%
+\paragraph{SOLUTION}\label{solution-20}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{viz\_input\_grid\_rf }\OtherTok{\textless{}{-}} \FunctionTok{make\_test\_input\_grid}\NormalTok{(}\FunctionTok{colnames}\NormalTok{(Sonar)[}\SpecialCharTok{{-}}\DecValTok{61}\NormalTok{],}
+                                          \FunctionTok{c}\NormalTok{(}\StringTok{"V11"}\NormalTok{,}\StringTok{"V12"}\NormalTok{,}\StringTok{"V9"}\NormalTok{,}\StringTok{"V10"}\NormalTok{),}
+\NormalTok{                                          Sonar)}
+\FunctionTok{dim}\NormalTok{(viz\_input\_grid\_rf)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 15625    60
+\end{verbatim}
+
+\hypertarget{e-3}{%
+\subsubsection{4e)}\label{e-3}}
+
+\textbf{Predict the class probabilities with the random forest model for
+the original neural network based input grid and the new random forest
+ranked input grid.}
+
+\textbf{Assign the predicted probabilities based on the neural network
+input grid to \texttt{pred\_prob\_rf\_on\_nnet\_grid}. Assign the
+predicted probabilities based on the random forest input grid to
+\texttt{pred\_prob\_rf\_on\_rf\_grid}.}
+
+\hypertarget{solution-21}{%
+\paragraph{SOLUTION}\label{solution-21}}
+
+Random forest predictions on the neural network based input grid.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\#}
+\NormalTok{pred\_prob\_rf\_on\_nnet\_grid }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(fit\_rf\_sonar, viz\_input\_grid, }\AttributeTok{type =} \StringTok{\textquotesingle{}prob\textquotesingle{}}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Random forest predictions on the random forest based input grid.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\#}
+\NormalTok{pred\_prob\_rf\_on\_rf\_grid }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(fit\_rf\_sonar, viz\_input\_grid\_rf, }\AttributeTok{type =} \StringTok{\textquotesingle{}prob\textquotesingle{}}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{f-2}{%
+\subsubsection{4f)}\label{f-2}}
+
+\textbf{Visualize the predicted probability surfaces for the \texttt{M}
+class using the same visualization approach used in Problem 3f).}
+
+\hypertarget{solution-22}{%
+\paragraph{SOLUTION}\label{solution-22}}
+
+Visualize the predicted probability surface based on the neural network
+grid.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\#}
+\NormalTok{viz\_input\_grid }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{bind\_cols}\NormalTok{(pred\_prob\_rf\_on\_nnet\_grid) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ V50, }\AttributeTok{y =}\NormalTok{ V57))}\SpecialCharTok{+}
+  \FunctionTok{geom\_raster}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{fill =}\NormalTok{ M))}\SpecialCharTok{+}
+  \FunctionTok{facet\_grid}\NormalTok{(}\AttributeTok{rows =} \FunctionTok{vars}\NormalTok{(V31), }\AttributeTok{cols =} \FunctionTok{vars}\NormalTok{(V22))}\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_gradient2}\NormalTok{(}\AttributeTok{limits =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{), }
+                       \AttributeTok{low =} \StringTok{\textquotesingle{}blue\textquotesingle{}}\NormalTok{, }
+                       \AttributeTok{high =} \StringTok{\textquotesingle{}red\textquotesingle{}}\NormalTok{, }
+                       \AttributeTok{mid =} \StringTok{\textquotesingle{}white\textquotesingle{}}\NormalTok{, }
+                       \AttributeTok{midpoint =} \FloatTok{0.5}\NormalTok{) }
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_11_files/figure-latex/solution_04f_a-1.pdf}
+
+Visualize the predicted probability surface based on the random forest
+grid.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\#}
+\NormalTok{viz\_input\_grid }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{bind\_cols}\NormalTok{(pred\_prob\_rf\_on\_rf\_grid) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ V50, }\AttributeTok{y =}\NormalTok{ V57))}\SpecialCharTok{+}
+  \FunctionTok{geom\_raster}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{fill =}\NormalTok{ M))}\SpecialCharTok{+}
+  \FunctionTok{facet\_grid}\NormalTok{(}\AttributeTok{rows =} \FunctionTok{vars}\NormalTok{(V31), }\AttributeTok{cols =} \FunctionTok{vars}\NormalTok{(V22))}\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_gradient2}\NormalTok{(}\AttributeTok{limits =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{), }
+                       \AttributeTok{low =} \StringTok{\textquotesingle{}blue\textquotesingle{}}\NormalTok{, }
+                       \AttributeTok{high =} \StringTok{\textquotesingle{}red\textquotesingle{}}\NormalTok{, }
+                       \AttributeTok{mid =} \StringTok{\textquotesingle{}white\textquotesingle{}}\NormalTok{, }
+                       \AttributeTok{midpoint =} \FloatTok{0.5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_11_files/figure-latex/solution_04f_b-1.pdf}
+
+\hypertarget{problem-05}{%
+\subsection{Problem 05}\label{problem-05}}
+
+Now that you have trained and tuned multiple models of varying
+complexity, it's time to identify the best performing model.
+
+\hypertarget{a-4}{%
+\subsubsection{5a)}\label{a-4}}
+
+The resampling results are compiled together using the
+\texttt{resamples()} function. You must complete the first code chunk
+below by assigning the model object to the corresponding name in the
+list. For example, you must set the \texttt{fit\_glm\_sonar} object to
+the \texttt{GLM} variable in the list.
+
+\textbf{Complete the first code chunk below, by assigning the
+\texttt{caret} trained model objects to their appropriate variables in
+the list.}
+
+\textbf{The results are then plotted for you using \texttt{dotplot()}
+which model is the best?}
+
+\hypertarget{solution-23}{%
+\paragraph{SOLUTION}\label{solution-23}}
+
+According to the figure, RF is the best model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sonar\_roc\_compare }\OtherTok{\textless{}{-}} \FunctionTok{resamples}\NormalTok{(}\FunctionTok{list}\NormalTok{(}\AttributeTok{GLM =}\NormalTok{ fit\_glm\_sonar,}
+                                    \AttributeTok{GLMNET =}\NormalTok{ fit\_glmnet\_sonar,}
+                                    \AttributeTok{NNET =}\NormalTok{ fit\_nnet\_sonar,}
+                                    \AttributeTok{RF =}\NormalTok{ fit\_rf\_sonar,}
+                                    \AttributeTok{XGB =}\NormalTok{ fit\_xgb\_sonar))}
+
+\FunctionTok{dotplot}\NormalTok{(sonar\_roc\_compare)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_11_files/figure-latex/solution_05a-1.pdf}
+
+\hypertarget{b-4}{%
+\subsubsection{5b)}\label{b-4}}
+
+The code chunk below is completed for you. It extracts the hold-out set
+predictions associated with the best tuning parameter values for 4 of
+the models you trained, the logistic regression model, the elastic net,
+the neural network, and the random forest.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model\_pred\_results }\OtherTok{\textless{}{-}}\NormalTok{ fit\_rf\_sonar}\SpecialCharTok{$}\NormalTok{pred }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ tibble}\SpecialCharTok{::}\FunctionTok{as\_tibble}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{filter}\NormalTok{(mtry }\SpecialCharTok{==}\NormalTok{ fit\_rf\_sonar}\SpecialCharTok{$}\NormalTok{bestTune}\SpecialCharTok{$}\NormalTok{mtry) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{select}\NormalTok{(pred, obs, M, R, rowIndex, Resample) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{model\_name =} \StringTok{"RF"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{bind\_rows}\NormalTok{(fit\_glm\_sonar}\SpecialCharTok{$}\NormalTok{pred }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ tibble}\SpecialCharTok{::}\FunctionTok{as\_tibble}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{select}\NormalTok{(pred, obs, M, R, rowIndex, Resample) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{model\_name =} \StringTok{"GLM"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{bind\_rows}\NormalTok{(fit\_glmnet\_sonar}\SpecialCharTok{$}\NormalTok{pred }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ tibble}\SpecialCharTok{::}\FunctionTok{as\_tibble}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} 
+              \FunctionTok{filter}\NormalTok{(alpha }\SpecialCharTok{==}\NormalTok{ fit\_glmnet\_sonar}\SpecialCharTok{$}\NormalTok{bestTune}\SpecialCharTok{$}\NormalTok{alpha,}
+\NormalTok{                     lambda }\SpecialCharTok{==}\NormalTok{ fit\_glmnet\_sonar}\SpecialCharTok{$}\NormalTok{bestTune}\SpecialCharTok{$}\NormalTok{lambda) }\SpecialCharTok{\%\textgreater{}\%} 
+              \FunctionTok{select}\NormalTok{(pred, obs, M, R, rowIndex, Resample) }\SpecialCharTok{\%\textgreater{}\%} 
+              \FunctionTok{mutate}\NormalTok{(}\AttributeTok{model\_name =} \StringTok{"GLMNET"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{bind\_rows}\NormalTok{(fit\_nnet\_sonar}\SpecialCharTok{$}\NormalTok{pred }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ tibble}\SpecialCharTok{::}\FunctionTok{as\_tibble}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} 
+              \FunctionTok{filter}\NormalTok{(size }\SpecialCharTok{==}\NormalTok{ fit\_nnet\_sonar}\SpecialCharTok{$}\NormalTok{bestTune}\SpecialCharTok{$}\NormalTok{size,}
+\NormalTok{                     decay }\SpecialCharTok{==}\NormalTok{ fit\_nnet\_sonar}\SpecialCharTok{$}\NormalTok{bestTune}\SpecialCharTok{$}\NormalTok{decay) }\SpecialCharTok{\%\textgreater{}\%} 
+              \FunctionTok{select}\NormalTok{(pred, obs, M, R, rowIndex, Resample) }\SpecialCharTok{\%\textgreater{}\%} 
+              \FunctionTok{mutate}\NormalTok{(}\AttributeTok{model\_name =} \StringTok{"NNET"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+The first few rows of the \texttt{model\_pred\_results} object are
+displayed for you in the code chunk below.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model\_pred\_results }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{head}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 6 x 7
+##   pred  obs       M     R rowIndex Resample model_name
+##   <fct> <fct> <dbl> <dbl>    <int> <chr>    <chr>     
+## 1 M     R     0.624 0.376        3 Fold1    RF        
+## 2 R     R     0.494 0.506        5 Fold1    RF        
+## 3 R     R     0.294 0.706       10 Fold1    RF        
+## 4 R     R     0.104 0.896       11 Fold1    RF        
+## 5 R     R     0.498 0.502       16 Fold1    RF        
+## 6 M     R     0.63  0.37        20 Fold1    RF
+\end{verbatim}
+
+You must use the \texttt{model\_pred\_results} to plot the ROC curves
+associated with the best tuning parameter results. You will use the
+\texttt{roc\_curve()} function from the \texttt{yardstick} package to
+create the ROC curve, just as you did in an earlier assignment. You
+should have \texttt{yardstick} installed already. If you do not please
+download and install \texttt{yardstick} before running the code chunk
+below.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(yardstick)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## For binary classification, the first factor level is assumed to be the event.
+## Use the argument `event_level = "second"` to alter this as needed.
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'yardstick'
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:caret':
+## 
+##     precision, recall, sensitivity, specificity
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:readr':
+## 
+##     spec
+\end{verbatim}
+
+\textbf{Create the cross-validation averaged ROC curve for each of the
+models you trained. To do so, pipe the \texttt{model\_pred\_results}
+objects into \texttt{group\_by()} and specify the grouping variable as
+\texttt{model\_name}. Pipe the result to \texttt{roc\_curve()} function
+with \texttt{obs} as the first argument and \texttt{M} as the second
+argument. Pipe the result to the \texttt{autoplot()} function.}
+
+\textbf{Are your generated ROC curves in aggreement with your
+cross-validation summary stats displayed before?}
+
+\hypertarget{solution-24}{%
+\paragraph{SOLUTION}\label{solution-24}}
+
+What do you think?
+
+Yes, they correspond to each other, RF is still the best model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model\_pred\_results }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(model\_name) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{roc\_curve}\NormalTok{(obs, M) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{autoplot}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_11_files/figure-latex/solution_05b-1.pdf}
+
+\hypertarget{c-4}{%
+\subsubsection{5c)}\label{c-4}}
+
+It can be useful to get a sense of the variability in the ROC curve,
+based on the variation in performance across resample folds. You will
+use the \texttt{roc\_curve()} function again, but this time you cannot
+use \texttt{autoplot()} to create the ROC curve. You will need to use
+the \texttt{geom\_path()} function from ggplot2, to create the figure
+manually.
+
+\textbf{Pipe the \texttt{model\_pred\_results} object to
+\texttt{group\_by()} and specify the grouping variables to be
+\texttt{model\_name} and \texttt{Resample}. Pipe the result to
+\texttt{roc\_curve()} with the first argument assigned as \texttt{obs}
+and the second argument assigned as \texttt{M}. Pipe the result to
+\texttt{ggplot()} where you map the \texttt{x} aesthetic to
+\texttt{1\ -\ specificity} and the \texttt{y} aesthetic to
+\texttt{sensitivity}. Add in the \texttt{geom\_path()} layer where you
+map the group \texttt{color} aesthetic to \texttt{Resample}. Use the
+\texttt{facet\_wrap()} function to create separate facets for the models
+that you trained. However, before your \texttt{facet\_wrap()} function
+include \texttt{geom\_abline()} with \texttt{slope\ =\ 1} and
+\texttt{intercept\ =\ 0} and
+\texttt{linetype\ =\ \textquotesingle{}dotted\textquotesingle{}}. Also
+include the \texttt{coord\_equa()} function. The line and equal
+coordinates will help make the ROC curve graphic easier to read.}
+
+\hypertarget{solution-25}{%
+\paragraph{SOLUTION}\label{solution-25}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model\_pred\_results }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(model\_name,Resample) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{roc\_curve}\NormalTok{(obs, M) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ specificity, }\AttributeTok{y =}\NormalTok{ sensitivity))}\SpecialCharTok{+}
+  \FunctionTok{geom\_path}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{color =}\NormalTok{ Resample)) }\SpecialCharTok{+} 
+  \FunctionTok{geom\_abline}\NormalTok{(}\AttributeTok{slope =} \DecValTok{1}\NormalTok{, }\AttributeTok{intercept =} \DecValTok{0}\NormalTok{, }\AttributeTok{linetype =} \StringTok{\textquotesingle{}dotted\textquotesingle{}}\NormalTok{) }\SpecialCharTok{+} 
+  \FunctionTok{coord\_equal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{( }\SpecialCharTok{\textasciitilde{}}\NormalTok{ model\_name)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_HW_11_files/figure-latex/solution_05c-1.pdf}
+
+\end{document}

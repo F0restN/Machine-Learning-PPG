@@ -1,0 +1,5 @@
+"0","mu_grid_lwr <- hw06_info$mu_0 - 3 * hw06_info$tau_0"
+"0","mu_grid_upr <- hw06_info$mu_0 + 3 * hw06_info$tau_0"
+"0",""
+"0","sigma_grid_lwr <- 1"
+"0","sigma_grid_upr <- qexp(0.99, rate = 0.5)"

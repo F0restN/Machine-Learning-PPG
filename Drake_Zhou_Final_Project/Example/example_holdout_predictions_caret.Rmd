@@ -1,0 +1,340 @@
+---
+title: "Final Project Spring 2022"
+subtitle: "Example: predict the hold-out test set - caret"
+author: "Dr. Joseph P. Yurko"
+output: 
+  html_document: 
+    toc: true
+    number_sections: true
+    toc_float:
+      collapsed: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Overview
+
+This report demonstrates how to read in the hold-out test, make predictions, and organize the predictions in the necessary format. The compiled predictions are then saved to a CSV file which can be uploaded to the RShiny app.  
+
+However, before we can make predictions, we need to train some models. Thus, this report demonstrates fitting a simple regression model and simple classification model with `caret`. I do not use all inputs even though you are required to do so. I am creating bad models on purpose because the purpose of this report is to demonstrate how to compile the predictions. You must fit the required models described in the final project guidelines.  
+
+This report uses `caret`.  
+
+```{r, load_tidy_package}
+library(tidyverse)
+```
+
+```{r, load_caret_package}
+library(caret)
+```
+
+## Read training data
+
+The training data set is read in the code chunk below assuming you have downloaded the data from Canvas.  
+
+```{r, read_data_01}
+df_all <- readr::read_csv("final_project_train.csv", col_names = TRUE)
+```
+
+## Regression problem
+
+The data associated with the regression task is created below. Note that the log-transformed response is calculated and assigned to the variable `y`.  
+
+```{r, reg_01}
+dfii <- df_all %>% 
+  mutate(y = log(response)) %>% 
+  select(region, customer, starts_with('x'), y)
+```
+
+Let's train and assess a simple linear model with `caret`. You should not use this model in your own work, it is just used for demonstration purposes. This model only uses 2 inputs and so its performance may be quite limited!  
+We will use 5-fold cross-validation with 3 repeats. You are free to use a different resampling scheme in your project.  
+
+```{r, reg_02}
+my_ctrl_regress <- trainControl(method = 'repeatedcv', number = 5, repeats = 3)
+```
+
+Next, define the primary performance metric of the model.  
+
+```{r, reg_03}
+my_metrics_regress <- 'RMSE'
+```
+
+
+Lastly, let's specify our method such that the `lm()` function will be used to fit the model.  
+
+```{r, reg_04a}
+my_regress_method <- 'lm'
+```
+
+
+Let's now train and assess our simple linear model. Again, you should **NOT** use this model since I am only consider 2 inputs.  
+
+```{r, reg_04}
+set.seed(2022)
+mod_regress <- train(y ~ xb_01 + xn_01,
+                     data = dfii,
+                     method = my_regress_method,
+                     preProcess = c("center", "scale"),
+                     metric = my_metrics_regress,
+                     trControl = my_ctrl_regress)
+```
+
+
+Displaying the returned `caret` object shows the cross-validation averaged performance for our simple linear model. Again, this model only uses 2 inputs for demonstration purposes. Your models should be better than this one!  
+
+```{r, reg_05}
+mod_regress
+```
+
+## Classification problem
+
+The data associated with the binary classification task are assembled below. The binary outcome is set as a `factor` variable with levels `'event'` and `'non_event'` with the first level set to be `'event'`. This is the format required by `caret` and is the same data created for part iiiD) for the project.  
+
+```{r, class_01}
+dfiiiD <- df_all %>% 
+  mutate(outcome = factor(outcome, 
+                          levels = c("event", "non_event"))) %>% 
+  select(region, customer, starts_with('x'), outcome)
+```
+
+The `caret` package requires specifying a primary performance. It can only tune models for one type of metric at a time. This means that we must train and tune a model twice in order to consider the impact of tuning for maximizing Accuracy vs tuning for maximizing ROC AUC. This is unfortunate, but is just how `caret` is constructed to operate. This demonstration first sets up training for Accuracy and then repeats the training a second time, but to maximize ROC AUC. This example only uses a simple logistic regression model and so there are no tuning parameters to optimize. Thus, we will not have any differences in the two models right now. This may not be the case for models that have tuning parameters, such as elastic net, neural networks.  
+
+### Accuracy
+
+The code chunk below specifies the resampling scheme that we will use for the model associated with the Accuracy metric.  
+
+```{r, acc_01}
+my_ctrl_acc <- trainControl(method = 'repeatedcv', number = 5, repeats = 3)
+```
+
+
+Next, define the primary performance metric.  
+
+```{r, acc_02}
+my_metrics_acc <- "Accuracy"
+```
+
+
+Lastly, define the method such that the `glm()` function will be used to fit the logistic regression model.  
+
+```{r, acc_03}
+my_binary_method <- 'glm'
+```
+
+
+The logistic regression model trained and assessed below uses just 2 inputs for demonstration purposes. Again, you should **NOT** use such a model in your projet.  
+
+```{r, acc_04}
+set.seed(2022)
+mod_binary_acc <- train(outcome ~ xb_01 + xn_01,
+                        data = dfiiiD,
+                        method = my_binary_method,
+                        preProcess = c('center', 'scale'),
+                        metric = my_metrics_acc,
+                        trControl = my_ctrl_acc)
+```
+
+
+The cross-validation averaged performance is printed to the screen below for our simple logistic regression model. Remember that it is important to consider the empirical event proportion before considering if a model's Accuracy is "good" or not!  
+
+```{r, acc_05}
+mod_binary_acc
+```
+
+### ROC AUC
+
+Next, let's setup the resampling scheme control options associated with maximizing the ROC AUC. We do not need to modify the resampling itself, we can use the same 5-fold cross-validation with 3 repeats that we used previously. However, `caret` requires that we modify how the predictions will be stored and summarized in order to calculate the ROC AUC. The metric is also set such that `caret` will calculate the ROC AUC.  
+
+```{r, roc_01}
+my_ctrl_roc <- trainControl(method = 'repeatedcv', number = 5, repeats = 3,
+                            summaryFunction = twoClassSummary,
+                            classProbs = TRUE,
+                            savePredictions = TRUE)
+
+my_metrics_roc <- 'ROC'
+```
+
+
+The logistic regression model is trained and assessed below using the ROC AUC associated resampling control options. The structure of the call to `train()` is the same as the previous call. We are just changing the `metric` and `trControl` arguments.  
+
+```{r, roc_02}
+set.seed(2022)
+mod_binary_roc <- train(outcome ~ xb_01 + xn_01,
+                        data = dfiiiD,
+                        method = my_binary_method,
+                        preProcess = c('center', 'scale'),
+                        metric = my_metrics_roc,
+                        trControl = my_ctrl_roc)
+```
+
+
+The returned `caret` object is displayed below.  
+
+```{r, roc_03}
+mod_binary_roc
+```
+
+## Hold-out set predictions
+
+Now that we have trained two models, it's time to setup the predictions! First, the hold-out test set is loaded in the code chunk below. You must download the hold-out test set from Canvas.  
+
+```{r, hold_01}
+holdout <- readr::read_csv('final_project_holdout_inputs.csv', col_names = TRUE)
+```
+
+Note that the holdout test set only consists of input variables! The number of columns is therefore different from the `df_all` object!  
+
+```{r, hold_02}
+sprintf("columns in df_all: %d vs columns in holdout: %d", ncol(df_all), ncol(holdout))
+```
+
+Displaying the names of the `holdout` tibble shows that the `response` and `outcome` columns are NOT present!  
+
+```{r, hold_03}
+holdout %>% names()
+```
+
+The `holdout` tibble therefore only consists of inputs. However, the identifying column `rowid` is present. You must **NOT** use this variable in your models. So for simplicity, let's remove it. In truth we do not have to do this, the formulas in the models will manage the book keeping for us. That said, just for simplicity let's remove `rowid`.  
+
+```{r, hold_04}
+holdout_inputs <- holdout %>% 
+  select(-rowid)
+```
+
+
+It is easy to make predictions with `caret` trained models. We simply call the `predict()` function! The first argument to `predict()` is the model object and the second argument is the data we wish to predict. Let's start by making predictions with the regression model. As shown below the result is a numeric vector!  
+
+```{r, hold_05}
+predict(mod_regress, holdout_inputs) %>% class()
+```
+
+The length of the returned vector is equal to the number of rows in the test set.  
+
+```{r, hold_06}
+length( predict(mod_regress, holdout_inputs) ) == nrow(holdout_inputs)
+```
+
+It should be noted though, that predicting a different data set will result in a different number of predictions. For example, if we predicted the training set, the length of the returned predictions equals the number of rows in the training set!  
+
+```{r, hold_07}
+length( predict(mod_regress, df_all) ) == nrow(df_all)
+```
+
+The values of the returned predicted vector are the predictions of the continuous output. However, in lecture we learned that these are really the trend or predictions of the *mean* response! The head of the predicted vector is displayed below to show a few of the values.  
+
+```{r, hold_08}
+predict( mod_regress, holdout_inputs ) %>% head()
+```
+
+Next, let's make predictions of the binary output, `outcome`. As with regression, `caret` trained classification models are "complete" models. We can make predictions with them! Classification model objects can return several types of predictions. The default option is to return the outcome class level or label. The returned object is a regular vector associated with the `factor` data type. The code chunk below makes predictions with the logistic regression model trained using the Accuracy resampling control options. The second argument to `predict()`, the `newdata` argument, is explicitly named in the `predict()` call. We will see why it is useful to use the name of the argument shortly. The predictions are pipped to the `class()` function to show the vector is a `factor` data type.  
+
+```{r, hold_09}
+predict(mod_binary_acc, newdata = holdout_inputs) %>% class()
+```
+
+The `factor` data type is `R`'s categorical data type. We can check the finite values, levels, labels, or categories using the `levels()` function. Notice that our predictions have just two levels, `'event'` and `'non_event'`. Thus, by default the `predict()` function returns the classifications rather than the predicted probability!  
+
+```{r, hold_10}
+predict(mod_binary_acc, newdata = holdout_inputs) %>% levels()
+```
+
+The number of elements in the vector equals the number of rows in the test set.  
+
+```{r, hold_11}
+length( predict(mod_binary_acc, newdata = holdout_inputs) ) == nrow(holdout_inputs)
+```
+
+The same holds true whether we use the `caret` object associated with maximizing Accuracy or maximizing ROC AUC.  
+
+```{r, hold_12}
+length( predict(mod_binary_roc, newdata = holdout_inputs) ) == nrow(holdout_inputs)
+```
+
+The `caret` object associated with maximizing ROC AUC by default also returns the classifications.  
+
+```{r, hold_13}
+predict(mod_binary_roc, newdata = holdout_inputs) %>% levels()
+```
+
+The first few elements of the `caret` trained logistic regression models are printed to the screen below.  
+
+```{r, hold_14}
+predict(mod_binary_acc, newdata = holdout_inputs) %>% head()
+
+predict(mod_binary_roc, newdata = holdout_inputs) %>% head()
+```
+
+Logistic regression fit by maximizing the likelihood does not have any tuning parameters. Thus, the two classification models trained in this example are the same model! That means the predictions are the same.  
+
+```{r, hold_15}
+all.equal(predict(mod_binary_acc, newdata = holdout_inputs), 
+          predict(mod_binary_roc, newdata = holdout_inputs))
+```
+
+However, this may not be the case for models with tuning parameters!  
+
+The returned predicted classifications assume the default threshold of 50%. We are also interested in knowing the predicted event probability. We can instruct a `caret` trained model to return the probability associated with each class by setting the `type` argument to `type='prob'` within the `predict()` call. However, by doing so the result is no longer a regular vector! Instead, a data.frame is returned!  
+
+```{r, hold_16}
+predict(mod_binary_acc, newdata = holdout_inputs, type = 'prob') %>% class()
+```
+
+This is the case with the `caret` object associated with maximizing the ROC AUC as well.  
+
+```{r, hold_17}
+predict(mod_binary_roc, newdata = holdout_inputs, type = 'prob') %>% class()
+```
+
+The returned datatypes because the predicted probability for each class is provided. This allows `caret` to scale to multi-class situations when there are more than 2 classes associated with the categorical output. The head of the probability predictions are shown below.  
+
+```{r, hold_18}
+predict(mod_binary_acc, newdata = holdout_inputs, type = 'prob') %>% head()
+```
+
+
+Please pay close attention to the column names in the returned data.frame. The `event` column gives the probability of `outcome = 'event'` and the `non_event` column gives the probability of `outcome = 'non_event'`. If the categorical output had different class (level or label or category) names, the returned data.frame column names would be different.  
+
+## Compile predictions
+
+You must upload your hold-out set predictions to an RShiny app. This app will calculate the performance of your models on the hold-out test set. You must organize your predictions into a single tibble with the following column names:  
+
+`id, y, outcome, probability`  
+
+The `id` column is a row index for the predictions, the `y` is the (log-transformed) continuous output, the `outcome` column is the binary output level, and the `probability` column is the event probability. Please note that the `y` column **MUST** correspond to the log-transformed response value.  
+
+The code chunk below demonstrates how to organize the hold-out test set predictions in support of the RShiny app.  
+
+```{r, compile_01}
+my_preds <- tibble::tibble(
+  y = predict(mod_regress, newdata = holdout_inputs),
+  outcome = predict(mod_binary_acc, newdata = holdout_inputs)
+) %>% 
+  bind_cols(
+    predict(mod_binary_acc, newdata = holdout_inputs, type = 'prob') %>% 
+      select(probability = event)
+  ) %>% 
+  tibble::rowid_to_column('id')
+```
+
+
+A glimpse of the predictions is shown below.  
+
+```{r, compile_02}
+my_preds %>% glimpse()
+```
+
+The head of the compiled predictions is shown below.  
+
+```{r, compile_03}
+my_preds %>% head()
+```
+
+The compiled hold-out test set predictions are saved to a CSV file in the code chunk below. This is the CSV file you should upload to the RShiny app!  
+
+```{r, compile_04}
+my_preds %>% 
+  readr::write_csv('example_preds_caret.csv', col_names = TRUE)
+```
+

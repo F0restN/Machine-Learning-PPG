@@ -1,0 +1,7 @@
+"0","### add more code chunks if you like"
+"0","bf <- exp(laplace_03_weak$log_evidence) / exp(laplace_06_weak$log_evidence)"
+"0","bf"
+"1","[1]"
+"1"," 1.555248e+88"
+"1","
+"

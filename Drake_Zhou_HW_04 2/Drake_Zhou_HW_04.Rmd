@@ -1,0 +1,523 @@
+---
+title: "INFSCI 2595 Spring 2022 Homework: 04"
+subtitle: "Assigned February 2, 2022; Due: February 9, 2022"
+author: "YOUR NAME HERE"
+date: "Submission time: February 9, 2022 at 11:00PM EST"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Collaborators
+
+Include the names of your collaborators here.  
+
+## Overview
+ 
+This assignment focuses on the mathematics of likelihoods, priors, and posterior distributions. You will work with the Binomial likelihood and a Beta prior throughout this assignment.  
+
+**IMPORTANT**: code chunks are created for you. Each code chunk has `eval=FALSE` set in the chunk options. You **MUST** change it to be `eval=TRUE` in order for the code chunks to be evaluated when rendering the document.  
+
+## Load packages
+
+You will use the `tidyverse` in this assignment, as you have done in the previous assignments.  
+
+```{r, load_packages}
+library(tidyverse) 
+```
+
+## Problem 01
+
+Baseball has a rich history of quantitative analysis, even before the rise in the popularity of advanced analytics techniques. Batting averages, slugging percentages, and other metrics have been used to evaluate a players offensive performance for over one hundred years. The batting average requires the number of at bats (or trials) and the number of successful hits (or events). It measures the fraction of at bats a player successfully gets a hit.  
+
+You will practice working with the Binomial distribution in order to study the probability that a player gets a hit.  
+
+### 1a)
+
+A certain player is considered to have had a good offensive season. He had 189 hits out of 602 at bats. The number of hits and at bats are provided as variables for you in the code chunk below.  
+
+```{r, set_player_obs_1a, eval=TRUE}
+player_hits <- 189
+player_atbats <- 602
+```
+
+We will assume that the number of hits, $H$, is Binomially distributed, conditioned on the number of at bats, $AB$, and the probability of a successful hit, $\mu$.  
+
+**Write out the formula for the Maximum Likelihood Estimate (MLE) for the probability of a successful hit, $\mu_{ML}$, based on the number of at bats, $AB$, and number of hits, $H$. Calculate the MLE for the player based on the data provided in the above code chunk. Save the MLE to the variable `player_mle` and print the value to the screen.**  
+
+#### SOLUTION
+
+The MLE for the probability of a successful hit is:  
+
+$$ 
+\mu_{MLE} = \frac{1}{N} \sum_{n=1}^N X_{n} = \frac{M}{N} = \frac{H}{AB}
+$$
+
+For this particular example:  
+
+```{r, solution_01a, eval=TRUE}
+### your code here
+player_mle = player_hits / player_atbats
+
+player_mle
+```
+
+### 1b)
+
+Let's check your answer in Problem 1a) by visualizing the log-likelihood with respect to the unknown probability, $\mu$. You will work with the un-normalized log-likelihood in this problem. Un-normalized corresponds to dropping the constants or the terms that do not involve the unknown variable, which in this case is the probability $\mu$.  
+
+**Write out the expression for the un-normalized Binomial log-likelihood for the number of hits $H$, given the number of at bats, $AB$, and the probability of a hit, $\mu$. The equation block is started for you, showing that the log-likelihood is just proportional to the expression on the right hand side.**  
+
+#### SOLUTION
+
+$$ 
+\log \left( p \left( H \mid AB, \mu \right) \right) \propto \log \left( \mu^H \left( 1-\mu \right)^{{AB}-H}   \right)  
+$$
+
+### 1c)
+
+Let's now generate the visualization. The code chunk below is started for you. It consists of a `tibble` containing a variable `mu`. You will complete the code chunk and generate a visualization for the un-normalized log-likelihood with respect to `mu`, over the interval $\mu = 0.1$ to $\mu = .6$.  
+
+**Set the variable `mu` equal to a vector consisting of 101 evenly spaced elements from 0.1 to 0.6. Pipe the `tibble` into the `mutate()` function and create a new variable `log_lik`. Evaluate the un-normalized log-likelihood using the number of hits and at bats for the player. Pipe the result into  `ggplot()` and map the `x` aesthetic `mu` and the `y` aesthetic to `log_lik`. Use a `geom_line()` to display those aesthetics. As a reference point, include your calculated MLE on the probability with a `geom_vline()`. The `geom_vline()` displays a vertical line at a specified `xintercept` value. You do not need to place `xintercept` within the `aes()` function.**  
+
+**The MLE is corresponds to what on the plotted curve?**  
+
+*HINT*: The `seq()` function allows you to create a vector of evenly spaced points from a starting value to an upper value. The `length.out` argument allows specifying the number of points to use.  
+
+*HINT*: Remember that when you pipe data.frames/tibbles you have full access to the variables contained within them.  
+
+#### SOLUTION
+
+```{r, solution_01c, eval=TRUE}
+tibble::tibble(
+  mu = seq(0.1,0.6, length.out = 101)
+) %>% 
+  mutate(log_lik = log(mu ^ player_hits * (1 - mu)^(player_atbats - player_hits))) %>%
+  ggplot(mapping= aes(x = mu, y = log_lik)) + 
+  geom_line() + 
+  geom_vline(xintercept = player_mle)
+```
+
+What do you think?  
+The value of y-axis means log(probability of a specific probability) and the x-axis means which the specific probability is.
+ 
+### 1d)
+
+If we were interested in evaluating the log-likelihood over and over again, it might be tedious to have to rewrite the expression many times. Instead of doing that, we can define a function to streamline the calculation of the un-normalized log-likelihood.  
+
+A function in `R` has the basic syntax shown in the code chunk below. The `function()` call is used to assign the newly created function to a variable. Specifically in the example below, the newly created function is named `my_example_function()`. The function receives two input arguments, `input_1` and `input_2`. You can define functions that require zero inputs or many inputs. The actions you want the function to perform are contained within curly braces, `{}`. The last comment states you can use the `return()` function to return a data object from a function. *Alternatively*, the last line evaluated within the function will be returned by default.  
+
+```{r, show_ex_function, eval=FALSE}
+my_example_function <- function(input_1, input_2)
+{
+  ### PERFORM ACTIONS
+  
+  ### return objects with return()
+}
+```
+
+
+To call our newly created function we could use either syntax shown below. If you do not name the input arguments, as in the second example below, by default `R` assumes the defined order for the inputs. Thus, the first call to the function below assumes that `input_1` equals 1 and `input_2` equals 2. It can be good practice to name the inputs when you're starting out to help you get familiar with the syntax.  
+
+```{r, show_ex_function_call, eval=FALSE}
+my_example_function(1, 2)
+
+my_example_function(input_1 = 1, input_2 = 2)
+```
+
+Let's now create a function to calculate the un-normalized Binomial log-likelihood. The function `log_binom_pmf_unnorm()` is started for you in the code chunk below. You will use more general names than hits and at bats for the function. The number of events will be denoted as `events` and the number of trials will be referred to as `trials`. The probability of the event will be denoted as `prob`.  
+
+**Complete the code chunk below by specifying the inputs to `log_binom_pmf_unnorm()` in the following order, `events`, `trials`, and `prob`. Within the function calculate the un-normalized log-likelihood and assign the result to the variable `log_lik`. Return `log_lik` as the result of the function call.**  
+
+#### SOLUTION
+
+```{r, solution_01d, eval=TRUE}
+### set the input arguments !!!
+log_binom_pmf_unnorm <- function(events, trials, prob)
+{
+  log_lik = log(prob^events * (1-prob) ^ (trials - events))
+  return (log_lik)
+}
+
+#log_binom_pmf_unnorm(player_hits, player_atbats, mu)
+```
+
+### 1e)
+
+Let's now use the `log_binom_pmf_unnorm()` function to recreate the figure from Problem 4c).  
+
+**Recreate the figure from Problem 1c), but this time call the `log_binom_pmf_unnorm()` function rather than typing out the expression in order to calculate the `log_lik` variable. Define the variable `mu` as you did before, as a vector of evenly spaced points between 0.1 and 0.6.**  
+
+#### SOLUTION
+
+```{r, solution_01e, eval=TRUE}
+tibble::tibble(
+  mu = seq(0.1,0.6,length.out=101)
+) %>% 
+  mutate(log_lik=log_binom_pmf_unnorm(player_hits, player_atbats, mu)) %>%
+  ggplot(mapping= aes(x = mu, y = log_lik)) + 
+  geom_line() + 
+  geom_vline(xintercept = player_mle)
+```
+
+### 1f)
+
+The un-normalized log-likelihood does not include normalizing constant terms. As discussed in lecture, the constant within the Binomial distribution is the Binomial coefficient. In `R` the Binomial coefficient is calculated by the function `choose()`. The input arguments are `n` and `k`, so the function can be read as "`n` choose `k`". There is also a function `lchoose()` which returns the log of the `choose()` function, and so serves as a short cut for writing `log(choose(n,k))`.  
+
+The code chunk below defines a function `log_binom_pmf()`. You will complete the function and include the log of the Binomial coefficient with the rest of the terms that you evaluated previously in the `log_binom_pmf_unnorm()` function.  
+
+**Complete the function `log_binom_pmf()` in the code chunk below. Define the input arguments, `events`, `trials`, and `prob`, in the same order as used in `log_binom_pmf_unnorm()`.**  
+
+#### SOLUTION
+
+```{r, solution_01f, eval=TRUE}
+### set the input arguments!
+log_binom_pmf <- function(events, trials, prob)
+{
+  log_lik <- lchoose(trials, events) + events * log(prob) + (trials - events) * log(1 - prob)
+  return(log_lik)
+}
+```
+
+### 1g)
+
+The un-normalized log-likelihood is all we needed when we were interested in finding the MLE. The constants do **not** impact the shape, because the constants drop out when we evaluate the derivative with respect to $\mu$. To show that is indeed the case, recreate the visualization of the log-likelihood with respect to the probability $\mu$. However, this time set the `log_lik` variable equal to the result of the `log_binom_pmf()` function instead of the un-normalized function.  
+
+**Recreate the plot from Problem 1e), except set the variable `log_lik` equal to the result of the `log_binom_pmf()` function. Does the MLE correspond to the same location as it did with the un-normalized log-likelihood?**  
+
+#### SOLUTION
+
+```{r, solution_01g, eval=TRUE}
+tibble::tibble(
+  mu = seq(0.1,0.6,length.out=101)
+) %>% 
+  mutate(log_lik=log_binom_pmf(player_hits, player_atbats, mu)) %>%
+  ggplot(mapping= aes(x = mu, y = log_lik)) + 
+  geom_line() + 
+  geom_vline(xintercept = player_mle)
+```
+
+What do you think?  
+Yes. It correspond to the same location as it did with the un-normalized log-likelihood
+
+## Problem 02
+
+Although we do not need to worry about normalizing constants when finding the MLE, we do need to include them when we wish to calculate probabilities. We have been working with the log of the Binomial PMF. We can use that PMF to answer questions such as "What is the probability of observing $H$ hits out of $AB$ at bats for a player with a true hit probability of 0.3?" We can therefore get an idea about the likelihood of the data we observed.  
+
+### 2a)
+
+Use the `log_binom_pmf()` function to calculate the probability of observing the 189 hits out of 602 at bats, assuming the true hit probability was 0.3. It is important to note that `log_binom_pmf()` is the log-Binomial. Therefore, you must perform an action to convert from the log-scale back to the original probability scale.  
+
+**Calculate the probability of observing 189 hits out of 602 at bats if the true probability is 0.3.**  
+
+#### SOLUTION
+```{r, solution_02a}
+### your code here
+log_binom_pmf(189,602,0.3)
+```
+
+### 2b)
+
+It may seem like a lot of work in order to evaluate the Binomial distribution. However, you were told to write the function yourself. Luckily in `R` there are many different PMFs and PDFs predefined for you. Unless it is explicitly stated in the homework instructions, you will be allowed to use the predefined PMF and PDF functions throughout the semester.  
+
+For the Binomial distribution, the predefined function is `dbinom()`. It contains 4 input arguments: `x`, `size`, `prob`, and `log`. `x` is the number of observed events. `size` is the number of trials, so you can think of `size` as the Trial size. `prob` is the probability of observing the event. `log` is a Boolean, so it equals either `TRUE` or `FALSE`. It is a flag to specify whether to return the log of the probability, `log=TRUE`, or the probability `log=FALSE`. By default, if you do not specify `log` the `dbinom()` function assumes `log=FALSE`.  
+
+**Check your result from Problem 2a) by using the `dbinom()` function to calculate the probability of observing 189 hits out of 602 at bats, assuming the probability of a hit is 0.3.**  
+
+```{r, solution_02b}
+### your code here
+dbinom(189,602,0.3)
+```
+
+### 2c)
+
+**Recreate the log-likelihood figure from Problem 1g), but this time use the `dbinom()` function instead of the `log_binom_pmf()`. Do not forget to set the `log` flag appropriately!**  
+
+#### SOLUTION
+
+```{r, solution_02c, eval=TRUE}
+tibble::tibble(
+  mu = seq(0.1,0.6,length.out=101)
+) %>% 
+  mutate(log_lik=dbinom(player_hits, player_atbats, mu, log = TRUE)) %>%
+  ggplot(mapping= aes(x = mu, y = log_lik)) + 
+  geom_line() + 
+  geom_vline(xintercept = player_mle)
+```
+
+### 2d)
+
+The `dbinom()` function evaluates the probability of observing **exactly** `x` events out of a `size` of trials. However, what if we were interested in the probability of observing at most a specified number of events? We would need to integrate, or sum, the probabilities of all events up to and including the max number of events.  
+
+To see how this works, consider a simple coin flip example. We will flip the coin 11 times. What is the probability of observing at most 5 heads if the probability of heads is 0.25 (so it is a biased coin). To perform this calculation we must first calculate the probability of observing exactly 0, 1, 2, 3, 4, and 5 heads out of 11 trials. The `dbinom()` function accepts vectors for the `x` argument. So all we have to do is pass in a vector from 0 to 5 as the `x` argument.  
+
+**Calculate the probabilities of observing exactly 0 through 5 heads out of 11 trials assuming the probability of heads is equal to 0.25. Set the `x` argument in `dbinom()` to be a vector of 0 through 5 using the `:` operator. Assign the result to the variable `coin_probs`. Print the result to the screen and check the length of `coin_probs` by using the `length()` function. What does the first element in the `coin_probs` vector correspond to?**  
+
+#### SOLUTION
+
+```{r, solution_02d, eval=TRUE}
+coin_probs <- dbinom(x = c(0:5), size = 11, prob = 0.25)
+
+# print to screen
+print(coin_probs)
+
+# length?
+length(coin_probs)
+```
+
+The first element 0.04 means the probability of fliping coin 11 times and get no heads. It is correspond to the probability of fliping the coin 11times and get 11 times tails. 
+
+### 2e)
+
+The probability of observing at most 5 heads out of 11 trials is then equal to the summation of all of the event probabilities. The `sum()` function will sum up all elements in a vector for us.  
+
+**Use the `sum()` function to sum all of the elements of the `coin_probs` vector. What is the probability of observing at most, or up to and including, 5 heads out of 11 trials?**  
+
+#### SOLUTION
+
+```{r, solution_02e}
+### your code here
+sum(coin_probs)
+```
+
+0.9656725 is the probability of observing at most, or up to and including, 5 heads out of 11 trials.
+
+### 2f)
+
+Alternatively, we can use the `pbinom()` function to perform this summation for us. The arguments are similar to `dbinom()`, except the first argument is referred to as `q` instead of `x`. The `q` argument corresponds to the value we are integrating up to. So in our coin example, we would set `q` to be 5.  
+
+**Calculate the probability of observing at most, or up to and including, 5 heads out of 11 trials assuming the probability equals 0.25 with the `pbinom()` function. How does your result compare to the "manual" approach using `sum()` and `dbinom()`?**  
+
+#### SOLUTION
+
+```{r, solution_02f}
+### your code here
+pbinom(q = 5, size = 11, prob = 0.25)
+```
+
+?  
+They are the same
+
+### 2g)
+
+With the `dbinom()` and `pbinom()` functions we can now work through many different types of probabilistic questions. Returning to the baseball example, let's consider the probability of observing between 175 hits and 195 hits out of 602 at bats, assuming the true hit probability is 0.3. We are now interested in the probability of an interval, rather than asking the probability of up to and including.  
+
+**Calculate the probability of observing 175 to 195 hits out of 602 at bats if the true hit probability is 0.3. Also, calculate the probability of observing 165 to 205 hits out of 602 at bats if the true hit probability is 0.3**  
+
+*HINT*: To calculate the probability of observing the number of hits between a specific interval, we have to take the difference of the summations.  
+
+#### SOLUTION
+
+```{r, solution_02g}
+### your code here
+dbinom(x = c(175:195), size = 602, prob = 0.3) %>% sum()
+pbinom(q = 205, size = 602, prob = 0.3) - pbinom(q = 164, size = 602, prob = 0.3)
+```
+
+## Problem 3
+
+The previous two questions focused on baseball. Moving forward in this assignment you will consider a generic situation of observed $m$ events out of $N$ trials. In this question, you will work through combining the Binomial likelihood with a Beta prior on the unknown event probability, $\mu$.  
+
+### 3a)
+
+You previously wrote out the un-normalized log-Binomial likelihood in terms of the baseball example. You will rewrite that expression, but this time with the generic variables for the number of events $m$ out of a generic number of trials $N$.  
+
+**Write out the un-normalized log-likelihood for the Binomial likelihood with $m$ events out of $N$ trials and unknown event probability $\mu$.**  
+
+#### SOLUTION
+
+The equation block is started for you below.  
+
+$$ 
+\log \left( p \left( m \mid N, \mu \right) \right) \propto \log \left(\mu^{m} \left(1 - \mu\right)^{N - m}\right)
+$$
+
+### 3b)
+
+**Write out the un-normalized log-density of the Beta distribution on the unknown event probability $\mu$ with hyperparameters $a$ and $b$.**  
+
+#### SOLUTION
+
+The equation block is started for you below.  
+
+$$ 
+\log \left( p \left( \mu \mid a, b \right) \right) \propto \log \left( \mu^{a-1} (1-\mu) ^ {b-1} \right)   
+$$
+
+### 3c)
+
+We already know that since the Beta is conjugate to the Binomial, the posterior distribution on the unknown event probability $\mu$ is also a Beta. You will practice working through the derivation of the updated hyperparameters $a_{new}$ and $b_{new}$. The log-likelihood was written in Problem 3a) and the log-prior in Problem 3b). In this problem you must add the un-normalized log-likelihood to the un-normalized log-prior, then perform some algebra to derive $a_{new}$ and $b_{new}$.  
+
+**Derive the expressions for the updated or posterior Beta hyperparameters. You must show all steps in the derivation. You are allowed to use multiple equation blocks if that's easier for you to type with.**  
+
+#### SOLUTION
+
+Write out your derivation below. An equation block is started for you, but you can add as many as you feel are necessary.  
+
+$$ 
+\log \left(\mu^{m} \left(1 - \mu\right)^{N - m}\right) + \log \left( \mu ^ {a - 1} \left( 1 - \mu \right) ^ {b - 1} \right) 
+\\ = \log \left(\mu ^ {m} \left(1 - \mu \right) ^ {N - m} * \mu ^ {a - 1} \left(1 - \mu \right) ^ {b - 1} \right)
+\\ = \log \left(\mu ^ {m + a -1} \left(1 - \mu \right) ^ {N - m + b - 1} \right)
+\\ \Rightarrow \ a_{new} =  a+m \ \ b_{new} = b+(N-m)
+$$ 
+
+### 3d)
+
+Since the posterior distribution on $\mu$ is a Beta, a formula exists for the posterior mode (Max a-posterior estimate). However, you will practice deriving the posterior mode through differentiation of the un-normalized log-posterior. You can always double check your answer with the known formula for the mode of a Beta!  
+
+**Derive the derivative of the un-normalized log-posterior with respect to the unknown event probability $\mu$. Write out the derivative in terms of the updated hyperparmaeters $a_{new}$ and $b_{new}$.**  
+
+#### SOLUTION
+
+You may add as many equation blocks as you feel are necessary. One is started for you below.  
+
+$$ 
+\frac{\partial}{\partial \mu} \log \left(p \left(\mu | m, N \right) \right) = \frac{\partial}{\partial \mu} \log \left(\mu ^ {a_{new} - 1} \left(1 - \mu \right) ^ {b_{new} - 1}\right)
+\\ \frac{\partial}{\partial \mu} \log \left(p \left(\mu | m, N \right) \right) = \frac{\partial}{\partial \mu} \log \left(\mu ^ {a_{new} - 1} \right) + \frac{\partial}{\partial \mu} \log \left(1 - \mu \right) ^ {b_{new} - 1}
+\\  \frac{\partial}{\partial \mu} \log \left(p \left(\mu | m, N \right) \right) = \left(a_{new} - 1 \right)  \frac{\partial}{\partial \mu} \log \left(\mu \right) + \left(b_{new} - 1 \right) \frac{\partial}{\partial \mu} \log \left(1 - \mu \right)
+\\ \frac{\partial}{\partial \mu} \log \left(p \left(\mu | m, N \right) \right) = \frac{\left(a_{new} - 1 \right)}{\mu} + \frac{\left( b_{new} - 1 \right)}{1 - \mu}
+$$
+
+### 3e)
+
+**Set the derivative from your solution to Problem 3d) equal to zero and solve for the posterior mode of the unknown event probability. Denote the posterior mode as $\mu_{MAP}$.**  
+
+#### SOLUTION
+
+You may add as many equation blocks as you feel are necessary. One is started for you below.  
+
+$$ 
+\frac{\partial}{\partial \mu} \log \left(p \left(\mu | m, N \right) \right) = 0
+\\ \frac{\left(a_{new} - 1 \right)}{\mu_{MAP}} - \frac{\left( b_{new} - 1 \right)}{1 - \mu_{MAP}} = 0
+\\ \left(a_{new} - 1 \right) \left(1 - \mu_{MAP} \right) = \left( b_{new} - 1 \right) \mu_{MAP} 
+\\ \mu_{MAP} = \frac{a_{new} - 1}{a_{new} + b_{new} -2}
+$$
+
+
+## Problem 4
+
+Now that you have worked through the equations, it's time to study the behavior of the posterior under various conditions and assumptions. Specifically, you will examine how the posterior changes when the sample size is small, medium, and large using two different prior specifications on the unknown event probability.  
+
+The data are provided as the number of observed events, $m$, out of a specified number of trials, $N$. The small data set consists of $m=0$ events out of $N=7$ trials. The "medium" data set consists of $m=9$ events out of $N=100$ trials. The "big" data set contains $m=103$ events out of $N=1000$ trials. The data are assigned to the variables in the code chunk below.  
+
+```{r, assign_prob_04_data, eval=TRUE}
+m_small <- 0
+N_small <- 7
+
+m_medium <- 9
+N_medium <- 100
+
+m_big <- 103
+N_big <- 1000
+```
+
+Two types of priors are considered for you to study. Both are Beta distributions, but one is considered to be "vague" less informative than the other more "informative" prior. The Beta priors are defined by their shape parameters, $a$ and $b$. The shape parameters are provided for you in the code chunk below. The variable names state which prior type the shape parameters belong to.  
+
+```{r, assign_prob_04_priors, eval=TRUE}
+a_vague <- 1
+b_vague <- 1
+
+a_inform <- 4.28
+b_inform <- 48.63
+```
+
+This question is purposely open ended to also examine your programming style.  
+
+### 4a)
+
+**Plot the two prior distributions on the unknown event probability $\mu$. The Beta pdf can be evaluated with the `dbeta()` function. You must plot the prior with `ggplot2`. The code chunk below is started for you.**  
+
+#### SOLUTION
+
+Plot the "vague" prior on $\mu$.  
+
+```{r, solutioN_04a_a, eval=TRUE}
+tibble::tibble(
+  mu = seq(0, 1, length.out = 101)
+) %>% 
+  mutate(vague_prior = dbeta(mu, a_vague, b_vague)) %>% 
+  ggplot(mapping = aes(x = mu, y = vague_prior)) +
+  geom_line()
+```
+
+Plot the informative prior on $\mu$.  
+
+```{r, solution_04a_b, eval=TRUE}
+tibble::tibble(
+  mu = seq(0, 1, length.out = 101)
+) %>% 
+  mutate(inform_prior = dbeta(mu, a_inform, b_inform)) %>% 
+  ggplot(mapping = aes(x = mu, y = inform_prior)) +
+  geom_line()
+```
+
+### 4b)
+
+There are 6 combinations in total between the 3 sample sizes and 2 prior types.  
+
+**Calculate the updated or posterior hyperparameters, $a_{new}$ and $b_{new}$, for each of the 6 combinations of prior type and sample size. Display the posterior hyperparameters as a table.**  
+
+#### SOLUTION
+
+You may use as many code chunks as you would like. A code chunk is started for you below.  
+
+```{r, solution_04b_a, eval=TRUE}
+### your code here
+small_vague_a <- m_small + a_vague
+small_vague_b <- b_vague - m_small + N_small
+small_inform_a <- m_small + a_inform
+small_inform_b <- b_inform - m_small + N_small
+medium_vague_a <- m_medium + a_vague
+medium_vague_b <- b_vague - m_medium + N_medium
+medium_inform_a <- m_medium + a_inform
+medium_inform_b <- b_inform - m_medium + N_medium
+big_vague_a <- m_big + a_vague
+big_vague_b <- b_vague - m_big + N_big
+big_inform_a <- m_big + a_inform
+big_inform_b <- b_inform - m_big + N_big
+
+posterior_table <- tibble::tibble(
+  a = c(small_vague_a, small_inform_a, medium_vague_a, medium_inform_a, big_vague_a, big_inform_a),
+  b = c(small_vague_b, small_inform_b, medium_vague_b, medium_inform_b, big_vague_b, big_inform_b)
+)
+posterior_table
+```
+
+### 4c)
+
+**Calculate the posterior mean, mode, 5th percential (0.05 quantile), and 95th percentile (0.95 quantile) for each of the 6 combinations of prior type and sample size. You should use your results from Problem 2b) for the updated or posterior beta hyperparameters.**  
+
+**Display your results in a table.**  
+
+*NOTE*: The `qbeta()` function allows calculating the quantiles associated with a particular probability of interest.  
+
+#### SOLUTION
+
+You may use as many code chunks as you would like. A code chunk is started for you below.  
+
+```{r, solution_04c_a}
+### your code here
+posterior_m_table <- tibble::tibble(
+  mean = (posterior_table$a) / (posterior_table$a+posterior_table$b),
+  mode = (posterior_table$a - 1) / (posterior_table$a + posterior_table$b -2),
+  quantile_5 = qbeta(0.05, shape1 = posterior_table$a, shape2 = posterior_table$b),
+  quantile_95 = qbeta(0.95, shape1 = posterior_table$a, shape2 = posterior_table$b)
+)
+posterior_m_table
+
+bind_cols(posterior_table, posterior_m_table)
+```
+
+### 4d)
+
+The summary statistics calculated in Problem 4c) (the mean, mode, 5th percentile, and 95th percentile) provide summaries about the central tendency and the dispersion (uncertainty) in the unknown event probability.  
+
+**Discuss the behavior of the summary statistics between the two prior assumptions (vague vs informative) when the data set is small compared to "big".** 
+
+#### SOLUTION
+
+Your discussion here.  
+
+Both results of vague and informative aggregate together to a specific value as the data set extension, which also means the uncertainty gets smaller. 

@@ -1,0 +1,5 @@
+"0","### add your code here"
+"0","mod_1_roc$pred %>%"
+"0","  group_by(Resample) %>%"
+"0","  roc_curve(obs, event) %>%"
+"0","  autoplot()"

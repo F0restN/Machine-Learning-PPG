@@ -1,0 +1,1 @@
+"0","plot(lasso_06, xvar = 'lambda', label = TRUE)"

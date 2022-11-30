@@ -1,0 +1,84 @@
+---
+title: "Drake_Zhou_Part_04_A"
+author: "Drake Zhou"
+date: "4/26/2022"
+output: 
+  html_document: 
+    toc: true
+    toc_float:
+      collapsed: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview & Preparation
+
+With the model training completed, you can now answer meaningful questions associated with the data!
+
+## Package Import
+
+```{r}
+library(caret)
+library(yardstick)
+library(tidyverse)
+```
+
+• You must identify the best regression model and the best classification model.
+• Identify the most important variables associated with your best performing models.
+
+# Inspection
+
+## Model Import
+
+```{r}
+best_reg_mod <- readr::read_rds('models/fit_reg_enet_pair.rds')
+best_cls_mod <- readr::read_rds('models/fit_acc_cat_nnet_tune.rds')
+```
+
+## Variables Inspection
+
+### Regression Model
+
+```{r}
+plot(varImp(best_reg_mod), top = 20)
+```
+
+### Classification Model
+
+```{r}
+plot(varImp(best_cls_mod), top = 20)
+```
+
+• Are the most important variables similar for the regression and classification tasks?
+
+```{text}
+No, they are not similar
+```
+
+• Does one of the sentiment derived feature types “dominate” the most important variables?
+
+```{text}
+In regression model, even though we are using all pair-wise models, most of important features are interaction between two factors, but we see that "xw" and sentiment appears a lot of time. 
+In classification model, we see a lot of xn and xa
+```
+
+• Does one of the sentiment derived feature types appear to be not helpful at all?
+
+```{text}
+Don't really see a helpless features set. But xb sentiment derived features seem appear very less. If there has to be one "no help" sentiment feature, it could be xs.
+```
+
+• Based on your modeling results, do you feel these sentiment derived features are helpful at predicting the outputs? 
+
+```{text}
+Yes, it is a very important input.
+```
+
+• Essentially, do you feel the model results are “good” and was I right about the relationship between report sentiment and the outputs?
+
+```{text}
+Yes, generally speaking, sentiment and output have strong relationship
+```
+

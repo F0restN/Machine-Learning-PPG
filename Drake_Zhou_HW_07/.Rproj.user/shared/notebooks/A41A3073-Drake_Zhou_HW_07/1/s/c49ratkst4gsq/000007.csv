@@ -1,0 +1,4 @@
+"0","### Ggplot"
+"0","post_samples_01 %>%"
+"0","  ggplot(mapping = aes(x = beta_01))+"
+"0","  geom_histogram(bins = 55)"

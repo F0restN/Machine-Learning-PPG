@@ -1,0 +1,5 @@
+"0","viz_grid <- expand.grid(x1 = seq(-3.2, 3.2, length.out = 101),"
+"0","                        x2 = seq(-3, 3, length.out = 9),"
+"0","                        KEEP.OUT.ATTRS = FALSE,"
+"0","                        stringsAsFactors = FALSE) %>% "
+"0","  as.data.frame() %>% tibble::as_tibble()"

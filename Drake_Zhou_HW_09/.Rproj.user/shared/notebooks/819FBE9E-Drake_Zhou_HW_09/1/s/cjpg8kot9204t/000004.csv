@@ -1,0 +1,5 @@
+"0","laplace_linear <- my_laplace(rep(0, ncol(Xmat_linear)), logistic_logpost, info_linear)"
+"0",""
+"0","laplace_cubic <- my_laplace(rep(0, ncol(Xmat_cubic)), logistic_logpost, info_cubic)"
+"0",""
+"0","laplace_spline7 <- my_laplace(rep(0, ncol(Xmat_spline7)), logistic_logpost, info_spline7)"

@@ -1,0 +1,7 @@
+"0","### add as many code chunks as you feel are necessary"
+"0","mod01 <- (model.matrix(y ~ x1 + x2 + x3 + x4 + x5 + x6, data = df))"
+"0","SSmat <- t(mod01) %*% mod01"
+"0","SSmat %>% "
+"0","  solve() %>% "
+"0","  cov2cor() %>% "
+"0","  corrplot(type = 'upper') "

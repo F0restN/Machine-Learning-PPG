@@ -1,0 +1,6 @@
+"0","### add more code chunks if you like"
+"0",""
+"0","mod05 <- lm(y ~ splines::ns(x1, 12) * (x2 + I(x2^2)), data = df)"
+"0",""
+"0","coefplot(mod05)"
+"0",""

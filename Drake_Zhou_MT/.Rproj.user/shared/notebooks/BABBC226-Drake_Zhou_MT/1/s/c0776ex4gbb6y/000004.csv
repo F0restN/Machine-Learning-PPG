@@ -1,0 +1,5 @@
+"0","summary_post_df_focus_pooled %>%"
+"0","  ggplot(mapping = aes(x = as.factor(player_id)))+"
+"0","  geom_linerange(aes(ymin = post_q05, ymax = post_q95))+"
+"0","  geom_point(mapping = aes(y = post_avg, color = ""AVG""))+"
+"0","  geom_point(mapping = aes(y = num_events / num_trials, color = ""MLE""))"

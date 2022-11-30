@@ -1,0 +1,5 @@
+"0","df_24 %>% "
+"0","  ggplot(mapping = aes(x = df_24$num_events / df_24$num_trials)) +"
+"0","  geom_histogram(mapping = aes(y = stat(density)),binwidth = 0.05) +"
+"0","  geom_line(mapping = aes(x = x, y = beta_pdf), data = prior_for_viz, color = ""red"", size = 1.15 )"
+"0",""

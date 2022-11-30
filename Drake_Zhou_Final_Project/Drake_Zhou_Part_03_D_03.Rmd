@@ -1,0 +1,152 @@
+---
+title: "Drake_Zhou_Part_03_D_03"
+author: "Drake Zhou"
+date: "4/26/2022"
+output: 
+  html_document: 
+    toc: true
+    toc_float:
+      collapsed: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview & Initialization
+
+You must make predictions with your 2 selected generalized linear models in order to visualize the trends of the event probability with respect to the inputs.
+
+## Package Import
+
+```{r, init, message=FALSE}
+library(tidyverse)
+library(caret)
+library(coefplot)
+```
+
+## Data Import
+
+Before I fit into linear models, I want transform the response to log-response and standardized the inputs and outputs especially those continuous inputs.
+
+```{r, eval=TRUE}
+df_all <- readr::read_csv("final_project_train.csv", col_names = TRUE)
+
+# Input standarize
+standard_df_all <- df_all %>% 
+  select(starts_with("x")) %>%
+  mutate(obs = factor(df_all$outcome, levels = c("event", "non_event")),
+         region = df_all$region, 
+         customer = df_all$customer)
+
+# Resampling
+train_id <- sample(1:nrow(standard_df_all), size = floor(0.8 * nrow(standard_df_all)))
+train_ready <- standard_df_all %>% slice(train_id)
+test_ready <- standard_df_all %>% slice(-train_id)
+
+```
+
+# Import Model
+
+## ROC
+
+```{r}
+fit_roc_cat_lm_add <- readr::read_rds('models/fit_roc_cat_lm_add.rds')
+fit_roc_cat_lm_pair <- readr::read_rds('models/fit_roc_cat_lm_pair.rds')
+fit_roc_cat_lm_mod1 <- readr::read_rds('models/fit_roc_cat_lm_mod1.rds')
+fit_roc_cat_lm_mod2 <- readr::read_rds('models/fit_roc_cat_lm_mod2.rds')
+fit_roc_cat_enet_pair <- readr::read_rds('models/fit_roc_cat_enet_pair.rds')
+fit_roc_cat_enet_mod7 <- readr::read_rds('models/fit_roc_cat_enet_mod7.rds')
+fit_roc_cat_enet_mod9 <- readr::read_rds('models/fit_roc_cat_enet_mod9.rds')
+fit_roc_cat_gbm_warmup <- readr::read_rds('models/fit_roc_cat_gbm_warmup.rds')
+fit_roc_cat_gbm_tune <- readr::read_rds('models/fit_roc_cat_gbm_tune.rds')
+fit_roc_cat_nnet_warmup <- readr::read_rds('models/fit_roc_cat_nnet_warmup.rds')
+fit_roc_cat_nnet_tune <- readr::read_rds('models/fit_roc_cat_nnet_tune.rds')
+fit_roc_cat_rf_tune <- readr::read_rds('models/fit_roc_cat_rf_tune.rds')
+fit_roc_cat_svm_tune <- readr::read_rds('models/fit_roc_cat_svm_tune.rds')
+fit_roc_cat_cls_pls <- readr::read_rds('models/fit_roc_cat_cls_pls.rds')
+```
+
+## ROC Posterior Result
+
+```{r}
+roc_result <- resamples(list(LM_1 = fit_roc_cat_lm_add,
+                                 #LM_2 = fit_roc_cat_lm_pair,
+                                 LM_MOD1 = fit_roc_cat_lm_mod1,
+                                 LM_MOD2 = fit_roc_cat_lm_mod2,
+                                 ENET_PAIR = fit_roc_cat_enet_pair,
+                                 ENET_MOD7 = fit_roc_cat_enet_mod7,
+                                 ENET_MOD9 = fit_roc_cat_enet_mod9,
+                                 GBM_W = fit_roc_cat_gbm_warmup,
+                                 GBN_T = fit_roc_cat_gbm_tune,
+                                 NNET_W = fit_roc_cat_nnet_warmup,
+                                 NNET_T = fit_roc_cat_nnet_tune,
+                                 RF = fit_roc_cat_rf_tune,
+                                 SVM = fit_roc_cat_svm_tune,
+                                 PLS = fit_roc_cat_cls_pls
+                                 )
+                            )
+```
+
+```{r}
+dotplot(roc_result, scales = "free")
+```
+
+## Accuracy
+
+```{r}
+fit_acc_cat_lm_add <- readr::read_rds('models/fit_acc_cat_lm_add.rds')
+fit_acc_cat_lm_pair <- readr::read_rds('models/fit_acc_cat_lm_pair.rds')
+fit_acc_cat_lm_mod1 <- readr::read_rds('models/fit_acc_cat_lm_mod1.rds')
+fit_acc_cat_lm_mod2 <- readr::read_rds('models/fit_acc_cat_lm_mod2.rds')
+fit_acc_cat_enet_pair <- readr::read_rds('models/fit_acc_cat_enet_pair.rds')
+fit_acc_cat_enet_mod7 <- readr::read_rds('models/fit_acc_cat_enet_mod7.rds')
+fit_acc_cat_enet_mod9 <- readr::read_rds('models/fit_acc_cat_enet_mod9.rds')
+fit_acc_cat_gbm_warmup <- readr::read_rds('models/fit_acc_cat_gbm_warmup.rds')
+fit_acc_cat_gbm_tune <- readr::read_rds('models/fit_acc_cat_gbm_tune.rds')
+fit_acc_cat_nnet_warmup <- readr::read_rds('models/fit_acc_cat_nnet_warmup.rds')
+fit_acc_cat_nnet_tune <- readr::read_rds('models/fit_acc_cat_nnet_tune.rds')
+fit_acc_cat_rf_tune <- readr::read_rds('models/fit_acc_cat_rf_tune.rds')
+fit_acc_cat_svm_tune <- readr::read_rds('models/fit_acc_cat_svm_tune.rds')
+fit_acc_cat_cls_pls <- readr::read_rds('models/fit_acc_cat_cls_pls.rds')
+```
+
+## Accuracy Posterior Result
+
+```{r}
+acc_result <- resamples(list(LM_1 = fit_acc_cat_lm_add,
+                                 #LM_2 = fit_acc_cat_lm_pair,
+                                 LM_MOD1 = fit_acc_cat_lm_mod1,
+                                 LM_MOD2 = fit_acc_cat_lm_mod2,
+                                 ENET_PAIR = fit_acc_cat_enet_pair,
+                                 ENET_MOD7 = fit_acc_cat_enet_mod7,
+                                 ENET_MOD9 = fit_acc_cat_enet_mod9,
+                                 GBM_W = fit_acc_cat_gbm_warmup,
+                                 GBN_T = fit_acc_cat_gbm_tune,
+                                 NNET_W = fit_acc_cat_nnet_warmup,
+                                 NNET_T = fit_acc_cat_nnet_tune,
+                                 RF = fit_acc_cat_rf_tune,
+                                 SVM = fit_acc_cat_svm_tune,
+                                 PLS = fit_acc_cat_cls_pls
+                                 )
+                            )
+```
+
+```{r}
+dotplot(acc_result, metric = "Accuracy")
+```
+
+Which model is the best if you are interested in maximizing Accuracy 
+compared to maximizing the Area Under the ROC Curve (ROC AUC)?
+
+```{text}
+Accuracy and AUC curve provides different answer for which model is the best. According to Accuracy performance metric, tuned neural network is the best model while AUC prefers all pair-wise elastic net.
+
+Best 2:
+fit_roc_cat_enet_pair (pair is add)
+fit_acc_cat_nnet_tune
+```
+
+
+
+

@@ -1,0 +1,5 @@
+"0","###"
+"0","train_small %>% "
+"0","  ggplot(mapping = aes(x = x, y = y)) +"
+"0","  geom_point(color = ""blue"") +"
+"0","  geom_vline(xintercept = -0.6, color = ""yellow"")"

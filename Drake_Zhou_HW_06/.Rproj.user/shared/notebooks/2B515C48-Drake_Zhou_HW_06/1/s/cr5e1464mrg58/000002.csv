@@ -1,0 +1,4 @@
+"0","cv_param_grid <- expand.grid(mu = seq(from = mu_grid_lwr, to = mu_grid_upr, length.out = 251),"
+"0","                             varphi = seq(from = varphi_grid_lwr, to = varphi_grid_upr, length.out = 251), "
+"0","                             KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE) %>%  "
+"0","  as.data.frame() %>% tibble::as_tibble()"

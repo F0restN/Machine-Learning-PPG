@@ -1,0 +1,8 @@
+"0","### add more code chunks if you like"
+"0","df %>% "
+"0","  pivot_longer(!y, names_to=""x"", values_to=""value"") %>% "
+"0","  ggplot() +"
+"0","  geom_point(mapping = aes(x = value, y = y), color = 'blue') +"
+"0","  geom_smooth(mapping = aes(x = value, y = y), color = ""red"")"
+"2","`geom_smooth()` using method = 'loess' and formula 'y ~ x'
+"

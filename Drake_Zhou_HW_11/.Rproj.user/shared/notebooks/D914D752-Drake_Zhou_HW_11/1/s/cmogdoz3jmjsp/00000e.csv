@@ -1,0 +1,5 @@
+"0","lf_sonar %>%"
+"0","  ggplot(mapping = aes(x = value))+"
+"0","  geom_freqpoly(mapping = aes(group = input_id), bins = 21)+"
+"0","  facet_wrap(vars(cut(input_id, breaks=seq(1, 60, length.out = 12), include.lowest = TRUE)), "
+"0","             scales = 'free_y')"

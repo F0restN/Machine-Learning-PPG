@@ -1,0 +1,8 @@
+"0","###"
+"0","data <- data.frame(train_set = train_02, test_set = test_02)"
+"0",""
+"0","data %>%"
+"0","  ggplot()+"
+"0","  geom_point(mapping = aes(x = train_set.x, y = train_set.y, color = 'Training set'))+"
+"0","  geom_point(mapping = aes(x = test_set.x, y = test_set.y, color = 'Test set'))"
+"0",""

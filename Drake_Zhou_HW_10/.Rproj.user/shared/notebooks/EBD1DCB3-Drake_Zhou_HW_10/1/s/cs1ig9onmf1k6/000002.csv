@@ -1,0 +1,3 @@
+"0","results_5hidden <- prob_01_df %>% "
+"0","  mutate(nnet_fa = calc_nnet_response(nnet_hidden_5a$H, params_02_5a$alpha_vector),"
+"0","         nnet_fb = calc_nnet_response(nnet_hidden_5b$H, params_02_5b$alpha_vector))"

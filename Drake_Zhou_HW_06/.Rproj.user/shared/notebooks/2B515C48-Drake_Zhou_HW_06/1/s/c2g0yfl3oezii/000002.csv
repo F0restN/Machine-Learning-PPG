@@ -1,0 +1,2 @@
+"0","laplace_result_01 <- my_laplace(init_guess_01, my_cv_logpost, hw06_info)"
+"0","laplace_result_02 <- my_laplace(init_guess_02, my_cv_logpost, hw06_info)"

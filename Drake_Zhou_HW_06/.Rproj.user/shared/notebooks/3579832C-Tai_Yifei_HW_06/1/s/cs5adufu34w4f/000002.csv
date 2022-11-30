@@ -1,0 +1,7 @@
+"0","expand.grid(x1 = c(1, 2),"
+"0","            x2 = 1:3,"
+"0","            # extra arguments I like to set"
+"0","            KEEP.OUT.ATTRS = FALSE,"
+"0","            stringsAsFactors = FALSE) %>% "
+"0","  # convert to a tibble!"
+"0","  as.data.frame() %>% tibble::as_tibble()"

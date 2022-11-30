@@ -1,0 +1,335 @@
+---
+title: "Drake_Zhou_Part_03_A"
+author: "Drake Zhou"
+date: "4/26/2022"
+output: 
+  html_document: 
+    toc: true
+    toc_float: 
+      collapsed: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Oerview & Preparation
+
+Before using advanced methods, you need to develop a baseline understanding of the event probability as a function of the inputs using generalized linear modeling techniques.
+
+## Package import
+
+```{r, message=FALSE, eval=TRUE}
+library(tidyverse)
+library(caret)
+library(coefplot)
+library(tidymodels)
+library(splines)
+```
+
+## Data import
+
+```{r, eval=TRUE}
+df_all <- readr::read_csv("final_project_train.csv", col_names = TRUE)
+
+# Standardize data
+standard_df_all <- df_all %>% 
+  select(starts_with("x")) %>%
+  scale(center = TRUE, scale = TRUE) %>% 
+  as.data.frame() %>% 
+  tibble::as_tibble() %>% 
+  mutate(obs = if_else(df_all$outcome == 'event',1,0),
+         region = factor(df_all$region, levels = c("XX", "YY", "ZZ")), 
+         customer = factor(df_all$customer, levels = c("A", "B", "D", "E", "G", "Other", "Q", "M", "K")))
+
+# Resampling validation
+train_id <- sample(1:nrow(standard_df_all), size = floor(0.8 * nrow(standard_df_all)))
+train_ready <- standard_df_all %>% slice(train_id)
+test_ready <- standard_df_all %>% slice(-train_id)
+
+```
+
+# Model Fitting
+
+Use glm() to fit the following linear models:
+• Categorical variables only –linear additive
+• Continuous variables only –linear additive
+• All categorical and continuous variables –linear additive
+• Interact region with continuous inputs, do not include customer
+• Interact customer with continuous inputs, do not include region
+• All pairwise interactions of continuous inputs, do not include categorical inputs
+• 3 models with basis functions of your choice• Can include interactions of the basis functions with other basis functions and with the categorical inputs!
+
+```{r}
+
+# Model for categorical variables
+cat_mod1 = glm(obs ~ region + customer, data = train_ready, family = binomial(link = "logit"))
+
+# Model for continuous variables only additively & 
+cat_mod2 = glm(obs ~ ., data = train_ready[c(-36, -35)], family = "binomial")
+
+# All categorical and continuous variables
+cat_mod3 <- glm(obs ~ ., data = train_ready,family = "binomial")
+
+# Interact region with continuous inputs, do not include customer
+cat_mod4 <- glm(obs ~ region * ., data = train_ready[-36],family = "binomial")
+
+# Interact customer with continuous inputs, do not include region
+cat_mod5 <- glm(obs ~ customer * ., data = train_ready[-35],family = "binomial")
+
+# All pairwise interactions of continuous inputs
+cat_mod6 = glm(obs ~ (.)^2, data = train_ready[c(-36, -35)],family = "binomial")
+
+# Model with polynomial
+cat_mod7 <- glm(obs ~ poly(xb_01, 2)+poly(xb_02, 2)+ poly(xb_03,2)+poly(xn_01,2)+poly(xn_02,2)+poly(xn_03,2)+poly(xa_01,2)+poly(xa_02,2)+poly(xa_03,2)+poly(xb_04,2)+poly(xb_05,2)+poly(xb_06,2)+poly(xb_07,2)+poly(xb_08,2)+poly(xn_04,2)+poly(xn_05,2)+poly(xn_06,2)+poly(xn_07,2)+poly(xn_08,2)+poly(xa_04,2)+poly(xa_05,2)+poly(xa_06,2)+poly(xa_07,2)+poly(xa_08,2)+poly(xw_01,2)+poly(xw_02,2)+poly(xw_03,2)+poly(xs_01,2)+poly(xs_02,2)+poly(xs_03,2)+poly(xs_04,2)+poly(xs_05,2)+poly(xs_06,2)*region*customer, data = train_ready,family = "binomial")
+
+# Model with natural spline on continuous variables
+cat_mod8 <- glm(obs ~ ns(xb_01, 2)+ns(xb_02, 2)+ ns(xb_03,2)+ns(xn_01,2)+ns(xn_02,2)+ns(xn_03,2)+ns(xa_01,2)+ns(xa_02,2)+ns(xa_03,2)+ns(xb_04,2)+ns(xb_05,2)+ns(xb_06,2)+ns(xb_07,2)+ns(xb_08,2)+ns(xn_04,2)+ns(xn_05,2)+ns(xn_06,2)+ns(xn_07,2)+ns(xn_08,2)+ns(xa_04,2)+ns(xa_05,2)+ns(xa_06,2)+ns(xa_07,2)+ns(xa_08,2)+ns(xw_01,2)+ns(xw_02,2)+ns(xw_03,2)+ns(xs_01,2)+ns(xs_02,2)+ns(xs_03,2)+ns(xs_04,2)+ns(xs_05,2)+ns(xs_06,2), data = train_ready,family = "binomial")
+
+# Model with natural spline with higher degree of freedom
+cat_mod9 <- glm(obs ~ ns(xb_01, 3)+ns(xb_03, 3)+ ns(xb_03,3)+ns(xn_01,3)+ns(xn_03,3)+ns(xn_03,3)+ns(xa_01,3)+ns(xa_03,3)+ns(xa_03,3)+ns(xb_04,3)+ns(xb_05,3)+ns(xb_06,3)+ns(xb_07,3)+ns(xb_08,3)+ns(xn_04,3)+ns(xn_05,3)+ns(xn_06,3)+ns(xn_07,3)+ns(xn_08,3)+ns(xa_04,3)+ns(xa_05,3)+ns(xa_06,3)+ns(xa_07,3)+ns(xa_08,3)+ns(xw_01,3)+ns(xw_03,3)+ns(xw_03,3)+ns(xs_01,3)+ns(xs_03,3)+ns(xs_03,3)+ns(xs_04,3)+ns(xs_05,3)+ns(xs_06,3)+region+customer, data = train_ready,family = "binomial")
+
+```
+Yes, R prints out some warning message
+
+# Model Evaluation
+
+## Accuracy and Kappa -- Train-set split
+
+```{r, test_01, warning=FALSE, message=FALSE}
+
+predict_and_assess <- function(mod, test_data){
+  mod1_predict <- predict(mod, test_ready, type = "response")
+  mod1_predict_class <- ifelse(mod1_predict > 0.50, 1, 0)
+  matrix_mod1 <- confusionMatrix(as.factor(mod1_predict_class), as.factor(test_data$obs))
+}
+
+perf_mod1 <- predict_and_assess(cat_mod1, test_ready)
+perf_mod2 <- predict_and_assess(cat_mod2, test_ready)
+perf_mod3 <- predict_and_assess(cat_mod3, test_ready)
+perf_mod4 <- predict_and_assess(cat_mod4, test_ready)
+perf_mod5 <- predict_and_assess(cat_mod5, test_ready)
+perf_mod6 <- predict_and_assess(cat_mod6, test_ready)
+perf_mod7 <- predict_and_assess(cat_mod7, test_ready)
+perf_mod8 <- predict_and_assess(cat_mod8, test_ready)
+perf_mod9 <- predict_and_assess(cat_mod9, test_ready)
+
+perf_all <- bind_rows(perf_mod1$overall, 
+                      perf_mod2$overall, 
+                      perf_mod3$overall, 
+                      perf_mod4$overall, 
+                      perf_mod5$overall, 
+                      perf_mod6$overall,
+                      perf_mod7$overall,
+                      perf_mod8$overall,
+                      perf_mod9$overall) %>%
+  tibble::rowid_to_column()
+
+perf_all
+```
+
+```{r}
+perf_all %>%
+  select(rowid, Accuracy, Kappa) %>%
+  pivot_longer(-c("rowid")) %>%
+  mutate(model_id = stringr::str_extract(rowid, "\\d+")) %>%
+  ggplot(mapping = aes(y = model_id, x = value, group = 1))+
+  geom_path()+
+  geom_point(size = 2.0)+
+  facet_grid(~name, scales = "free_x")+
+  labs(x = '')+
+  theme_bw()
+```
+
+## Sensitivity, Precision and Specificity -- Train-set split
+
+```{r}
+perf_all_spec <- bind_rows(perf_mod1$byClass, 
+                          perf_mod2$byClass, 
+                          perf_mod3$byClass, 
+                          perf_mod4$byClass, 
+                          perf_mod5$byClass, 
+                          perf_mod6$byClass,
+                          perf_mod7$byClass,
+                          perf_mod8$byClass,
+                          perf_mod9$byClass) %>%
+  tibble::rowid_to_column()
+
+perf_all_spec
+```
+```{r}
+perf_all_spec %>%
+  select(rowid, Sensitivity, Precision, Specificity) %>%
+  pivot_longer(-c("rowid")) %>%
+  mutate(model_id = stringr::str_extract(rowid, "\\d+")) %>%
+  ggplot(mapping = aes(y = model_id, x = value, group = 1))+
+  geom_path()+
+  geom_point(size = 2.0)+
+  facet_grid(~name, scales = "free_x")+
+  labs(x = '')+
+  theme_bw()
+```
+
+```{r}
+p1 <- broom::glance(cat_mod1)
+p2 <- broom::glance(cat_mod2)
+p3 <- broom::glance(cat_mod3)
+p4 <- broom::glance(cat_mod4)
+p5 <- broom::glance(cat_mod5)
+p6 <- broom::glance(cat_mod6)
+p7 <- broom::glance(cat_mod7)
+p8 <- broom::glance(cat_mod8)
+p9 <- broom::glance(cat_mod9)
+
+p_all <- rbind(p1,p2,p3,p4,p5,p6,p7,p8,p9) %>%
+  tibble::rowid_to_column()
+
+p_all
+```
+
+## Deviance
+
+The closer r-squared value is close to one, the better the model is.
+
+```{r}
+p_all %>%
+  select(deviance, rowid) %>% 
+  pivot_longer(-c("rowid")) %>%
+  mutate(model_id = stringr::str_extract(rowid, "\\d+")) %>% 
+  ggplot(mapping = aes(x = model_id, y = value, group = 1))+
+  geom_path()+
+  geom_point(size = 2.0)+
+  facet_grid(~name, scales = "free")+
+  labs(x = '')+
+  theme_bw()
+```
+
+## AIC & BIC
+
+AIC and BIC are information criterion metrics, hence we want to minimize them which represent a better model.
+
+```{r}
+p_all %>%
+  select(AIC, BIC, rowid) %>% 
+  pivot_longer(-c("rowid")) %>%
+  mutate(model_id = stringr::str_extract(rowid, "\\d+")) %>% 
+  ggplot(mapping = aes(x = model_id, y = value, group = 1))+
+  geom_path()+
+  geom_point(size = 2.0)+
+  facet_grid(~name, scales = "free")+
+  labs(x = '')+
+  theme_bw()
+```
+
+# Conclusion
+
+Since p7 and p5 have extreme value that will impede us from have a intuitive selection, I removed them away.
+
+```{r}
+p_all_selec <- rbind(p1,p2,p3,p4,p6,p8,p9) %>%
+  mutate(model_id = c(1,2,3,4,6,8,9))
+
+p_all_selec %>%
+  select(model_id, deviance, AIC, BIC) %>%
+  pivot_longer(-c("model_id")) %>%
+  mutate(model_id = stringr::str_extract(model_id, "\\d+")) %>% 
+  ggplot(mapping = aes(y = model_id, x = value, group = 1))+
+  geom_path()+
+  geom_point(size = 2.0)+
+  facet_wrap(~name, scales = "free_y")+
+  labs(x = '')+
+  theme_bw()
+```
+
+Which of the 9 models is the best? What performance metric did you use to make your selection?
+
+```{text}
+Top 3 are mod3, mod9 and mod4
+```
+
+# Coefficient inspection
+
+Visualize the coefficient summaries for your top 3 models. How do the coefficient summaries compare between the top 3?
+
+## Model #3
+
+In model #3, since too much features, we can't really conclu something. But it looks like no feature is statistically significant.
+
+```{r}
+cat_mod3 %>%
+  coefplot(scales = "free", sort = "natural", pointSize = 1, innerCI = 0.5)+
+  geom_vline(xintercept = 0, color = "red")+
+  theme_bw()+
+  theme(legend.position = 'none')
+```
+
+## Model #9
+
+In model #9, if we zoom in, there are several features that are significantly important, which means 0 is not contained in their confidence interval. There are several significantly important features.
+
+```{r}
+cat_mod9 %>%
+  coefplot(scales = "free", sort = "magnitude", pointSize = 1, innerCI = 0.5)+
+  geom_vline(xintercept = 0, color = "red")+
+  theme_bw()+
+  theme(legend.position = 'none')
+```
+
+## Model #4
+
+In model #4, xb_04, xb_01, xs_06 etc. are significantly important because 0 is not included in their confidence interval. There are a lot of significant important features in this model.
+
+```{r}
+cat_mod4 %>%
+  coefplot(scales = "free", sort = "magnitude", pointSize = 1, innerCI = 0.5)+
+  geom_vline(xintercept = 0, color = "red")+
+  theme_bw()+
+  theme(legend.position = 'none')
+```
+
+# Variable importance
+
+Which input is important?
+
+## Model #3
+
+Top 4 are xn_06, xa_05, xb_07, xw_01
+
+```{r}
+import_input_mod3 <- cat_mod3 %>% 
+  coefplot(sort = "magnitude", plot = FALSE) %>%
+  tibble::as_tibble() %>%
+  filter((HighOuter > 0 & LowOuter > 0) | (HighOuter < 0 & LowOuter < 0))
+
+head(import_input_mod3)
+```
+
+## Model #9
+
+```{r}
+import_input_mod9 <- cat_mod9 %>% 
+  coefplot(sort = "magnitude", plot = FALSE) %>%
+  tibble::as_tibble() %>%
+  filter((HighOuter > 0 & LowOuter > 0) | (HighOuter < 0 & LowOuter < 0))
+
+head(import_input_mod9)
+```
+
+## Model #4
+
+```{r}
+import_input_mod4 <- cat_mod4 %>% 
+  coefplot(sort = "magnitude", plot = FALSE) %>%
+  tibble::as_tibble() %>%
+  filter((HighOuter > 0 & LowOuter > 0) | (HighOuter < 0 & LowOuter < 0))
+
+head(import_input_mod4)
+```
+
+# Export models
+
+```{r}
+cat_mod9 %>% readr::write_rds('models/cat_mod9.rds')
+cat_mod3 %>% readr::write_rds('models/cat_mod3.rds')
+cat_mod4 %>% readr::write_rds('models/cat_mod4.rds')
+```

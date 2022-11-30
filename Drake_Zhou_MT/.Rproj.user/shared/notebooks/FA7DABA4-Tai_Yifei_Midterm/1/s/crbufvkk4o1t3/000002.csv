@@ -1,0 +1,6 @@
+"0","log_test <- c(2.5, 2.5)"
+"0","my_beta_loglik(log_test, info_for_ab)"
+"1","[1]"
+"1"," -254.3934"
+"1","
+"

@@ -1,0 +1,3 @@
+"0","post_df_focus_empbayes <- df_focus %>%"
+"0","  mutate(anew = num_events + ab_emp_bayes[1],"
+"0","         bnew = (num_trials - num_events) + ab_emp_bayes[2])"

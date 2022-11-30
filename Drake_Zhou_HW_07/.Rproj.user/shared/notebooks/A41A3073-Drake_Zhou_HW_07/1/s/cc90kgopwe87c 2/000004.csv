@@ -1,0 +1,5 @@
+"0","#absE01mat <- "
+"0",""
+"0","matrix(post_pred_samples_01$Umat, nrow = nrow(Umat), byrow = TRUE) - train_01$y"
+"2","Error in nrow(Umat) : object 'Umat' not found
+"

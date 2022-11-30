@@ -1,0 +1,7 @@
+"0","post_pred_summary_linear_class <- post_pred_summary_linear %>% mutate(pred_class = ifelse(mu_avg > 0.5, 1, 0)) "
+"0",""
+"0","post_pred_summary_cubic_class <- post_pred_summary_cubic %>% mutate(pred_class = ifelse(mu_avg > 0.5, 1, 0))"
+"0",""
+"0","post_pred_summary_spline7_class <- post_pred_summary_spline7 %>% mutate(pred_class = ifelse(mu_avg > 0.5, 1, 0))"
+"0",""
+"0","post_pred_summary_linear_class "

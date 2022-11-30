@@ -1,0 +1,6 @@
+"0","tibble::tibble("
+"0","  mu = seq(0, 1, length.out = 101)"
+"0",") %>% "
+"0","  mutate(vague_prior = dbeta(mu, a_vague, b_vague)) %>% "
+"0","  ggplot(mapping = aes(x = mu, y = vague_prior)) +"
+"0","  geom_line()"

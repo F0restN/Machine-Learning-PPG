@@ -1,0 +1,8 @@
+"0",""
+"0","all_model_metrics %>% "
+"0","  select(model_name, r.squared, AIC, BIC) %>% "
+"0","  gather(key = ""key"", value = ""value"", -model_name) %>% "
+"0","  ggplot(mapping = aes(x = model_name, y = value)) +"
+"0","  geom_line(mapping = aes(group = key)) +"
+"0","  geom_point(size = 2.5) +"
+"0","  facet_wrap(~key, scales = ""free_y"")"

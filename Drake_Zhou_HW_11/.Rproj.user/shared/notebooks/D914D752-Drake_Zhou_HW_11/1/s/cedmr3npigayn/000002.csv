@@ -1,0 +1,2 @@
+"0","###"
+"0","pred_prob_rf_on_rf_grid <- predict(fit_rf_sonar, viz_input_grid_rf, type = 'prob')"

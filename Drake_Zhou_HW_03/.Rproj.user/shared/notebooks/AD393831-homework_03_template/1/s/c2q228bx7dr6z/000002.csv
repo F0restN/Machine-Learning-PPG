@@ -1,0 +1,5 @@
+"0","### your code here"
+"0","test_df_1_b %>%"
+"0","  ggplot() +"
+"0","  geom_bar(mapping = aes(x = pred_bin, fill = y)) + "
+"0","  scale_color_brewer(palette = ""Set1"")"

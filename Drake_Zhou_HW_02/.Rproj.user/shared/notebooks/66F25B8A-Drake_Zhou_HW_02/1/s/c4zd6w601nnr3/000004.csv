@@ -1,0 +1,3 @@
+"0","model_class_0.7 <- model_pred_df %>% mutate(pred_class = ifelse(pred_prob>0.7, ""event"", ""non_event""))"
+"0",""
+"0","model_class_0.7"

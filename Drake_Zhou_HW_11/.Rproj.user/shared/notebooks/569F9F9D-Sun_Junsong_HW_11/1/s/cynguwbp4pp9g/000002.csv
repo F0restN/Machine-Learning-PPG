@@ -1,0 +1,6 @@
+"0","ctrl_k05_roc <- trainControl(method = ""cv"", number = 5,"
+"0","                             summaryFunction = twoClassSummary,"
+"0","                             classProbs = TRUE,"
+"0","                             savePredictions = TRUE)"
+"0",""
+"0","metric_sonar <- ""ROC"""

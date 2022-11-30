@@ -1,0 +1,7 @@
+"0","optim_fit_3_a <- optim(rep(0, info_three_units$num_params),"
+"0","                       my_neuralnet_sse,"
+"0","                       gr = NULL,"
+"0","                       info_three_units,"
+"0","                       method =  ""BFGS"","
+"0","                       hessian =  FALSE,"
+"0","                       control = list(maxit = 5001))"

@@ -1,0 +1,1035 @@
+---
+title: "INFSCI 2595 Spring 2022 Homework: 09"
+subtitle: "Assigned March 31, 2022; Due: April 7, 2022"
+author: "Drake Zhou"
+date: "Submission time: April 7, 2022 at 11:00PM EST"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Collaborators
+
+Include the names of your collaborators here.  
+
+## Overview
+
+This assignment has two goals. First, you will fit, make predictions, and assess the performance of Bayesian logistic regression models for binary classification. Second, you will gain experience working with correlated inputs and assessing the influence of their correlation structure on regression model performance via the elastic net penalty.  
+
+You will work with `caret` and the `glmnet` packages in the regression problem. You should have both packages installed already.  
+ 
+You will also work with the `corrplot` package in this assignment. You must download and install `corrplot` before starting the assignment.  
+
+**IMPORTANT**: Problems 01 through 03 are associated with logistic regression, while Problems 04 and 05 are associated with a regression problem. You may work on the regression problem first if you would like.  
+
+**IMPORTANT**: code chunks are created for you. Each code chunk has `eval=FALSE` set in the chunk options. You **MUST** change it to be `eval=TRUE` in order for the code chunks to be evaluated when rendering the document.  
+
+You are allowed to add as many code chunks as you see fit to answer the questions.  
+
+## Load packages
+
+The `tidyverse` suite of packages is loaded for you in the code chunk below. The `caret` package will be loaded later in the assignment, when it is required.  
+
+```{r, load_tidy_packages}
+library(tidyverse)
+library(corrplot)
+```
+
+## Problem 01
+
+You defined log-posterior functions for linear models in previous assignments. You worked with simple linear relationships, interactions, polynomials, and more complex spline basis features. In lecture, we discussed how the linear model framework can be *generalized* to handle non-continuous binary outcomes. The likelihood changed from a Gaussian to a Binomial distribution and a non-linear **link** function is required. In this way, the regression model is applied to a *linear predictor* which "behaves" like the trend in an ordinary linear model. In this problem, you will define the log-posterior function for logistic regression. By doing so you will be able to directly contrast what you did to define the log-posterior function for the linear model in previous assignments.  
+
+### 1a)
+
+The complete probability model for logistic regression consists of the likelihood of the response $y_n$ given the event probability $\mu_n$, the inverse link function between the probability of the event, $\mu_n$, and the linear predictor, $\eta_n$, and the prior on all linear predictor model coefficients $\boldsymbol{\beta}$.  
+
+As in lecture, you will assume that the $\boldsymbol{\beta}$-parameters are a-priori independent Gaussians with a shared prior mean $\mu_{\beta}$ and a shared prior standard deviation $\tau_{\beta}$.  
+
+**Write out complete probability model for logistic regression. You must write out the $n$-th observation's linear predictor using the inner product of the $n$-th row of a design matrix $\mathbf{x}_{n,:}$ and the unknown $\boldsymbol{\beta}$-parameter column vector. You can assume that the number of unknown coefficients is equal to $D + 1$.**  
+
+You are allowed to separate each equation into its own equation block.  
+
+*HINT*: The "given" sign, the vertical line, $\mid$, is created by typing `\mid` in a latex math expression. The product symbol (the giant PI) is created with `prod_{}^{}`.  
+
+#### SOLUTION
+
+Add in your equations here.  
+
+$$
+p (\mathbf{y} \mid \boldsymbol{\mu}) =
+\prod_{n=1}^{N} \left(Bernoulli \left(y_{n} \mid \mu_{n} \right) \right)
+$$
+
+$$
+\mu_n = \mathbf{logit}^{-1} \left(\eta_n \right)
+$$
+$$
+\eta_n = \mathbf{x}_{n,:}\boldsymbol{\beta}
+$$
+$$
+p(\boldsymbol{\beta}) = 
+\prod_{d=0}^{D} \left(normal \left(\boldsymbol{\beta}_d \mid \mu_{\beta}, \tau_{\beta} \right) \right)
+$$
+$$
+p(\boldsymbol{\beta} \mid \mathbf{y}, \mathbf{X}) =
+\prod_{n=1}^{N} \left(Bernoulli \left(y_{n} \mid \mathbf{logit}^{-1} \left[\mathbf{x}_{n,:}\boldsymbol{\beta} \right] \right) \right) 
+\prod_{d=0}^{D} \left(normal \left(\boldsymbol{\beta}_d \mid \mu_{\beta}, \tau_{\beta} \right) \right)
+$$
+
+### 1b)
+
+The code chunk below loads in a data set consisting of two variables: a continuous input `x` and a binary outcome `y`. The binary outcome is encoded as 0 if the event does not occur and 1 if the event does occur.  
+
+```{r, read_glm_dataset, eval=TRUE}
+train_data_url <- 'https://raw.githubusercontent.com/jyurko/INFSCI_2595_Spring_2022/main/HW/09/hw09_binary_01.csv'
+train_df <- readr::read_csv(train_data_url, col_names = TRUE)
+
+train_df %>% glimpse()
+```
+
+The `count()` function is used to count the number of observations associated with each binary class in the second code chunk. As shown below, the event occurs more frequently than the non-event, but the two classes are not overly imbalanced.  
+
+```{r, check_outcome_count, eval=TRUE}
+train_df %>% count(y)
+```
+
+It is always good practice to visualize data before fitting models. However, visualizing the relationship between a binary outcome and a continuous input is more challenging than visualizing the relationship between two continuous variables. In this question you will create two scatter plots, one with the data as they are, and the other with "jittered" markers.  
+
+**Create two scatter plots using ggplot2 to visualize the relationship between the binary outcome `y` and the continuous input `x`. You must use `geom_point()` in the first scatter plot and you must use `geom_jitter()` for the second scatter plot. In your `geom_point()` call, set the marker size to 4 and the marker transparency to 0.33. The amount of "jitter" or noise added to the markers is controlled by the `height` and `width` arguments in `geom_jitter()`. In your `geom_jitter()` call, set the `height` argument to 0.02 and the `width` argument to 0. You may keep the default marker size and marker transparency in your `geom_jitter()` scatter plot.**  
+
+**What trends do you see in the graphs? Does the event probability appear to increase or decrease as the input `x` increases?**  
+
+#### SOLUTION
+
+Add as many code chunks as you like for this problem.  
+
+```{r, solution_01a_01, eval=TRUE}
+train_df %>%
+  ggplot()+
+  geom_point(mapping = aes(x=x, y=y, size=4, alpha=0.33))
+```
+```{r, solution_01a_02, eval=TRUE}
+train_df %>%
+  ggplot()+
+  geom_jitter(mapping = aes(x=x, y=y), height = 0.02, width = 0)
+```
+
+What do you think?  
+Even though there is a overlap between a period of X, but generally speaking, it looks like the probability increase as the input increase.
+
+### 1c)
+
+You will fit three logistic regression models in this assignment. The first will be a linear relationship for the linear predictor, the second will be a cubic polynomial relationship, and the third will be a 7 degree-of-freedom natural spline. The linear predictor for the linear relationship model is:  
+
+$$ 
+\eta_n = \beta_0 + \beta_1 x_n
+$$
+
+The linear predictor for the cubic polynomial is:  
+
+$$ 
+\eta_n = \beta_0 + \beta_1 x_n + \beta_2 x_{n}^2 + \beta_3 x_{n}^3
+$$
+
+Assuming the $j$-th spline feature is $\phi_j\left(x\right)$ the 7th degree of freedom natural spline can be written as a summation series:  
+
+$$ 
+\eta_n = \beta_0 + \sum_{j=1}^{J=7} \left( \phi_j \left(x_n\right) \right)
+$$
+
+You will be defining a log-posterior function similar to those from previous assignments. However, before doing so, you will create lists of required information for each of the desired models. You must create the design matrices associated with the linear and cubic polynomials, and the 7 degree-of-freedom natural spline. You must assign those design matrices to the `Xmat_linear`, `Xmat_cubic`, and `Xmat_spline7` objects. You must then complete the lists `info_linear`, `info_cubic`, and `info_spline7` by setting the observed responses to the `yobs` variable, the design matrices to the `design_matrix` variable, and also set the $\boldsymbol{\beta}$ prior hyperparameters.  
+
+**Create the design matrices for the 3 models and specify the lists of required information. Specify the prior mean to be 0 and the prior standard deviation to be 5.**  
+
+#### SOLUTION
+
+Create the design matrices.  
+
+```{r, solution_01c_a, eval=TRUE}
+Xmat_linear <- model.matrix(y ~ x, train_df)
+
+Xmat_cubic <- model.matrix(y ~ x + I(x^2) + I(x^3), train_df)
+
+Xmat_spline7 <- model.matrix(y ~ splines::ns(x, 7), train_df)
+```
+
+Create the lists of required information.  
+
+```{r, solution_01c_b, eval=TRUE}
+info_linear <- list(
+  yobs = train_df$y,
+  design_matrix = Xmat_linear,
+  mu_beta = 0,
+  tau_beta = 5
+)
+
+info_cubic <- list(
+  yobs = train_df$y,
+  design_matrix = Xmat_cubic,
+  mu_beta = 0,
+  tau_beta = 5
+)
+
+info_spline7 <- list(
+  yobs = train_df$y,
+  design_matrix = Xmat_spline7,
+  mu_beta = 0,
+  tau_beta = 5
+)
+```
+
+
+### 1d)
+
+You will now define the log-posterior function for logistic regression, `logistic_logpost()`. The first argument to `logistic_logpost()` is the vector of unknowns and the second argument is the list of required information. You will assume that the variables within the `my_info` list are those contained in the `info_linear` list you defined previously.  
+
+**Complete the code chunk to define the `logistic_logpost()` function. The comments describe what you need to fill in. Do you need to separate out the $\boldsymbol{\beta}$-parameters from the vector of `unknowns`?**  
+
+**After you complete `logistic_logpost()`, test it by setting the `unknowns` vector to be a vector of -1's and then 2's for the linear relationship case. If you have successfully programmed the function you should get `-164.6232` and `-130.1428` for the -1 test case and +2 test case, respectively.**  
+
+#### SOLUTION
+
+Do you need to separate the $\boldsymbol{\beta}$-parameters from the `unknowns` vector?  
+
+Don't need to do so.
+
+```{r, solution_01d, eval=TRUE}
+logistic_logpost <- function(unknowns, my_info)
+{
+  # extract the design matrix and assign to X
+  X <- my_info$design_matrix
+  
+  # calculate the linear predictor
+  eta <- as.vector(X %*% matrix(unknowns))
+  
+  # calculate the event probability
+  mu <- boot::inv.logit(eta)
+  
+  # evaluate the log-likelihood
+  log_lik <- sum(dbinom(x = my_info$yobs,
+                        size = 1,
+                        prob = mu,
+                        log = TRUE))
+  
+  # evaluate the log-prior
+  log_prior <- sum(dnorm(x = unknowns,
+                         mean = my_info$mu_beta,
+                         sd = my_info$tau_beta,
+                         log = TRUE))
+  
+  # sum together
+  log_lik + log_prior
+}
+```
+
+Test out your function using the linear relationship information and setting the unknowns to a vector of -1's.  
+
+```{r, solution_01d_b}
+###
+logistic_logpost(rep(-1, ncol(Xmat_linear)), info_linear)
+```
+
+Test out your function using the linear relationship information and setting the unknowns to a vector of 2's.  
+
+```{r, solution_01d_c}
+###
+logistic_logpost(rep(2, ncol(Xmat_linear)), info_linear)
+```
+
+
+### 1e)
+
+The `my_laplace()` function is provided to you in the code chunk below.  
+
+```{r, define_my_laplace_func, eval=TRUE}
+my_laplace <- function(start_guess, logpost_func, ...)
+{
+  # code adapted from the `LearnBayes`` function `laplace()`
+  fit <- optim(start_guess,
+               logpost_func,
+               gr = NULL,
+               ...,
+               method = "BFGS",
+               hessian = TRUE,
+               control = list(fnscale = -1, maxit = 1001))
+  
+  mode <- fit$par
+  post_var_matrix <- -solve(fit$hessian)
+  p <- length(mode)
+  int <- p/2 * log(2 * pi) + 0.5 * log(det(post_var_matrix)) + logpost_func(mode, ...)
+  # package all of the results into a list
+  list(mode = mode,
+       var_matrix = post_var_matrix,
+       log_evidence = int,
+       converge = ifelse(fit$convergence == 0,
+                         "YES", 
+                         "NO"),
+       iter_counts = as.numeric(fit$counts[1]))
+}
+```
+
+
+You will use `my_laplace()` to execute the Laplace Approximation for the three models, using initial guess values of zero. After fitting the models, calculate the middle 95% uncertainty intervals for the linear and cubic model parameters.  
+
+**Perform the Laplace Approximation for all three models. The linear relationship should be assigned to the `laplace_linear` object, the cubic relationship to the `laplace_cubic`, and the 7 degree-of-freedom spline should be assigned to the `laplace_spline7` object. Should you be concerned that the initial guess will impact the results?**  
+
+**After fitting, calculate the middle 95% uncertainty interval on the $\boldsymbol{\beta}$ parameters for the linear and cubic models. Which parameters contain zero in the middle 95% uncertainty interval?**  
+
+#### SOLUTION
+
+What do you think?  
+
+We don't need to worry about the initial guess. Because logistic regression is unimodal. No matter what the initial guess is, they will all reach to a same result.
+
+```{r, solution_01e_a, eval=TRUE}
+laplace_linear <- my_laplace(rep(0, ncol(Xmat_linear)), logistic_logpost, info_linear)
+
+laplace_cubic <- my_laplace(rep(0, ncol(Xmat_cubic)), logistic_logpost, info_cubic)
+
+laplace_spline7 <- my_laplace(rep(0, ncol(Xmat_spline7)), logistic_logpost, info_spline7)
+```
+
+Calculate the 95% uncertainty intervals on the linear relationship model.  
+
+```{r, solution_01e_b, eval=TRUE}
+###
+upper_line <- laplace_linear$mode + 2 * sqrt(diag(laplace_linear$var_matrix))
+lower_line <- laplace_linear$mode- 2 * sqrt(diag(laplace_linear$var_matrix))
+upper_line
+lower_line
+```
+
+Calculate the 95% uncertainty intervals on the cubic relationship model.  
+
+```{r, solution_01e_c, eval=TRUE}
+### 
+upper_cubic <- laplace_cubic$mode+2*sqrt(diag(laplace_cubic$var_matrix))
+lower_cubic <- laplace_cubic$mode-2*sqrt(diag(laplace_cubic$var_matrix))
+upper_cubic
+lower_cubic
+```
+
+### 1f)
+
+Let's compare the performance of the models using the Evidence-based assessment.  
+
+**You must calculate the posterior model weight associated with each model. Based on your results, which model do you think is the best?**  
+
+#### SOLUTION
+
+```{r, solution_01f, eval=TRUE}
+###
+weight_linear <- exp(laplace_linear$log_evidence) / (exp(laplace_linear$log_evidence) + exp(laplace_cubic$log_evidence) + exp(laplace_spline7$log_evidence))
+weight_linear
+
+weight_cubic <- exp(laplace_cubic$log_evidence) / (exp(laplace_linear$log_evidence) + exp(laplace_cubic$log_evidence) + exp(laplace_spline7$log_evidence))
+weight_cubic
+
+weight_splines <- exp(laplace_spline7$log_evidence) / (exp(laplace_linear$log_evidence) + exp(laplace_cubic$log_evidence) + exp(laplace_spline7$log_evidence))
+weight_splines
+```
+
+### 1g)
+
+**Is the log-Evidence identified best model consistent with your initial interprations from Problem 1b)?**  
+
+#### SOLUTION
+
+What do you think?  
+According to the data, cubic model is the best one. 
+
+## Problem 02
+
+In Problem 01, you compared the linear and cubic relationships based on the Evidence. Your assessment considered how well the model "fit" the data via the likelihood, based on the constraints imposed by the prior. The likelihood examines how likely the binary outcome is given the event probability. Thus, the Evidence is considering if the observations are consistent with the modeled event probability. In this problem, you will consider point-wise error metrics by calculating the confusion matrix associated with the training set. Confusion matrices are useful because the accuracy and errors are in the same "units" of the data.  
+
+However, the logistic regression model predicts the event probability via the log-odds ratio. In order to move from the probability to the binary outcome a decision must be made. As discussed earlier in the semester during the Applied Machine Learning portion of the course, the decision consists of comparing the predicted probability to a threshold value. If the predicted probability is greater than the threshold, classify the outcome as the event. Otherwise, classify the outcome as the non-event.  
+
+In order to classify the training points, you must make posterior predictions with the logistic regression models you fit in Problem 01.  
+
+### 2a)
+
+Although you were able to apply the `my_laplace()` function to both the regression and logistic regression settings, you cannot directly apply the `generate_lm_post_samples()` function from your previous assignments. You will therefore adapt `generate_lm_post_samples()` and define `generate_glm_post_samples()`. The code chunk below starts the function for you and uses just two input arguments, `mvn_result` and `num_samples`. You must complete the function.  
+
+**Why can you not directly use the `generate_lm_post_samples()` function? Since the `length_beta` argument is NOT provided to `generate_glm_post_samples()`, how can you determine the number of $\boldsymbol{\beta}$-parameters? Complete the code chunk below by first assigning the number of $\boldsymbol{\beta}$-parameters to the `length_beta` variable. Then generate the random samples from the MVN distribution. You do not have to name the variables, you only need to call the correct random number generator.**  
+
+#### SOLUTION
+
+What do you think? Why do we need a new function compared to the previous assignments?  
+
+In order to use logistic regression, we need to use log transformed event probability. But the old function include back transformation. Hence, we need to create a new one.
+
+```{r, solution_02a, eval=TRUE}
+generate_glm_post_samples <- function(mvn_result, num_samples)
+{
+  # specify the number of unknown beta parameters
+  length_beta <- length(mvn_result$mode)
+  
+  # generate the random samples
+  beta_samples <- MASS::mvrnorm(n = num_samples,
+                                mu = mvn_result$mode,
+                                Sigma = mvn_result$var_matrix)
+
+  # change the data type and name
+  beta_samples %>% 
+    as.data.frame() %>% tibble::as_tibble() %>% 
+    purrr::set_names(sprintf("beta_%02d", (1:length_beta) - 1))
+}
+```
+
+
+### 2b)
+
+You will now define a function which calculates the posterior prediction samples on the linear predictor and the event probability. The function, `post_logistic_pred_samples()` is started for you in the code chunk below. It consists of two input arguments `Xnew` and `Bmat`. `Xnew` is a test design matrix where rows correspond to prediction points. The matrix `Bmat` stores the posterior samples on the $\boldsymbol{\beta}$-parameters, where each row is a posterior sample and each column is a parameter.  
+
+**Complete the code chunk below by using matrix math to calculate the linear predictor at every posterior sample. Then, calculate the event probability for every posterior sample.**  
+
+The `eta_mat` and `mu_mat` matrices are returned within a list, similar to how the `Umat` and `Ymat` matrices were returned for the regression problems.  
+
+*HINT*: The `boot::inv.logit()` can take a matrix as an input. When it does, it returns a matrix as a result.  
+
+#### SOLUTION
+
+```{r, solution_02b, eval=TRUE}
+post_logistic_pred_samples <- function(Xnew, Bmat)
+{
+  # calculate the linear predictor at all prediction points and posterior samples
+  eta_mat <- Xnew %*% t(Bmat)
+  
+  # calculate the event probability
+  mu_mat <- boot::inv.logit(eta_mat)
+  
+  # book keeping
+  list(eta_mat = eta_mat, mu_mat = mu_mat)
+}
+```
+
+
+### 2c)
+
+The code chunk below defines a function `summarize_logistic_pred_from_laplace()` which manages the actions necessary to summarize posterior predictions of the event probability. The first argument, `mvn_result`, is the Laplace Approximation object. The second object is the test design matrix, `Xtest`, and the third argument, `num_samples`, is the number of posterior samples to make. You must follow the comments within the function in order to generate posterior prediction samples of the linear predictor and the event probability, and then to summarize the posterior predictions of the event probability.  
+
+The result from `summarize_logistic_pred_from_laplace()` summarizes the posterior predicted event probability with the posterior mean, as well as the 5th and 95th quantiles. If you have completed the `post_logistic_pred_samples()` function correctly, the dimensions of the `mu_mat` matrix should be consistent with those from the `Umat` matrix from the regression problems.  
+
+The posterior summary statistics summarize the posterior samples. You must therefore choose between `colMeans()` and `rowMeans()` as to how to calculate the posterior mean event probability for each prediction point. The posterior quantiles are calculated for you.  
+
+**Follow the comments in the code chunk below to complete the definition of the `summarize_logistic_pred_from_laplace()` function. You must generate posterior samples, make posterior predictions, and then summarize the posterior predictions of the event probability.**  
+
+*HINT*: The result from `post_logistic_pred_samples()` is a list.  
+
+#### SOLUTION
+
+```{r, solution_02, eval=TRUE}
+summarize_logistic_pred_from_laplace <- function(mvn_result, Xtest, num_samples)
+{
+  # generate posterior samples of the beta parameters
+  betas <- generate_glm_post_samples(mvn_result, num_samples)
+  
+  # data type conversion
+  betas <- as.matrix(betas)
+  
+  # make posterior predictions on the test set
+  pred_test <- post_logistic_pred_samples(Xtest, betas)
+  
+  # calculate summary statistics on the posterior predicted probability
+  # summarize over the posterior samples
+  
+  # posterior mean, should you summarize along rows (rowMeans) or 
+  # summarize down columns (colMeans) ???
+  mu_avg <- rowMeans(pred_test$mu_mat)
+  
+  # posterior quantiles
+  mu_q05 <- apply(pred_test$mu_mat, 1, stats::quantile, probs = 0.05)
+  mu_q95 <- apply(pred_test$mu_mat, 1, stats::quantile, probs = 0.95)
+  
+  # book keeping
+  tibble::tibble(
+    mu_avg = mu_avg,
+    mu_q05 = mu_q05,
+    mu_q95 = mu_q95
+  ) %>% 
+    tibble::rowid_to_column("pred_id")
+}
+```
+
+
+### 2d)
+
+Summarize the posterior predicted event probability associated with the training set all three models. After making the predictions, a code chunk is provided for you which generates a figure showing how the posterior predicted probability summaries compare with the observed binary outcomes. Which of the three models appear to better capture the trends in the binary outcome?  
+
+**Call `summarize_logistic_pred_from_laplace()` for the all three models on the training set. Specify the number of posterior samples to be 2500. Print the dimensions of the resulting objects to the screen. How many rows are in each data set?**  
+
+**The third code chunk below uses the prediction summaries to visualize the posterior predicted event probability on the training set. Which relationship seems more in line with the observations?**  
+
+#### SOLUTION
+
+The prediction summarizes should be executed in the code chunk below.  
+
+```{r, solution_02_a, eval=TRUE}
+set.seed(8123) 
+
+post_pred_summary_linear <- summarize_logistic_pred_from_laplace(laplace_linear, Xmat_linear, 2500)
+
+post_pred_summary_cubic <- summarize_logistic_pred_from_laplace(laplace_cubic, Xmat_cubic, 2500)
+
+post_pred_summary_spline7 <- summarize_logistic_pred_from_laplace(laplace_spline7, Xmat_spline7, 2500)
+post_pred_summary_linear
+```
+
+Print the dimensions of the objects to the screen.  
+
+```{r, solution_02_b, eval=TRUE}
+###
+dim(post_pred_summary_linear)
+dim(post_pred_summary_cubic)
+dim(post_pred_summary_spline7)
+```
+
+The figure below is created for you.  
+
+```{r, solutioN_02_c, eval=TRUE}
+post_pred_summary_linear %>% 
+  mutate(type = "linear relationship") %>% 
+  bind_rows(post_pred_summary_cubic %>% 
+              mutate(type = "cubic relationship")) %>% 
+  bind_rows(post_pred_summary_spline7 %>% 
+              mutate(type = "7 dof spline")) %>% 
+  left_join(train_df %>% tibble::rowid_to_column("pred_id"),
+            by = "pred_id") %>% 
+  ggplot(mapping = aes(x = x)) +
+  geom_ribbon(mapping = aes(ymin = mu_q05,
+                            ymax = mu_q95,
+                            group = type),
+              fill = "steelblue", alpha = 0.5) +
+  geom_line(mapping = aes(y = mu_avg,
+                          group = type),
+            color = "navyblue", size = 1.15) +
+  geom_point(mapping = aes(y = y),
+             size = 2.5, alpha = 0.2) +
+  facet_grid( . ~ type) +
+  labs(y = "y or event probability") +
+  theme_bw()
+```
+
+Each data set has 125 rows. According to figures, cubic model seems more in line with observations compared to other two, which is more balance between flexibility and uncertainty. 
+
+### 2e)
+
+You will now consider classifying the predictions based upon a threshold value of 0.5. You will compare that threshold value to the posterior predicted event probabilities associated with the training set. Although the Bayesian model provides a full posterior predictive distribution, you will work just with the posterior mean value. Thus, you will create a single confusion matrix, rather than considering the uncertainty in the confusion matrix.  
+
+Creating the confusion matrix is rather simple compared to some of the previous tasks in this assignment. The first step is to classify the prediction as event or non-event, which can be accomplished with an if-statement. The `ifelse()` function provides an "Excel-like" conditional statement, and is a simple way to perform the classification task. The syntax for `ifelse()` consists of three arguments, shown below:  
+
+`ifelse(<conditional test>, <return if condition is TRUE>, <return if condition is FALSE>)`
+
+The first argument is the conditional test you wish to apply. The second argument is what will be returned if the condition is true, and the third argument is what will be returned if the condition is false.  
+
+You will use the `ifelse()` function to compare the posterior predicted mean event probability to the assumed threshold value of 0.5.  
+
+**Pipe the `post_pred_summary_linear` object into a `mutate()` call and create a new variable `pred_class` which is the result of an `ifelse()` operation. For the conditional test, return a value of `1` if the posterior predicted mean event probability is greater than 0.5, and return `0` otherwise. Repeat the process for the `post_pred_summary_cubic` and `post_pred_summary_spline7` objects.**  
+
+#### SOLUTION
+
+```{r, solution_2e, eval=TRUE}
+post_pred_summary_linear_class <- post_pred_summary_linear %>% mutate(pred_class = ifelse(mu_avg > 0.5, 1, 0)) 
+
+post_pred_summary_cubic_class <- post_pred_summary_cubic %>% mutate(pred_class = ifelse(mu_avg > 0.5, 1, 0))
+
+post_pred_summary_spline7_class <- post_pred_summary_spline7 %>% mutate(pred_class = ifelse(mu_avg > 0.5, 1, 0))
+
+post_pred_summary_linear_class 
+```
+
+### 2f)
+
+The code chunk below uses the `left_join()` function to merge the training data set, `train_df` with each of the posterior prediction summary objects. The results, `post_pred_summary_linear_class_b`, `post_pred_summary_cubic_class_b`, and `post_pred_summary_spline7_class_b` now have predicted classifications, `pred_class`, and observed outcomes `y`.  
+
+```{r, merge_preds_and_train_obs, eval=TRUE}
+post_pred_summary_linear_class_b <- post_pred_summary_linear_class %>% 
+  left_join(train_df %>% tibble::rowid_to_column("pred_id"),
+            by = "pred_id")
+
+post_pred_summary_cubic_class_b <- post_pred_summary_cubic_class %>% 
+  left_join(train_df %>% tibble::rowid_to_column("pred_id"),
+            by = "pred_id")
+
+post_pred_summary_spline7_class_b <- post_pred_summary_spline7_class %>% 
+  left_join(train_df %>% tibble::rowid_to_column("pred_id"),
+            by = "pred_id")
+```
+
+
+**Use the `count()` function to determine the confusion matrix associated with each relationship. How many true-positives, true-negatives, false-positives, and false-negatives does each relationship have?**  
+
+#### SOLUTION
+
+Determine the confusion matrix for the linear relationship below.  
+
+```{r, solution_02f_a, eval=TRUE}
+###
+post_pred_summary_linear_class_b %>% count((pred_class == 1) & (y == 1), ((pred_class == 0) & (y == 0)), (pred_class == 1) & (y == 0), (pred_class == 0) & (y == 1))
+```
+
+Determine the confusion matrix for the cubic relationship below.  
+
+```{r, solution_02f_b, eval=TRUE}
+###
+post_pred_summary_cubic_class_b %>% count((pred_class == 1) & (y == 1), ((pred_class == 0) & (y == 0)), (pred_class == 1) & (y == 0), (pred_class == 0) & (y == 1))
+```
+
+Determine the confusion matrix for the 7 degree-of-freedom spline below.  
+
+```{r, solution_02f_c}
+###
+post_pred_summary_spline7_class_b %>% count((pred_class == 1) & (y == 1), ((pred_class == 0) & (y == 0)), (pred_class == 1) & (y == 0), (pred_class == 0) & (y == 1))
+```
+
+(Note. order is linear, cubic and splines)
+TRUE POSITIVE: 63, 57, 62
+TRUE NEGATIVE: 16, 31, 29
+FALSE POSITIVE: 34, 19, 21
+FALSE NEGATIVE: 12, 18, 13
+
+### 2g)
+
+**Calculate the Accuracy on the training set for each model. Which model has the highest Accuracy on the training set?**  
+
+#### SOLUTION
+
+Add as many code chunks as you feel are necessary.  
+
+According to the result, splines model has the highest accuracy on the training set.
+
+```{r, solution_02g, eval=TRUE}
+ac_linear <- (63+16) / 125
+ac_cubic <- (57+31) / 125
+ac_splines <- (62+29) / 125
+
+ac_linear
+ac_cubic
+ac_splines
+```
+
+
+## Problem 03
+
+In lecture, we spent a considerable amount of time discussing a situation which challenges fitting logistic regression with maximum likelihood estimation. Now that you have fit several logistic regression models, let's get some practice working with this challenging situation.  
+
+A small data set is read for you in the code chunk below, consisting of a single input, `x`, and a binary outcome `y`. As shown by the `glimpse()` this data set consists of just 5 observations.  
+
+```{r, read_small_data_05}
+small_data_url <- "https://raw.githubusercontent.com/jyurko/INFSCI_2595_Spring_2022/main/HW/09/hw09_binary_02.csv"
+
+train_small <- readr::read_csv( small_data_url )
+
+train_small %>% glimpse()
+```
+
+### 3a)
+
+**Plot the binary outcome, `y`, with respect to the continuous input, `x`. Include an additional layer to your graphic by adding in geom_vline() with the `xintercept` argument set to -0.6.**  
+
+**Based on the figure, should we expect the logistic regression model to struggle with this small data set?**  
+
+#### SOLUTION
+
+It looks like so since its separable.
+
+```{r, solution_03a}
+###
+train_small %>% 
+  ggplot(mapping = aes(x = x, y = y)) +
+  geom_point(color = "blue") +
+  geom_vline(xintercept = -0.6, color = "yellow")
+```
+
+
+### 3b)
+
+You will fit a Bayesian logistic regression model assuming a linear relationship between the input and the linear predictor:  
+
+$$ 
+\eta_n = \beta_0 + \beta_1 x_{n}
+$$
+
+You will fit two models using the linear relationship. The first will use an informative prior on the unknown $\boldsymbol{\beta}$ coefficients with a prior standard deviation of 2.5. The second model will use an very diffuse or *very weak* prior with a prior standard deviation of 50.  
+
+Before fitting the models, you must create the lists of required information for this application. 
+
+**Complete the code chunk below which creates the lists of required information for the informative and very weak priors using the small data set of just 5 observations.**  
+
+**The informative prior should use the prior standard deviation of 2.5 and the very weak prior should use a prior standard deviation of 50. Both priors should use prior mean of 0.**  
+
+#### SOLUTION
+
+```{r, solution_03b, eval=TRUE}
+Xmat <- model.matrix(y ~ x, data = train_small)
+
+info_small_inform <- list(
+  yobs = train_small$y,
+  design_matrix = Xmat,
+  mu_beta = 0,
+  tau_beta = 2.5
+)
+
+info_small_weak <- list(
+  yobs = train_small$y,
+  design_matrix = Xmat,
+  mu_beta = 0,
+  tau_beta = 50
+)
+```
+
+
+### 3c)
+
+You will now execute the Laplace Approximation to fit the Bayesian logistic regression models associated with the informative and weak priors.  
+
+**Execute the laplace approximation for the two prior specifications. Assign the result associated with the informative prior to `small_laplace_from_inform` and the assign the result associated with the very weak prior to `small_laplace_from_weak`.**  
+
+**How do the posterior modes compare between the two models? Does the informative prior cause the posterior mode to be different from the mode associated with the very weak prior?**  
+
+#### SOLUTION
+
+```{r, solution_03c_a, eval=TRUE}
+small_laplace_from_inform <- my_laplace(rep(0, ncol(Xmat)), logistic_logpost, info_small_inform)
+small_laplace_from_inform$mode
+```
+
+
+```{r, solution_03c_b, eval=TRUE}
+small_laplace_from_weak <- my_laplace(rep(0, ncol(Xmat)), logistic_logpost, info_small_weak)
+small_laplace_from_weak$mode
+```
+
+How do the posterior modes compare? Include text and code chunks to answer this question.  
+
+The modes with informative prior are closer to zero compare to very weak prior. 
+
+### 3d)
+
+**Compare the posterior correlation between the intercept and slope associated with an informative prior to the posterior correlation associated with the very weak prior.**  
+
+*HINT*: The Laplace Approximation gives you something that lets you easily calculate the correlation matrix...  
+
+#### SOLUTION
+
+Add as many code chunks as you feel are necessary to answer this question.
+
+```{r, eval=TRUE}
+cor_info <- small_laplace_from_inform$var_matrix %>% cov2cor()
+corrplot(cor_info) 
+```
+```{r, eval=TRUE}
+cor_weak <- small_laplace_from_weak$var_matrix %>% cov2cor()
+corrplot(cor_weak)
+```
+
+The posterior correlation associated with an informative prior is stronger compare to model with weak prior.
+
+### 3e)
+
+**Discuss the differences between the posterior correlation between the coefficients when an informative prior is used compared to a very weak prior on this very small data set.**  
+
+#### SOLUTION
+
+What do you think?  
+
+The posterior probability is always a compromise between prior and likelihood. The result will always yield to whoever is more precised. Since this data set it small, the effect of prior is more clearly. When we use informative prior the posterior correlation between the coefficients is weaker than the posterior correlation associated with the weak prior. But also, weak prior lead to more uncertainty in the beginning.
+
+### 3f)
+
+What do you think will happen if you would find the MLEs for the coefficients, and thus have no prior influence at all?  
+
+**Use `glm()` to fit the logistic regression model via maximum likelihood estimation for the small data set. Assign the result to `mod_small_mle`.**  
+
+**Display the coefficient MLEs, what's going on with the maximum likelihood result for the small data set?**  
+
+#### SOLUTION
+
+```{r, solution_03f}
+###
+mod_small_mle <- glm(y ~ x, family = "binomial", data = train_small)
+mod_small_mle %>% coef()
+summary(mod_small_mle)
+```
+
+Add as many code chunks as you feel are necessary and discussion text.  
+
+When data set is too small, in order to include or explain as much as it can, the model will change rapidly or stay still. This will crash the model.
+
+## Problem 04
+
+A data set is loaded in the code chunk below for you. You will use this data set for the remainder of the assignment. There are 6 continuous inputs, `x1` through `x6`, and a single continuous response `y`.  
+
+```{r, load_hw_data}
+data_url <- "https://raw.githubusercontent.com/jyurko/INFSCI_2595_Spring_2022/main/HW/09/hw09_regression.csv"
+
+df <- readr::read_csv(data_url, col_names = TRUE)
+
+df %>% glimpse()
+```
+
+
+### 4a)
+
+**Create a scatter plot between the response, `y`, and each input using `ggplot()`.**  
+
+**Based on the visualizations, do you think there are trends between either input and the response?**  
+
+#### SOLUTION
+
+It looks like there is no specific trend.
+
+```{r, solution_04a, eval=TRUE}
+### add more code chunks if you like
+df %>% 
+  pivot_longer(!y, names_to="x", values_to="value") %>% 
+  ggplot() +
+  geom_point(mapping = aes(x = value, y = y), color = 'blue') +
+  geom_smooth(mapping = aes(x = value, y = y), color = "red") +
+  facet_wrap(~x)
+```
+
+
+### 4b)
+
+You visualized the output to input relationship, but you must also examine the relationship between the inputs! The `cor()` function can be used to calculate the correlation matrix between all columns in a data frame.  
+
+**Pipe `df` into `select()` and select all columns except the response `y`. Pipe the result to the `cor()` function and display the correlation matrix to screen.**  
+
+#### SOLUTION
+
+```{r, solution_04b, eval=TRUE}
+### add more code chunks if you like
+df %>%
+  select(-y) %>%
+  cor()
+```
+
+### 4c)
+
+Rather than displaying the numbers of the correlation matrix, let's create a **correlation plot** to visualize the correlation coefficient between each pair of inputs. The `corrplot` package provides the `corrplot()` function to easily create clean and simple correlation plots. You do not have to load the `corrplot` package, instead you will call the `corrplot()` function from `corrplot` using the `::` operator. Thus, you will call the function as `corrplot::corrplot()`.  
+
+The first argument to `corrplot::corrplot()` is a correlation matrix. You must therefore calculate the correlation matrix associated with a data frame and pass that matrix into `corrplot::corrplot()`.  
+
+**You will create two correlation plots. For the first, use the default input arguments to `corrplot::corrplot()`. For the second, set the `type` argument equal to `'upper'` to visualize the correlation plot as an upper-triangular matrix.**  
+
+**Based on your visualizations, are the inputs correlated?**  
+
+#### SOLUTION
+
+```{r, solution_04c1, eval=TRUE}
+### first corrplot
+df %>%
+  select(-y) %>% 
+  cor() %>% 
+  corrplot()
+```
+
+
+```{r, solution_04c2}
+### second corrplot
+df %>%
+  select(-y) %>% 
+  cor() %>% 
+  corrplot(type = 'upper')
+```
+
+What do you think?  
+
+Most of them are correlated at least in some extend except from x5,6
+
+### 4d)
+
+In lecture, we discussed the influence of the input correlation structure on the posterior correlation between the unknown regression parameters. You must calculate the posterior correlation matrix between the regression coefficients of a model with **linear additive features**, assuming an infinitely diffuse prior. Assume $\sigma=1$ for this calculation, that way you focus on the parameter-to-parameter correlation.  
+
+**Calculate the posterior correlation matrix between the regression coefficients (the $\beta parameters) for a model with linear additive features for all 6 inputs. Display the correlation matrix as a correlation plot using `corrplot::corrplot()`.**  
+
+**How does the $\beta$ parameter posterior correlation matrix compare to the input correlation matrix?**
+
+*HINT*: The `cov2cor()` function can be helpful here.  
+
+#### SOLUTION
+
+According to the figure, beta parameter posterior correlation matrix seems to be better. Because we want to be more certainty. Hence, we need to wipe out or limite the correlation between inputs. 
+
+```{r, solution_04d, eval=TRUE}
+### add as many code chunks as you feel are necessary
+mod01 <- (model.matrix(y ~ x1 + x2 + x3 + x4 + x5 + x6, data = df))
+SSmat <- t(mod01) %*% mod01
+SSmat %>% 
+  solve() %>% 
+  cov2cor() %>% 
+  corrplot(type = 'upper') 
+```
+
+
+### 4e)
+
+In previous assignments, you were focused on identifying the best regression model out of a set of candidate models. For the remainder of this assignment, you will instead work with a relatively complex model and focus on understanding the influence of the **elastic net** $\lambda$ and $\alpha$ parameters on the non-zero coefficients. Specifically, you will work with all **triplet** or **three-way** interactions between the 6 inputs.  
+
+**Create a design matrix for a model with up to all triplet interactions between the 6 inputs. Assign the result to the `Xtrips` object.**  
+
+#### SOLUTION
+
+```{r, solution_04e, eval=TRUE}
+### add your code here
+Xtrips <- model.matrix(y ~ (.)^3, df)
+```
+
+
+### 4f)
+
+Let's examine the posterior correlation matrix for the model with all triplet interactions assuming an infinitely diffuse prior.  
+
+**Create the correlation plot for the regression coefficient (\beta parameter) posterior correlation matrix for the model with all triplet interactions using `corrplot::corrplot()`. Assign the `type` argument to `'upper'` and set the `method` argument to `'square'` to visualize the correlation coefficients as colored square "tiles" within an upper triangular matrix.**  
+
+*HINT*: The `cov2cor()` function can be helpful here.  
+
+#### SOLUTION
+
+```{r, solution_04f, eval=TRUE}
+### add as many code chunks as you'd like
+SSmat <- t(Xtrips) %*% Xtrips;
+matrix01f <- SSmat %>% 
+  solve() %>% 
+  cov2cor() %>% 
+  corrplot(type = 'upper', method = 'square')
+```
+
+
+## Problem 05
+
+We could fit Bayesian linear models to understand influence of the prior regularization strength on the $\boldsymbol{\beta}$ posterior distribution. However, in this assignment you will instead use the non-Bayesian techniques to regularize the coefficients. In the non-Bayesian setting, we typically focus on **tuning** the hyperparameters via resampling methods. We discussed the differences between LASSO and RIDGE penalties in lecture, but we also discussed **blending** or **mixing** the two penalties via **elastic net**. You will tune the `glmnet` elastic net model associated with all triplet interactions. Elastic net consists of two tuning parameters, the regularization strength $\lambda$, and the mixing fraction between LASSO and RIDGE $\alpha$. You will use the `caret` package to manage the tuning with resampling of the hyperparameters for the elastic net model in `glmnet`.  
+
+The code chunk below loads in the `caret` package for you. You do not need to load in `glmnet`, the `caret` package will manage that when it is called.  
+
+```{r, load_caret}
+library(caret)
+```
+
+
+### 5a)
+
+You must specify the resampling scheme that `caret` will use to train, assess, and tune a model. You worked with `caret` in an earlier assignment and there are several examples provided in lecture if you need additional help.  
+
+**Specify the resampling scheme to be 5 fold with 5 repeats. Assign the result of the `trainControl()` function to the `my_ctrl` object. Specify the primary performance metric to be `'RMSE'` and assign that to the `my_metric` object.**  
+
+#### SOLUTION
+
+```{r, solution_05a, eval=TRUE}
+### your code here
+my_ctrl <- trainControl(method = "repeatedcv", number = 5, repeats = 5)
+my_metric <- "RMSE"
+```
+
+
+### 5b)
+
+You must train, assess, and tune an elastic model using the **default** `caret` tuning grid. In the `caret::train()` function you must use the formula interface to specify a model with all triplet interactions to predict the response `y`. Assign the `method` argument to `'glmnet'` and set the `metric` argument to `my_metric`. You must also instruct `caret` to standardize the features by setting the `preProcess` argument equal to `c('center', 'scale')`. Assign the `trControl` argument to the `my_ctrl` object.  
+
+**Train, assess, and tune the `glmnet` elastic net model consisting of all triplet interactions with the defined resampling scheme. Assign the result to the `enet_default` object and print the result to the screen. Which tuning parameter combinations are considered to be the best? Is the best set of tuning parameters more consistent with lasso or ridge regression?**  
+
+#### SOLUTION
+
+```{r, solution_05b}
+### your code here
+enet_default <- train(y ~ (.)^3,
+                      data = df,
+                      method = "glmnet",
+                      metric = my_metric,
+                      preProcess = c("center", "scale"),
+                      trControl = my_ctrl)
+enet_default
+```
+
+What do you think?  
+
+According to the data, when alpha=1, lambda=0.008321703 is the best, which shows tuning parameters are more corresponded to LASSO regression(Elastic net will equivalent to LASSO regression when coefficient = 1)
+
+### 5c)
+
+Create a custom tuning grid to further tune the elastic net `lambda` and `alpha` tuning parameters.  
+
+**Create a tuning grid with the `expand.grid()` function which has two columns named `alpha` and `lambda`. The `alpha` variable should have 9 evenly spaced values between 0.1 and 0.9. The `lambda` variable should have 25 evenly spaced values in the log-space between the minimum and maximum `lambda` values from the caret default tuning grid. Assign the tuning grid to the `enet_grid` object.**  
+
+**How many tuning parameter combinations are you trying out? How many total models will be fit assuming the 5-fold with 5-repeat resampling approach?**  
+
+#### SOLUTION
+
+```{r, solution_05c}
+### your code here
+enet_grid <- expand.grid(alpha = seq(0.1, 0.9, length.out = 9),
+                         lambda = exp(seq(log(min(enet_default$results$lambda)),
+                          log(max(enet_default$results$lambda)),
+                          length.out = 25)))
+enet_grid %>% nrow()
+```
+
+We tries 255 pairs of variables and are going to fit 5625 models.
+
+### 5d)
+
+**Train, assess, and tune the elastic net model with the custom tuning grid and assign the result to the `enet_tune` object. You should specify the arguments to `caret::train()` consistent with your solution in Problem 4b), except you should also assign `enet_grid` to the `tuneGrid` argument.**  
+
+**Do not print the result to the screen. Instead use the default plot method to visualize the resampling results. Assign the `xTrans` argument to `log` in the default plot method call. Use the `$bestTune` field to print the identified best tuning parameter values to the screen. Is the identified best elastic net model more similar to lasso or ridge regression?**  
+
+#### SOLUTION
+
+```{r, solution_05d, eval=TRUE}
+### add more code chunks if you'd like
+enet_tune <- train(y ~ (.)^3,
+                   data = df,
+                   method = "glmnet",
+                   metric = my_metric,
+                   preProcess = c("center", "scale"),
+                   trControl = my_ctrl,
+                   tuneGrid = enet_grid)
+```
+
+```{r, eval=TRUE}
+enet_tune %>% plot(xTrans = log)
+```
+
+```{r, eval=TRUE}
+enet_tune$bestTune
+```
+
+What do you think?  
+
+According to this data, it looks like so.
+
+
+### 5e)
+
+**Print the coefficients to the screen for the tuned elastic net model. Which coefficients are non-zero?**  
+
+#### SOLUTION
+
+```{r, solution_05e}
+### add more code chunks if you'd like
+coef(enet_tune$finalModel, s = enet_tune$bestTune$lambda)
+```
+
+What do you think?  
+
+Non-zero coefficients:
+(Intercept), x2, x3, x5, x6, x1:x2 ,x1:x6, x2:x6, x3:x5, x5:x6, x1:x2:x4, x1:x2:x5
+
+### 5f)
+
+`caret` provides several useful helper functions for ranking the features based on their influence on the response. This is known as ranking the variable importances and the `varImp()` function will extract the variable importances from a model for you. Wrapping the `varImp()` result with `plot()` will plot the variable importances with the importance values displayed in a relative scale with 100 corresponding to the most important variable.  
+
+**Plot the variable importances for your tuned elastic net model. Are the rankings consistent with the magnitude of the coefficients you printed to the screen in Problem 4e)?**  
+
+#### SOLUTION
+
+```{r, solution_5f}
+plot(varImp(enet_tune))
+```
+
+
+What do you think? 
+
+They are consistent with each other.

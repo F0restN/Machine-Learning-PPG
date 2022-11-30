@@ -1,0 +1,8 @@
+"0","set.seed(8123) "
+"0",""
+"0","post_pred_summary_linear <- summarize_logistic_pred_from_laplace(laplace_linear, Xmat_linear, 2500)"
+"0",""
+"0","post_pred_summary_cubic <- summarize_logistic_pred_from_laplace(laplace_cubic, Xmat_cubic, 2500)"
+"0",""
+"0","post_pred_summary_spline7 <- summarize_logistic_pred_from_laplace(laplace_spline7, Xmat_spline7, 2500)"
+"0","post_pred_summary_linear"

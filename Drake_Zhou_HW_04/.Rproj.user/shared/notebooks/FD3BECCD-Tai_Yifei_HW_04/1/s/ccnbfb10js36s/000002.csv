@@ -1,0 +1,8 @@
+"0","### your code here"
+"0","posterior_m_table <- tibble::tibble("
+"0","  mean = (posterior_table$a) / (posterior_table$a+posterior_table$b),"
+"0","  mode = (posterior_table$a - 1) / (posterior_table$a + posterior_table$b -2),"
+"0","  quantile_5 = qbeta(0.05, shape1 = posterior_table$a, shape2 = posterior_table$b),"
+"0","  quantile_95 = qbeta(0.95, shape1 = posterior_table$a, shape2 = posterior_table$b)"
+"0",")"
+"0","posterior_m_table"

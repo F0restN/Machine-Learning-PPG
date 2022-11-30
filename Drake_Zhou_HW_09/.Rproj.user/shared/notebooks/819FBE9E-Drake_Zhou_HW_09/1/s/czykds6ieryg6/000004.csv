@@ -1,0 +1,5 @@
+"0","Xmat_linear <- model.matrix(y ~ x, train_df)"
+"0",""
+"0","Xmat_cubic <- model.matrix(y ~ x + I(x^2) + I(x^3), train_df)"
+"0",""
+"0","Xmat_spline7 <- model.matrix(y ~ splines::ns(x, 7), train_df)"

@@ -1,0 +1,8 @@
+"0","model_pred_results %>%"
+"0","  group_by(model_name,Resample) %>%"
+"0","  roc_curve(obs, M) %>%"
+"0","  ggplot(aes(x = 1 - specificity, y = sensitivity))+"
+"0","  geom_path(aes(color = Resample)) + "
+"0","  geom_abline(slope = 1, intercept = 0, linetype = 'dotted') + "
+"0","  coord_equal() +"
+"0","  facet_wrap( ~ model_name)"

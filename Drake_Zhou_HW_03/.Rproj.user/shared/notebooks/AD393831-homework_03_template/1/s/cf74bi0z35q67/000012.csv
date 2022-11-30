@@ -1,0 +1,11 @@
+"0",""
+"0","mean(my_calcurve_1$pred_bin)"
+"2","Warning in mean.default(my_calcurve_1$pred_bin) :"
+"2","
+ "
+"2"," argument is not numeric or logical: returning NA
+"
+"1","[1]"
+"1"," NA"
+"1","
+"

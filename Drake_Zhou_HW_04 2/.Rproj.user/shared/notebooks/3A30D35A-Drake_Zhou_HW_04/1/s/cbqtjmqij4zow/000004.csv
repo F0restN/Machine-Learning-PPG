@@ -1,0 +1,6 @@
+"0","tibble::tibble("
+"0","  mu = seq(0, 1, length.out = 101)"
+"0",") %>% "
+"0","  mutate(inform_prior = dbeta(mu, a_inform, b_inform)) %>% "
+"0","  ggplot(mapping = aes(x = mu, y = inform_prior)) +"
+"0","  geom_line()"

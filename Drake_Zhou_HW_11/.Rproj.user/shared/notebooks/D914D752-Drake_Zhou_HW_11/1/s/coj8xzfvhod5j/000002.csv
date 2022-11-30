@@ -1,0 +1,4 @@
+"0","model_pred_results %>%"
+"0","  group_by(model_name) %>%"
+"0","  roc_curve(obs, M) %>%"
+"0","  autoplot()"

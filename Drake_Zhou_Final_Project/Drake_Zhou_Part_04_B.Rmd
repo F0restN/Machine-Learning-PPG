@@ -1,0 +1,257 @@
+---
+title: "Drake_Zhou_Part_04_B"
+author: "Drake Zhou"
+date: "4/26/2022"
+output: 
+  html_document: 
+    toc: true
+    number_sections: true
+    toc_float:
+      collapsed: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview & Preparation
+
+•You must identify which customers appear to be the hardest to predict in the regression and classification tasks.
+•Base your conclusions on the best performing regression and classification models.
+•You should base your conclusions on the resampled hold-out sets and NOT on the training set!
+•Thus, save your hold-out set predictions!
+
+## Package Import
+
+```{r, message=FALSE}
+library(caret)
+library(yardstick)
+library(tidyverse)
+```
+
+## Data Import
+
+```{r, message=FALSE}
+holdout <- readr::read_csv('final_project_holdout_inputs.csv', col_names = TRUE)
+holdout_inputs <- holdout %>% 
+  select(-rowid)
+
+df_all <- readr::read_csv("final_project_train.csv", col_names = TRUE)
+# standard_df_all <- df_all %>%
+#   select(starts_with("x"), region, customer) %>%
+#   mutate(outcome = factor(df_all$outcome, levels = c("event", "non_event")),
+#          region = df_all$region,
+#          customer = df_all$customer)
+df_all <- df_all %>%
+  select(-rowid) %>%
+  mutate(outcome = factor(outcome, levels = c("event", "non_event")))
+
+# Resampling
+train_id <- sample(1:nrow(df_all), size = floor(0.7 * nrow(df_all)))
+
+train_ready <- df_all %>% slice(train_id)
+test_ready <- df_all %>% slice(-train_id)
+# test_ready <- df_all %>% slice(-train_id) %>% select(c(-response, -outcome, -rowid))
+
+```
+
+# Model
+
+•You must identify which customers appear to be the hardest to predict in the regression and classification tasks.
+•Base your conclusions on the best performing regression and classification models.
+•You should base your conclusions on the resampled hold-out sets and NOT on the training set!
+•Thus, save your hold-out set predictions!
+
+## Model Import
+
+```{r}
+best_reg_mod <- readr::read_rds('models/fit_reg_enet_pair.rds')
+best_cls_mod <- readr::read_rds('models/fit_acc_cat_nnet_tune.rds')
+```
+
+## Model Predict
+
+### Regression model
+
+```{r}
+predict(best_reg_mod, test_ready) %>% head()
+```
+
+### Classification model
+
+```{r}
+predict(best_cls_mod, test_ready) %>% head()
+```
+
+
+# Interpretation
+
+## Based on Train-set
+
+### Function Preparation
+
+```{r, eval=TRUE}
+predict_df <- function(mod, test_data){
+  my_preds <- tibble::tibble(
+    y = predict(best_reg_mod, newdata = test_ready),
+    pred_outcome = predict(best_cls_mod, newdata = test_ready)
+  ) %>% 
+  bind_cols(
+    predict(best_cls_mod, newdata = test_ready, type = 'prob') %>% 
+      select(probability = event)
+  ) %>% 
+  tibble::rowid_to_column('id')
+
+  my_preds_all <- test_data %>%
+    mutate(pred_response = my_preds$y,
+           pred_outcome = factor(my_preds$pred_outcome, levels = c("event", "non_event")),
+           pred_prob = my_preds$probability) %>%
+    select(customer, response, pred_response, outcome, pred_outcome, pred_prob)
+}
+
+assess_mod <- function(my_preds_all){
+  rmse_cal <- my_preds_all %>%
+    group_by(customer) %>%
+    rmse(estimate = pred_response, truth = response)
+  
+  mae_cal <- my_preds_all %>%
+    group_by(customer) %>%
+    mae(estimate = pred_response, truth = response)
+  
+  rsq_cal <- my_preds_all %>%
+    group_by(customer) %>%
+    rsq(estimate = pred_response, truth = response)
+  
+  acc_cal <- my_preds_all %>%
+    group_by(customer) %>%
+    accuracy(estimate = pred_outcome, truth = outcome)
+  
+  final_result <- tibble::tibble(
+    customer = rmse_cal$customer,
+    rmse = rmse_cal$.estimate,
+    mae = mae_cal$.estimate,
+    rsq = rsq_cal$.estimate,
+    acc = acc_cal$.estimate
+  )
+}
+```
+
+```{r}
+mod_df_all <- predict_df(best_reg_mod, test_ready)
+mod_df <- mod_df_all %>% assess_mod()
+mod_df
+```
+
+```{r}
+
+mod_df %>%
+  select(-acc) %>%
+  pivot_longer(-c("customer")) %>%
+  ggplot(mapping = aes(y = customer, x = value, group = 1))+
+  geom_path()+
+  geom_point(size = 2.0)+
+  facet_grid(~name, scales = "free_x")+
+  labs(x = '')+
+  theme_bw()
+```
+
+According to figures above, in regression model, customer D and E are really hard to predict
+
+```{r}
+mod_df %>%
+  select(acc, customer) %>%
+  pivot_longer(-c("customer")) %>%
+  ggplot(mapping = aes(y = customer, x = value, group = 1))+
+  geom_linerange(mapping = aes(xmin = 0,
+                               xmax = value)) +
+  geom_point(size = 2.0)+
+  labs(x = '')+
+  theme_bw()
+```
+
+According to figures above, in regression model, customer Other and A are really hard to predict
+
+## Based on Holdout-set
+
+```{r}
+my_preds <- tibble::tibble(
+  customer = holdout_inputs$customer,
+  y = predict(best_reg_mod, newdata = holdout_inputs),
+  outcome = predict(best_cls_mod, newdata = holdout_inputs)
+) %>% 
+  bind_cols(
+    predict(best_cls_mod, newdata = holdout_inputs, type = 'prob') %>% 
+      select(probability = event)
+  ) %>% 
+  tibble::rowid_to_column('id')
+```
+
+```{r}
+my_preds %>% 
+  filter(customer == "A") %>%
+  readr::write_csv('metric/my_predict_A.csv', col_names = TRUE)
+my_preds %>% 
+  filter(customer == "B") %>%
+  readr::write_csv('metric/my_predict_B.csv', col_names = TRUE)
+my_preds %>% 
+  filter(customer == "D") %>%
+  readr::write_csv('metric/my_predict_D.csv', col_names = TRUE)
+my_preds %>% 
+  filter(customer == "E") %>%
+  readr::write_csv('metric/my_predict_E.csv', col_names = TRUE)
+my_preds %>% 
+  filter(customer == "G") %>%
+  readr::write_csv('metric/my_predict_G.csv', col_names = TRUE)
+my_preds %>% 
+  filter(customer == "M") %>%
+  readr::write_csv('metric/my_predict_M.csv', col_names = TRUE)
+my_preds %>% 
+  filter(customer == "Other") %>%
+  readr::write_csv('metric/my_predict_Other.csv', col_names = TRUE)
+my_preds %>% 
+  filter(customer == "Q") %>%
+  readr::write_csv('metric/my_predict_Q.csv', col_names = TRUE)
+```
+
+# Prediction Result Export 
+
+```{r}
+my_preds <- tibble::tibble(
+  customer = holdout_inputs$customer,
+  y = predict(best_reg_mod, newdata = holdout_inputs),
+  outcome = predict(best_cls_mod, newdata = holdout_inputs)
+) %>% 
+  bind_cols(
+    predict(best_cls_mod, newdata = holdout_inputs, type = 'prob') %>% 
+      select(probability = event)
+  ) %>% 
+  tibble::rowid_to_column('id')
+```
+
+```{r}
+my_preds %>% 
+  filter(customer == "A") %>%
+  readr::write_csv('metric/my_predict_A.csv', col_names = TRUE)
+my_preds %>% 
+  filter(customer == "B") %>%
+  readr::write_csv('metric/my_predict_B.csv', col_names = TRUE)
+my_preds %>% 
+  filter(customer == "D") %>%
+  readr::write_csv('metric/my_predict_D.csv', col_names = TRUE)
+my_preds %>% 
+  filter(customer == "E") %>%
+  readr::write_csv('metric/my_predict_E.csv', col_names = TRUE)
+my_preds %>% 
+  filter(customer == "G") %>%
+  readr::write_csv('metric/my_predict_G.csv', col_names = TRUE)
+my_preds %>% 
+  filter(customer == "M") %>%
+  readr::write_csv('metric/my_predict_M.csv', col_names = TRUE)
+my_preds %>% 
+  filter(customer == "Other") %>%
+  readr::write_csv('metric/my_predict_Other.csv', col_names = TRUE)
+my_preds %>% 
+  filter(customer == "Q") %>%
+  readr::write_csv('metric/my_predict_Q.csv', col_names = TRUE)
+```
+

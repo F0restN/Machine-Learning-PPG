@@ -1,0 +1,8 @@
+"0","### set the input arguments !!!"
+"0","log_binom_pmf_unnorm <- function(events, trials, prob)"
+"0","{"
+"0","  log_lik = log(prob^events * (1-prob) ^ (trials - events))"
+"0","  return (log_lik)"
+"0","}"
+"0",""
+"0","#log_binom_pmf_unnorm(player_hits, player_atbats, mu)"

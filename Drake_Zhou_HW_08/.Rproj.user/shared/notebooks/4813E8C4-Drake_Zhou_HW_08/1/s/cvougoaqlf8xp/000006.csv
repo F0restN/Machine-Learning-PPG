@@ -1,0 +1,4 @@
+"0","### add more code chunks if you like"
+"0","mod04 <- lm(y ~ (x1 + I(x1^2) + I(x1^3) + I(x1^4)) * (x2 + I(x2^2) + I(x2^3) + I(x2^4)), data = df)"
+"0",""
+"0","coefplot(mod04)"

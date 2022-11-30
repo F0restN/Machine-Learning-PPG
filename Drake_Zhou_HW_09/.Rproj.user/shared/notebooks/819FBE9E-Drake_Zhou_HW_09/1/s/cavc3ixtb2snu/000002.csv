@@ -1,0 +1,7 @@
+"0","small_laplace_from_weak <- my_laplace(rep(0, ncol(Xmat)), logistic_logpost, info_small_weak)"
+"0","small_laplace_from_weak$mode"
+"1","[1]"
+"1"," -12.52945"
+"1"," -20.29667"
+"1","
+"

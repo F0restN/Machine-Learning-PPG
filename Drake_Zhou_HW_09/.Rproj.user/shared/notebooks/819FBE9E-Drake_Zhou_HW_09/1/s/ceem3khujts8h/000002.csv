@@ -1,0 +1,2 @@
+"0","cor_weak <- small_laplace_from_weak$var_matrix %>% cov2cor()"
+"0","corrplot(cor_weak)"

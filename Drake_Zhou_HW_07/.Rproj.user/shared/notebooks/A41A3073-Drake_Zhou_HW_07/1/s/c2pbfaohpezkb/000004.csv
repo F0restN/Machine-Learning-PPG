@@ -1,0 +1,5 @@
+"0","set.seed(724412)"
+"0","all_spline_models <- purrr::map(spline_matrices$design_matrix, "
+"0","                                manage_spline_fit,"
+"0","                                logpost_func = lm_logpost,"
+"0","                                my_settings = info_02_train)"

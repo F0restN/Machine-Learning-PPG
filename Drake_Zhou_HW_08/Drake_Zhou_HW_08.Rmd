@@ -1,0 +1,1154 @@
+---
+title: "INFSCI 2595 Spring 2022 Homework: 08"
+subtitle: "Assigned March 24, 2022; Due: March 30, 2022"
+author: "Drake Zhou"
+date: "Submission time: March 30, 2022 at 11:00PM EST"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Collaborators
+
+Include the names of your collaborators here.  
+
+## Overview
+
+This homework assignment is focused on model complexity and the influence of the prior **regularization** strength. You will fit non-Bayesian and Bayesian linear models, compare them, and make predictions to visualize the trends. You will use multiple prior *strengths* to study the impact on the coefficient posteriors and on the posterior predictive distributions.  
+
+You are also introduced to non-Bayesian regularization with Lasso regression via the `glmnet` package. If you do not have `glmnet` installed please download it before starting the assignment.  
+
+**IMPORTANT**: code chunks are created for you. Each code chunk has `eval=FALSE` set in the chunk options. You **MUST** change it to be `eval=TRUE` in order for the code chunks to be evaluated when rendering the document.  
+
+You are allowed to add as many code chunks as you see fit to answer the questions.  
+
+## Load packages
+
+This assignment will use packages from the `tidyverse` suite as well as the `coefplot` package. Those packages are imported for you below.  
+
+```{r, load_packages}
+library(tidyverse)
+
+library(coefplot)
+```
+
+This assignment also uses the `splines` and `MASS` packages. Both are installed with base `R` and so you do not need to download any additional packages to complete the assignment.  
+
+The last question in the assignment uses the `glmnet` package. As stated previously, please download and install `glmnet` if you do not currently have it.  
+
+## Problem 01
+
+You will fit and compare 6 models of varying complexity using non-Bayesian methods. The unknown parameters will be be estimated by finding their Maximum Likelihood Estimates (MLE). You are allowed to the `lm()` function for this problem.  
+
+The data are loaded in the code chunk and a glimpse is shown for you below. There are 2 continuous inputs, `x1` and `x2`, and a continuous response `y`.  
+
+```{r, read_data}
+data_url <- 'https://raw.githubusercontent.com/jyurko/INFSCI_2595_Spring_2022/main/HW/08/hw08_data.csv'
+
+df <- readr::read_csv(data_url, col_names = TRUE)
+
+df %>% glimpse()
+```
+
+### 1a)
+
+**Create a scatter plot between the response, `y`, and each input using `ggplot()`.**  
+**Based on the visualizations, do you think there are trends between either input and the response?**  
+
+#### SOLUTION
+
+To be honest, it is really hard to figure out a trend between the inputs and response. But the figure of x2 looks like a parabola.
+
+```{r, solution_01a}
+df %>%
+  ggplot()+
+  geom_point(mapping = aes(x = x1, y=y, color = 'x1'))
+
+df %>%
+  ggplot()+
+  geom_point(mapping = aes(x = x2, y=y, color = 'x2'))
+```
+
+### 1b)
+
+You will fit multiple models of varying complexity in this problem. You will start with *linear additive features*.  
+
+**Fit a model with linear additive features to predict the response, `y`. Use the formula interface and the `lm()` function to fit the model. Assign the result to the `mod01` object.**  
+
+**Visualize the coefficient summaries with the `coefplot()` function. Are any of the features statistically significant?**  
+
+#### SOLUTION
+
+x1 could be statistically significant, since 0 is not contained within its confidence interval. Based on this principle, x2 is definitely not statistically significant.
+
+```{r, solution_01b, eval=TRUE}
+### add more code chunks if you like
+mod01 <- lm(y ~ x1+x2,  data = df)
+
+coefplot(model = mod01)
+```
+
+
+### 1c)
+
+As discussed in lecture, we can derive features from inputs. We have worked with polynomial features and spline-based features in previous assignments. Features can also be derived as the products between different inputs. A feature calculated as the product of multiple inputs is usually referred to as the **interaction** between those inputs.  
+
+In the formula interface, a product of two inputs is denoted by the `:`. And so if we wanted to include just the multiplication of `x1` and `x2` in a model we would type, `x1:x2`. We can then include **main-effect** terms by including the additive features within the formula. Thus, the formula for a model with additive features and the interaction between `x1` and `x2` is:  
+
+`y ~ x1 + x2 + x1:x2`  
+
+However, the formula interface provides a short-cut to create main effects and interaction features. In the formula interface, the `*` operator will generate all main-effects and all interactions for us.  
+
+**Fit a model with all main-effect and all-interaction features between `x1` and `x2` using the short-cut `*` operator within the formula interface. Assign the result to the `mod02` object.**  
+
+**Visualize the coefficient summaries with the `coefplot()` function. How many features are present in the model? Are any of the features statistically significant?**  
+
+#### SOLUTION
+
+We have 3 features and 1 intercept. All the presented 3 features are statistically significant because 0 is not contained within their confidence interval.
+
+```{r, solution_01c, eval=TRUE}
+### add more code chunks if you like
+mod02 <- lm(y ~ x1 * x2,  data = df)
+
+coefplot(model = mod02)
+```
+
+
+### 1d)
+
+The `*` operator will interact more than just inputs. We can interact expressions or groups of features together. To interact one group of features by another group of features, we just need to enclose each group by parenthesis, `()`, and separate them by the `*` operator. The line of code below shows how this works with the `<expression 1>` and `<expression 2>` as place holders for any expression we want to use.  
+
+`(<expression 1>) * (<expression 2>)`  
+
+**Fit a model which interacts linear and quadratic features from `x1` with linear and quadratic features from `x2`. Assign the result to the `mod03` object.**  
+
+**Visualize the coefficient summaries with the `coefplot()` function. How many features are present in the model? Are any of the features statistically significant?**  
+
+*HINT*: Remember to use the `I()` function when typing polynomials in the formula interface.  
+
+#### SOLUTION
+
+8 features are presented while only one of them is statistically significant which is the quadratic feature about x2 --- x2^2
+
+```{r, solution_01d, eval=TRUE}
+### add more code chunks if you like
+mod03 <- lm(y ~ (x1 + I(x1^2)) * (x2 + I(x2^2)),  data = df)
+coefplot(model = mod03)
+```
+
+### 1e)
+
+Let's now try a more complicated model.  
+
+**Fit a model which interacts linear, quadratic, cubic, quartic (4th degree) polynomial features from `x1` with linear, quadratic, cubic, and quartic (4th degree) polynomial features from `x2`. Assign the result to the `mod04` object.**  
+
+**Visualize the coefficient summaries with the `coefplot()` function. Are any of the features statistically significant?**  
+
+#### SOLUTION
+
+None of them is statistically significant.
+
+```{r, solution_01e, eval=TRUE}
+### add more code chunks if you like
+mod04 <- lm(y ~ (x1 + I(x1^2) + I(x1^3) + I(x1^4)) * (x2 + I(x2^2) + I(x2^3) + I(x2^4)), data = df)
+
+coefplot(mod04)
+```
+
+
+### 1f)
+
+Let's try using spline based features. We will use a high degree-of-freedom natural spline applied to `x1` and interact those features with polynomial features derived from `x2`.  
+
+**Fit a model which interacts 12 degree-of-freedom natural spline from `x1` with linear and quadrtic polyonomial features from `x2`. Assign the result to `mod05`.**  
+
+**Visualize the coefficient summaries with the `coefplot()` function. Are any of the features statistically significant?**  
+
+#### SOLUTION
+
+None of them is statistically significant.
+
+```{r, solution_01f, eval=TRUE}
+### add more code chunks if you like
+
+mod05 <- lm(y ~ splines::ns(x1, 12) * (x2 + I(x2^2)), data = df)
+
+coefplot(mod05)
+
+```
+
+
+### 1g)
+
+Let's fit one final model.  
+
+**Fit a model which interacts 12 degree-of-freedom natural spline from `x1` with linear, quadrtic, cubic, and quartic (4th degree) polyonomial features from `x2`. Assign the result to `mod05`.**  
+
+**Visualize the coefficient summaries with the `coefplot()` function. Are any of the features statistically significant?**  
+
+#### SOLUTION
+
+None of them is statistically significant.
+
+```{r, solution_01g, eval=TRUE}
+### add more code chunks if you like
+
+mod06 <- lm(y ~ splines::ns(x1, 12) * (x2 + I(x2^2) + I(x2^3) + I(x2^4)), data = df)
+
+coefplot(mod05)
+```
+
+
+### 1h)
+
+Now that you have fit multiple models of varying complexity, it is time to identify the best performing model.  
+
+**Identify the best model considering training set only performance metrics. Which model is best according to R-squared? Which model is best according to AIC? Which model is best according to BIC?**  
+
+*HINT*: The `brooom::glance()` function can be helpful here. The `broom` package is installed with `tidyverse` and so you should have it already.  
+
+#### SOLUTION
+
+As we can see through the figure, Mod03 is the best one since it has the lowest AIC and BIC value. Even though according to the R.square evaluation, Mod06 gets looks better than Mod03 but r.squared only represent the performance of a model for training set, which means mod06 could be overfitting. Besides, the high value of AIC and BIC of mod06 indicate that this model is way too complex and not worth it. Hence, we should choose mod03 as our best model.
+
+```{r, solution_01h}
+### extract the performance metrics on the training set with broom glance
+extract_metrics <- function(my_mod, mod_name)
+{
+  broom::glance(my_mod) %>% 
+    mutate(model_name = mod_name)
+}
+
+### Mapping result together
+all_model_metrics <- purrr::map2_dfr(list(mod01,mod02,mod03,mod04,mod05, mod06),
+                                     as.character(1:6),
+                                     extract_metrics)
+
+### Display the result
+all_model_metrics
+
+all_model_metrics %>% 
+  select(model_name, r.squared, AIC, BIC) %>% 
+  gather(key = "key", value = "value", -model_name) %>% 
+  ggplot(mapping = aes(x = model_name, y = value)) +
+  geom_line(mapping = aes(group = key)) +
+  geom_point(size = 2.5) +
+  facet_wrap(~key, scales = "free_y")
+```
+
+
+## Problem 02
+
+Now that you know which model is best, let's visualize the predictive trends from the six models. This will help us better understand their performance and behavior. 
+
+### 2a)
+
+You will define a prediction or visualization test grid. This grid will allow you to visualize behavior with respect to `x1` for multiple values of `x2`.  
+
+**Create a grid of input values where `x1` consists of 101 evenly spaced points between -3.2 and 3.2 and `x2` is 9 evenly spaced points between -3 and 3. The `expand.grid()` function is started for you and the data type conversion is provided to force the result to be a `tibble`.**  
+
+#### SOLUTION
+
+```{r, solution_02a, eval=TRUE}
+viz_grid <- expand.grid(x1 = seq(-3.2, 3.2, length.out = 101),
+                        x2 = seq(-3, 3, length.out = 9),
+                        KEEP.OUT.ATTRS = FALSE,
+                        stringsAsFactors = FALSE) %>% 
+  as.data.frame() %>% tibble::as_tibble()
+```
+
+
+### 2b)
+
+You will make predictions for each of the models and visualize their trends. A function, `tidy_predict()`, is created for you which assembles the predicted mean trend, the confidence interval, and the prediction interval into a `tibble` for you. The result include the input values to streamline making the visualizations.  
+
+```{r, make_tidy_predict_function}
+tidy_predict <- function(mod, xnew)
+{
+  pred_df <- predict(mod, xnew, interval = "confidence") %>% 
+    as.data.frame() %>% tibble::as_tibble() %>% 
+    dplyr::select(pred = fit, ci_lwr = lwr, ci_upr = upr) %>% 
+    bind_cols(predict(mod, xnew, interval = 'prediction') %>% 
+                as.data.frame() %>% tibble::as_tibble() %>% 
+                dplyr::select(pred_lwr = lwr, pred_upr = upr))
+  
+  xnew %>% bind_cols(pred_df)
+}
+```
+
+
+The first argument to the `tidy_predict()` function is a `lm()` model object and the second argument is new or test dataframe of inputs. When working with `lm()` and its `predict()` method, the functions will create the test design matrix consistent with the training design basis. It does so via the model object's formula which is contained within the `lm()` model object. The `lm()` object therefore takes care of the heavy lifting for us!  
+
+**Make predictions with each of the six models you fit in Problem 01 using the visualization grid, `viz_grid`. The predictions should be assigned to the variables `pred_lm_01` through `pred_lm_06` where the number is consistent with the model number fit previously.**  
+
+#### SOLUTION
+
+```{r, solution_02b, eval=TRUE}
+pred_lm_01 <- tidy_predict(mod01, viz_grid)
+
+pred_lm_02 <- tidy_predict(mod02, viz_grid)
+
+pred_lm_03 <- tidy_predict(mod03, viz_grid)
+
+pred_lm_04 <- tidy_predict(mod04, viz_grid)
+
+pred_lm_05 <- tidy_predict(mod05, viz_grid)
+
+pred_lm_06 <- tidy_predict(mod06, viz_grid)
+```
+
+
+### 2c)
+
+You will now visualize the predictive trends and the confidence and prediction intervals for each model. The `pred` column in of each `pred_lm_` objects is the predictive mean trend. The `ci_lwr` and `ci_upr` columns are the lower and upper bounds of the confidence interval, respectively. The `pred_lwr` and `pred_upr` columns are the lower and upper bounds of the prediction interval, respectively.  
+
+You will use `ggplot()` to visualize the predictions. You will use `geom_line()` to visualize the mean trend and `geom_ribbon()` to visualize the uncertainty intervals.  
+
+**Visualize the predictions of each model on the visualization grid. Pipe the `pred_lm_` object to `ggplot()` and map the `x1` variable to the x-aesthetic. Add three geometric object layers. The first and second layers are each `geom_ribbon()` and the third layer is `geom_line()`. In the `geom_line()` layer map the `pred` variable to the `y` aesthetic. In the first `geom_ribbon()` layer, map `pred_lwr` and `pred_upr` to the `ymin` and `ymax` aesthetics, respectively. Hard code the `fill` to be orange in the first `geom_ribbon()` layer (outside the `aes()` call). In the second `geom_ribbon()` layer, map `ci_lwr` and `ci_upr` to the `ymin` and `ymax` aesthetics, respectively. Hard code the `fill` to be `grey` in the second `geom_ribbon()` layer (outside the `aes()` call). Include `facet_wrap()` with the facets with controlled by the `x2` variable.**  
+
+**To help compare the visualizations across models include a `coord_cartesian()` layer with the `ylim` argument set to `c(-7,7)`.**  
+
+**Each model's prediction visualization should be created in a separate code chunk.**  
+
+#### SOLUTION
+
+Create separate code chunks for each visualization.
+```{r, solution_02c_01, eval=TRUE}
+pred_lm_01 %>%
+  ggplot(mapping = aes(x = x1))+
+  geom_ribbon(mapping = aes(ymin = pred_lwr, ymax = pred_upr), fill = 'orange')+
+  geom_ribbon(mapping = aes(ymin = ci_lwr, ymax = ci_upr), fill = 'grey')+
+  geom_line(mapping = aes(y = pred))+
+  coord_cartesian(ylim = c(-7,7))+
+  facet_wrap(~x2)
+```
+```{r, solution_02c_02, eval=TRUE}
+pred_lm_02 %>%
+  ggplot(mapping = aes(x = x1))+
+  geom_ribbon(mapping = aes(ymin = pred_lwr, ymax = pred_upr), fill = 'orange')+
+  geom_ribbon(mapping = aes(ymin = ci_lwr, ymax = ci_upr), fill = 'grey')+
+  geom_line(mapping = aes(y = pred))+
+  coord_cartesian(ylim = c(-7,7))+
+  facet_wrap(~x2)
+```
+```{r, solution_02c_03, eval=TRUE}
+pred_lm_03 %>%
+  ggplot(mapping = aes(x = x1))+
+  geom_ribbon(mapping = aes(ymin = pred_lwr, ymax = pred_upr), fill = 'orange')+
+  geom_ribbon(mapping = aes(ymin = ci_lwr, ymax = ci_upr), fill = 'grey')+
+  geom_line(mapping = aes(y = pred))+
+  coord_cartesian(ylim = c(-7,7))+
+  facet_wrap(~x2)
+```
+```{r, solution_02c_04, eval=TRUE}
+pred_lm_04 %>%
+  ggplot(mapping = aes(x = x1))+
+  geom_ribbon(mapping = aes(ymin = pred_lwr, ymax = pred_upr), fill = 'orange')+
+  geom_ribbon(mapping = aes(ymin = ci_lwr, ymax = ci_upr), fill = 'grey')+
+  geom_line(mapping = aes(y = pred))+
+  coord_cartesian(ylim = c(-7,7))+
+  facet_wrap(~x2)
+```
+```{r, solution_02c_05, eval=TRUE}
+pred_lm_05 %>%
+  ggplot(mapping = aes(x = x1))+
+  geom_ribbon(mapping = aes(ymin = pred_lwr, ymax = pred_upr), fill = 'orange')+
+  geom_ribbon(mapping = aes(ymin = ci_lwr, ymax = ci_upr), fill = 'grey')+
+  geom_line(mapping = aes(y = pred))+
+  coord_cartesian(ylim = c(-7,7))+
+  facet_wrap(~x2)
+```
+```{r, solution_02c_06, eval=TRUE}
+pred_lm_06 %>%
+  ggplot(mapping = aes(x = x1))+
+  geom_ribbon(mapping = aes(ymin = pred_lwr, ymax = pred_upr), fill = 'orange')+
+  geom_ribbon(mapping = aes(ymin = ci_lwr, ymax = ci_upr), fill = 'grey')+
+  geom_line(mapping = aes(y = pred))+
+  coord_cartesian(ylim = c(-7,7))+
+  facet_wrap(~x2)
+```
+
+### 2d)
+
+**Do you feel the predictions are consistent with the model performance rankings based on AIC/BIC? What is the defining characteristic of the models considered to be the worst by AIC/BIC?**  
+
+#### SOLUTION
+
+What do you think?  
+
+Yes, it consistent with the AIC and BIC ranking. As we can see through the figures, with the increase of degrees of freedom, the confidence interval is expanding and the prediction interval is shrinking. This means our performance is getting better. However, when we add too much features, the ribbons is start wiggling. This is because the model is trying to cover every single measurement and each measurement have many different ways to be reached since we have a lot of features. So the model is getting harder to reach a certain trend(mean trend) which is also a represent of worse model.
+
+## Problem 03
+
+Now that you have fit non-Bayesian linear models with maximum likelihood estimation, it is time to use Bayesian models to understand the influence of the prior on the model behavior.  
+
+Regardless of your answers in Problem 02 you will only work with model 3 and model 6 in this problem.  
+
+### 3a)
+
+You will perform the Bayesian analysis using the Laplace Approximation just as you did in the previous assignment. You will define the log-posterior function just as you did in the previous assignment and so before doing so you must create the list of required information. This list will include the observed response, the design matrix, and the prior specification. You will use independent Gaussian priors on the regression parameters with a shared prior mean and shared prior standard deviation. You will use an Exponential prior on the unknown likelihood noise (the $\sigma$ parameter).  
+
+**Complete the two code chunks below. In the first, create the design matrix following `mod03`'s formula, and assign the object to the `X03` variable. Complete the `info_03_weak` list by assigning the response to `yobs` and the design matrix to `design_matrix`. Specify the shared prior mean, `mu_beta`, to be 0, the shared prior standard deviation, `tau_beta`, as 50, and the rate parameter on the noise, `sigma_rate`, to be 1.**  
+
+**Complete the second code chunk with the same prior specification. The second code chunk however requires that you create the design matrix associated with `mod06`'s formula and assign the object to the `X06` variable. Assign `X06` to the `design_matrix` field of the `info_06_weak` list.**  
+
+#### SOLUTION
+
+```{r, solution_03a_a, eval=TRUE}
+X03 <- model.matrix(y ~ (x1 + I(x1^2)) * (x2 + I(x2^2)), data = df)
+
+info_03_weak <- list(
+  yobs = df$y,
+  design_matrix = X03,
+  mu_beta = 0,
+  tau_beta = 50,
+  sigma_rate = 1
+)
+```
+
+
+```{r, solution_03a_b, eval=TRUE}
+X06 <- model.matrix(y ~ splines::ns(x1, 12) * (x2 + I(x2^2) + I(x2^3) + I(x2^4)),data = df)
+
+info_06_weak <- list(
+  yobs = df$y,
+  design_matrix = X06,
+  mu_beta = 0,
+  tau_beta = 50,
+  sigma_rate = 1
+)
+```
+
+
+
+### 3b)
+
+You will now define the log-posterior function `lm_logpost()`. You will continue to use the log-transformation on $\sigma$, and so you will actually define the log-posterior in terms of the mean trend $\boldsymbol{\beta}$-parameters and the unbounded noise parameter, $\varphi = \log\left[\sigma\right]$.  
+
+The comments in the code chunk below tell you what you need to fill in. The unknown parameters to learn are contained within the first input argument, `unknowns`. You will assume that the unknown $\boldsymbol{\beta}$-parameters are listed before the unknown $\varphi$ parameter in the `unknowns` vector. You must specify the number of $\boldsymbol{\beta}$ parameters programmatically to allow scaling up your function to an arbitrary number of unknowns. You will assume that all variables contained in the `my_info` list (the second argument to `lm_logpost()`) are the same fields in the `info_03_weak` list you defined in Problem 3a).  
+
+**Define the log-posterior function by completing the code chunk below. You must calculate the mean trend, `mu`, using matrix math between the design matrix and the unknown $\boldsymbol{\beta}$ column vector.**  
+
+*HINT*: This function should look very famaliar...  
+
+#### SOLUTION
+
+```{r, solution_03b, eval=TRUE}
+lm_logpost <- function(unknowns, my_info)
+{
+  # specify the number of unknown beta parameters
+  length_beta <- ncol(my_info$design_matrix)
+  
+  # extract the beta parameters from the `unknowns` vector
+  beta_v <- unknowns[1:length_beta]
+  
+  # extract the unbounded noise parameter, varphi
+  lik_varphi <- unknowns[length_beta + 1]
+  
+  # back-transform from varphi to sigma
+  lik_sigma <- exp(lik_varphi)
+  
+  # extract design matrix
+  X <- my_info$design_matrix
+  
+  # calculate the linear predictor
+  mu <- as.vector(X %*% as.matrix(beta_v))
+  
+  # evaluate the log-likelihood
+  log_lik <- sum(dnorm(x = my_info$yobs,
+                       mean = mu,
+                       sd = lik_sigma,
+                       log = TRUE))
+  
+  # evaluate the log-prior
+  log_prior_beta <- sum(dnorm(x = beta_v,
+                              mean = my_info$mu_beta,
+                              sd = my_info$tau_beta,
+                              log = TRUE))
+  
+  log_prior_sigma <- dexp(x = lik_sigma,
+                          rate = my_info$sigma_rate)
+  
+  # add the mean trend prior and noise prior together
+  log_prior <- log_prior_beta + log_prior_sigma
+  
+  # account for the transformation
+  log_derive_adjust <- lik_varphi
+  
+  # sum together
+  log_lik + log_prior + log_derive_adjust
+}
+```
+
+
+### 3c)
+
+The `my_laplace()` function is defined for you in the code chunk below. This function executes the laplace approximation and returns the object consisting of the posterior mode, posterior covariance matrix, and the log-evidence.  
+
+```{r, define_my_laplace_func}
+my_laplace <- function(start_guess, logpost_func, ...)
+{
+  # code adapted from the `LearnBayes`` function `laplace()`
+  fit <- optim(start_guess,
+               logpost_func,
+               gr = NULL,
+               ...,
+               method = "BFGS",
+               hessian = TRUE,
+               control = list(fnscale = -1, maxit = 1001))
+  
+  mode <- fit$par
+  post_var_matrix <- -solve(fit$hessian)
+  p <- length(mode)
+  int <- p/2 * log(2 * pi) + 0.5 * log(det(post_var_matrix)) + logpost_func(mode, ...)
+  # package all of the results into a list
+  list(mode = mode,
+       var_matrix = post_var_matrix,
+       log_evidence = int,
+       converge = ifelse(fit$convergence == 0,
+                         "YES", 
+                         "NO"),
+       iter_counts = as.numeric(fit$counts[1]))
+}
+```
+
+
+**Execute the Laplace Approximation for the model 3 formulation and the model 6 formulation. Assign the model 3 result to the `laplace_03_weak` object, and assign the model 6 result to the `laplace_06_weak` object. Check that the optimization scheme converged.**  
+
+#### SOLUTION
+
+```{r, solution_03c_01}
+### add more code chunks if you like
+laplace_03_weak <- my_laplace(rep(0, ncol(X03)+1), lm_logpost, info_03_weak)
+laplace_03_weak$converge
+
+laplace_06_weak <- my_laplace(rep(0, ncol(X06)+1), lm_logpost, info_06_weak)
+laplace_06_weak$converge
+```
+
+
+### 3d)
+
+A function is defined for you in the code chunk below. This function creates a coefficient summary plot in the style of the `coefplot()` function, but uses the Bayesian results from the Laplace Approximation. The first argument is the vector of posterior means, and the second argument is the vector of posterior standard deviations. The third argument is the name of the feature associated with each coefficient.  
+
+```{r, make_coef_viz_function, eval=TRUE}
+viz_post_coefs <- function(post_means, post_sds, xnames)
+{
+  tibble::tibble(
+    mu = post_means,
+    sd = post_sds,
+    x = xnames
+  ) %>% 
+    mutate(x = factor(x, levels = xnames)) %>% 
+    ggplot(mapping = aes(x = x)) +
+    geom_hline(yintercept = 0, color = 'grey', linetype = 'dashed') +
+    geom_point(mapping = aes(y = mu)) +
+    geom_linerange(mapping = aes(ymin = mu - 2 * sd,
+                                 ymax = mu + 2 * sd,
+                                 group = x)) +
+    labs(x = 'feature', y = 'coefficient value') +
+    coord_flip() +
+    theme_bw()
+}
+```
+
+
+**Create the posterior summary visualization figure for model 3 and model 6. You must provide the posterior means and standard deviations of the regression coefficients (the $\beta$ parameters). Do NOT include the $\varphi$ parameter. The feature names associated with the coefficients can be extracted from the design matrix using the `colnames()` function.**  
+
+#### SOLUTION
+
+```{r, solution_03d_a}
+### make the posterior coefficient visualization for model 3
+post_means <- laplace_03_weak$mode[1:ncol(X03)]
+post_sd <- sqrt(diag(laplace_03_weak$var_matrix)[1:ncol(X03)])
+viz_post_coefs(post_means, post_sd, colnames(X03))
+```
+
+
+```{r, solution_03d_b}
+### make the posterior coefficient visualization for model 6
+post_means <- laplace_06_weak$mode[1:ncol(X06)]
+post_sd <- sqrt(diag(laplace_06_weak$var_matrix)[1:ncol(X06)])
+viz_post_coefs(post_means, post_sd, colnames(X06))
+```
+
+
+### 3e)
+
+**Use the Bayes Factor to identify the better of the models.**  
+
+#### SOLUTION
+
+Since bf is greater than 1, mod03 is greater than mod06
+
+```{r, solution_03e}
+### add more code chunks if you like
+bf <- exp(laplace_03_weak$log_evidence) / exp(laplace_06_weak$log_evidence)
+bf
+```
+
+
+### 3f)
+
+You fit the Bayesian models assuming a diffuse or *weak* prior. Let's now try a more informative or *strong* prior by reducing the prior standard deviation on the regression coefficients from 50 to 1. The prior mean will still be zero.  
+
+**Complete the first code chunk below, which defines the list of required information for both the model 3 and model 6 formulations using the strong prior on the regression coefficients. All other information, data and the $\sigma$ prior, are the same as before.**  
+
+**Run the Laplace Approximation using the strong prior for both the model 3 and model 6 formulations. Assign the results to `laplace_03_strong` and `laplace_06_strong`.**  
+
+**Confirm that the optimizations converged for both laplace approximation results.**  
+
+#### SOLUTION
+
+Define the lists of required information for the strong prior.  
+
+```{r, solution_03f_a, eval=TRUE}
+info_03_strong <- list(
+  yobs = df$y,
+  design_matrix = X03,
+  mu_beta = 0,
+  tau_beta = 1,
+  sigma_rate = 1
+)
+
+info_06_strong <- list(
+  yobs = df$y,
+  design_matrix = X06,
+  mu_beta = 0,
+  tau_beta = 1,
+  sigma_rate = 1
+)
+```
+
+
+Execute the Laplace Approximation.  
+
+```{r, solution_03f_b}
+### add more code chunks if you like
+### Laplace Approximation for mod03_strong
+laplace_03_strong <- my_laplace(rep(0,ncol(X03)+1), lm_logpost, info_03_strong)
+laplace_03_strong$converge
+
+### Laplace Approximation for mod06_strong
+laplace_06_strong <- my_laplace(rep(0,ncol(X06)+1), lm_logpost, info_06_strong)
+laplace_06_strong$converge
+```
+
+
+### 3g)
+
+**Use the `viz_post_coefs()` function to visualize the posterior coefficient summaries for model 3 and model 6, based on the strong prior specification.**  
+
+#### SOLUTION
+
+```{r, solution_03g}
+### add more code chunks if you like
+
+### mod03_strong
+post_means <- laplace_03_strong$mode[1:ncol(X03)]
+post_sd <- sqrt(diag(laplace_03_strong$var_matrix)[1:ncol(X03)])
+viz_post_coefs(post_means, post_sd, colnames(X03))
+
+### mod06_strong
+post_means <- laplace_06_strong$mode[1:ncol(X06)]
+post_sd <- sqrt(diag(laplace_06_strong$var_matrix)[1:ncol(X06)])
+viz_post_coefs(post_means, post_sd, colnames(X06))
+```
+
+
+### 3h)
+
+You will fit one more set of Bayesian models with a very strong prior on the regression coefficients. The prior standard deviation will be equal to 1/50.  
+
+**Complete the first code chunk below, which defines the list of required information for both the model 3 and model 6 formulations using the very strong prior on the regression coefficients. All other information, data and the $\sigma$ prior, are the same as before.**  
+
+**Run the Laplace Approximation using the strong prior for both the model 3 and model 6 formulations. Assign the results to `laplace_03_very_strong` and `laplace_06_very_strong`.**  
+
+**Confirm that the optimizations converged for both laplace approximation results.**  
+
+#### SOLUTION
+
+
+```{r, solution_03h_a, eval=TRUE}
+info_03_very_strong <- list(
+  yobs = df$y,
+  design_matrix = X03,
+  mu_beta = 0,
+  tau_beta = 1/50,
+  sigma_rate = 1
+)
+
+info_06_very_strong <- list(
+  yobs = df$y,
+  design_matrix = X06,
+  mu_beta = 0,
+  tau_beta = 1/50,
+  sigma_rate = 1
+)
+```
+
+
+Execute the Laplace Approximation.  
+
+```{r, solution_03h_b}
+### add more code chunks if you like
+laplace_03_very_strong <- my_laplace(rep(0, ncol(X03)+1), lm_logpost, info_03_very_strong) 
+laplace_03_very_strong$converge
+
+laplace_06_very_strong <- my_laplace(rep(0, ncol(X06)+1), lm_logpost, info_06_very_strong)
+laplace_06_very_strong$converge
+```
+
+### 3i)
+
+**Use the `viz_post_coefs()` function to visualize the posterior coefficient summaries for model 3 and model 6, based on the very strong prior specification.**  
+
+#### SOLUTION
+
+```{r, solution_03i}
+### mod03_strong
+post_means <- laplace_03_very_strong$mode[1:ncol(X03)]
+post_sd <- sqrt(diag(laplace_03_very_strong$var_matrix)[1:ncol(X03)])
+viz_post_coefs(post_means, post_sd, colnames(X03))
+
+### mod06_strong
+post_means <- laplace_06_very_strong$mode[1:ncol(X06)]
+post_sd <- sqrt(diag(laplace_06_very_strong$var_matrix)[1:ncol(X06)])
+viz_post_coefs(post_means, post_sd, colnames(X06))
+```
+
+
+### 3j)
+
+**Describe the influence of the regression coefficient prior standard deviation on the coefficient posterior distributions.**  
+
+#### SOLUTION
+
+What do you think?
+
+The posterior is a compromise between prior and likelihood, which ever more strong or precise will put more affection on the posterior. With a diffuse prior standard deviation, the model is basically set up without a "bound" which means the coefficient can be what ever it want to be. With a informative prior standard deviation, we set up a bound on the coefficient posterior, which means it has to be within the bound. However, since Gaussian distribution is a unimodal, regardless the bound and initial guess, we will reach a certain interval. And a reasonable informative prior standard deviation would not really mess up the model. However, if the prior standard deviation is too strong such as mean = 0, tau = 1/50, we are saying that the coefficient has to be between -1/50 and +1/50. As we can see through the figure, the coefficient value is so narrowed down, which could mess up a model that used to be good.
+
+### 3k)
+
+You previously compared the two models using the Bayes Factor based on the weak prior specification.  
+
+**Compare the performance of the two models with Bayes Factors again, but considering the results based on the strong and very strong priors. Does the prior influence which model is considered to be better?**  
+
+#### SOLUTIOn
+
+As we can see through the result. With a strong but relatively informative or reasonable prior standard deviation, the Bayes factor is still greater than 1 , which mean mod03 is still considered to be better than mod06. However, just like what I said above, if the prior standard deviation is too strong it will mess up the "right" model, Now the Bayes factor is less than one, which means mod06 is better than mod03. Yes the prior affect which model is better. By setting up a very strong prior, the flexibility in "right" model could be limited and wipe out the predicted mean trend. Hence, the model can not explain the observation any more which misguide us to choose a model with higher degree (under this certain case) cause it has higher flexibility.
+
+```{r, solution_03k}
+### add more code chunks if you like
+bf_strong = exp(laplace_03_strong$log_evidence) / exp(laplace_06_strong$log_evidence)
+bf_very_strong = exp(laplace_03_very_strong$log_evidence) / exp(laplace_06_very_strong$log_evidence)
+
+bf_strong
+bf_very_strong
+```
+
+
+## Problem 04
+
+
+You examined the behavior of the coefficient posterior based on the influence of the prior. Let's now consider the prior's influence by examining the posterior predictive distributions.  
+
+### 4a)
+
+You will make posterior predictions following the approach from the previous assignment. Posterior samples are generated and those samples are used to calculate the posterior samples of the mean trend and generate random posterior samples of the response around the mean. In the previous assignment, you made posterior predictions in order to calculate errors. In this assignment, you will not calculate errors, instead you will summarize the posterior predictions of the mean and of the random response.  
+
+The `generate_lm_post_samples()` function is defined for you below. It uses the `MASS::mvrnorm()` function generate posterior samples from the Laplace Approximation's MVN distribution.  
+
+```{r, make_lm_post_samples_func}
+generate_lm_post_samples <- function(mvn_result, length_beta, num_samples)
+{
+  MASS::mvrnorm(n = num_samples,
+                mu = mvn_result$mode,
+                Sigma = mvn_result$var_matrix) %>% 
+    as.data.frame() %>% tibble::as_tibble() %>% 
+    purrr::set_names(c(sprintf("beta_%02d", 0:(length_beta-1)), "varphi")) %>% 
+    mutate(sigma = exp(varphi))
+}
+
+```
+
+
+The code chunk below starts the `post_lm_pred_samples()` function. This function generates posterior mean trend predictions and posterior predictions of the response. The first argument, `Xnew`, is a potentially new or test design matrix that we wish to make predictions at. The second argument, `Bmat`, is a matrix of posterior samples of the $\boldsymbol{\beta}$-parameters, and the third argument, `sigma_vector`, is a vector of posterior samples of the likelihood noise. The `Xnew` matrix has rows equal to the number of predictions points, `M`, and the `Bmat` matrix has rows equal to the number of posterior samples `S`.  
+
+You must complete the function by performing the necessary matrix math to calculate the matrix of posterior mean trend predictions, `Umat`, and the matrix of posterior response predictions, `Ymat`. You must also complete missing arguments to the definition of the `Rmat` and `Zmat` matrices. The `Rmat` matrix replicates the posterior likelihood noise samples the correct number of times. The `Zmat` matrix is the matrix of randomly generated standard normal values. You must correctly specify the required number of rows to the `Rmat` and `Zmat` matrices.  
+
+The `post_lm_pred_samples()` returns the `Umat` and `Ymat` matrices contained within a list.  
+
+**Perform the necessary matrix math to calculate the matrix of posterior predicted mean trends `Umat` and posterior predicted responses `Ymat`. You must specify the number of required rows to create the `Rmat` and `Zmat` matrices.**  
+
+*HINT*: The following code chunk should look famaliar...  
+
+#### SOLUTION
+
+```{r, solution_04a, eval=TRUE}
+post_lm_pred_samples <- function(Xnew, Bmat, sigma_vector)
+{
+  # number of new prediction locations
+  M <- nrow(Xnew)
+  # number of posterior samples
+  S <- nrow(Bmat)
+  
+  # matrix of linear predictors
+  Umat <- Xnew %*% t(Bmat)
+  
+  # assmeble matrix of sigma samples, set the number of rows
+  Rmat <- matrix(rep(sigma_vector, M), M, byrow = TRUE)
+  
+  # generate standard normal and assemble into matrix
+  # set the number of rows
+  Zmat <- matrix(rnorm(M*S), M, byrow = TRUE)
+  
+  # calculate the random observation predictions
+  Ymat <- Umat + Zmat * Rmat
+  
+  # package together
+  list(Umat = Umat, Ymat = Ymat)
+}
+```
+
+
+### 4b)
+
+Since this assignment is focused on visualizing the predictions, we will summarize the posterior predictions to focus on the posterior means and the middle 95% uncertainty intervals. The code chunk below is defined for you which serves as a useful wrapper function to call `post_lm_pred_samples()`.  
+
+```{r, make_the_lm_pred_func}
+make_post_lm_pred <- function(Xnew, post)
+{
+  Bmat <- post %>% select(starts_with("beta_")) %>% as.matrix()
+  
+  sigma_vector <- post %>% pull(sigma)
+  
+  post_lm_pred_samples(Xnew, Bmat, sigma_vector)
+}
+```
+
+
+The code chunk below defines a function `summarize_lm_pred_from_laplace()` which manages the actions necessary to summarize posterior predictions. The first argument, `mvn_result`, is the Laplace Approximation object. The second object is the test design matrix, `Xtest`, and the third argument, `num_samples`, is the number of posterior samples to make.  
+
+You must complete the code chunk below which summarizes the posterior predictions. This function takes care of most of the coding for you. You do not have to worry about the generation of the posterior samples OR calculating the posterior quantiles associated with the middle 95% uncertainty interval. You must calculate the posterior average by deciding on whether you should use `colMeans()` or `rowMeans()` to calculate the average across all posterior samples per prediction location.  
+
+**Follow the comments in the code chunk below to complete the definition of the summarize_lm_pred_from_laplace() function. You must calculate the average posterior mean trend and the average posterior response.**  
+
+#### SOLUTION
+
+```{r, solution_04b, eval=TRUE}
+summarize_lm_pred_from_laplace <- function(mvn_result, Xtest, num_samples)
+{
+  # generate posterior samples of the beta parameters
+  post <- generate_lm_post_samples(mvn_result, ncol(Xtest), num_samples)
+  
+  # make posterior predictions on the test set
+  pred_test <- make_post_lm_pred(Xtest, post)
+  
+  # calculate summary statistics on the predicted mean and response
+  # summarize over the posterior samples
+  
+  # posterior mean, should you summarize along rows (rowMeans) or 
+  # summarize down columns (colMeans) ???
+  mu_avg <- rowMeans(pred_test$Umat)
+  y_avg <- rowMeans(pred_test$Ymat)
+  
+  # posterior quantiles for the middle 95% uncertainty intervals
+  mu_lwr <- apply(pred_test$Umat, 1, stats::quantile, probs = 0.025)
+  mu_upr <- apply(pred_test$Umat, 1, stats::quantile, probs = 0.975)
+  y_lwr <- apply(pred_test$Ymat, 1, stats::quantile, probs = 0.025)
+  y_upr <- apply(pred_test$Ymat, 1, stats::quantile, probs = 0.975)
+  
+  # book keeping
+  tibble::tibble(
+    mu_avg = mu_avg,
+    mu_lwr = mu_lwr,
+    mu_upr = mu_upr,
+    y_avg = y_avg,
+    y_lwr = y_lwr,
+    y_upr = y_upr
+  ) %>% 
+    tibble::rowid_to_column("pred_id")
+}
+```
+
+
+### 4c)
+
+When you made predictions in Problem 02, the `lm()` object handled making the test design matrix. However, since we have programmed the Bayesian modeling approach from scratch we need to create the test design matrix manually.  
+
+**Create the test design matrix based on the visualization grid, `viz_grid`, using the model 3 formulation. Assign the result to the `X03_test` object.**  
+
+**Call the `summarize_lm_pred_from_laplace()` function to summarize the posterior predictions from the model 3 formulation for the weak, strong, and very strong prior specifications. Use 5000 posterior samples for each case. Assign the results from the weak prior to `post_pred_summary_viz_03_weak`, the results from the strong prior to `post_pred_summary_viz_03_strong`, and the results from the very strong prior to `post_pred_summary_viz_03_very_strong`.**  
+
+#### SOLUTION
+
+```{r, solution_04c}
+### add as many code chunks as you'd like
+X03_test <- model.matrix( ~ (x1 + I(x1^2))*(x2 + I(x2^2)), data = viz_grid )
+  
+post_pred_summary_viz_03_weak <- summarize_lm_pred_from_laplace(laplace_03_weak, X03_test, 5000)
+
+post_pred_summary_viz_03_strong <-
+  summarize_lm_pred_from_laplace(laplace_03_strong, X03_test, 5000)
+
+post_pred_summary_viz_03_very_strong <- summarize_lm_pred_from_laplace(laplace_03_very_strong, X03_test, 5000)
+```
+
+
+### 4d)
+
+You will now visualize the posterior predictions from the model 3 Bayesian models associated with the weak, strong, and very strong priors. The `viz_grid` object is joined to the prediction dataframes assuming you have used the correct variable names!  
+
+**Visualize the predicted means, confidence intervals, and prediction intervals in the style of those that you created in Problem 02. The confidence interval bounds are `mu_lwr` and `mu_upr` columns and the prediction interval bounds are the `y_lwr` and `y_upr` columns, respectively. The posterior predicted mean of the mean is `mu_avg`.**  
+
+**Pipe the result of the joined dataframe into `ggplot()` and make appropriate aesthetics and layers to visualize the predictions with the `x1` variable mapped to the `x` aesthetic and the `x2` variable used as a facet variable.**  
+
+#### SOLUTION
+
+```{r, solution_04d_a, eval=TRUE}
+post_pred_summary_viz_03_weak %>% 
+  left_join(viz_grid %>% tibble::rowid_to_column("pred_id"),
+            by = 'pred_id') %>%
+  ggplot(mapping = aes(x = x1))+
+  geom_ribbon(mapping = aes(ymin = y_lwr, ymax = y_upr), fill = 'orange')+
+  geom_ribbon(mapping = aes(ymin = mu_lwr, ymax = mu_upr), fill = 'grey')+
+  geom_line(mapping = aes(y = mu_avg))+
+  coord_cartesian(ylim = c(-7,7))+
+  facet_wrap(~x2)
+```
+
+
+```{r, solution_04d_b, eval=TRUE}
+post_pred_summary_viz_03_strong %>% 
+  left_join(viz_grid %>% tibble::rowid_to_column("pred_id"),
+            by = 'pred_id') %>%
+  ggplot(mapping = aes(x = x1))+
+  geom_ribbon(mapping = aes(ymin = y_lwr, ymax = y_upr), fill = 'orange')+
+  geom_ribbon(mapping = aes(ymin = mu_lwr, ymax = mu_upr), fill = 'grey')+
+  geom_line(mapping = aes(y = mu_avg))+
+  coord_cartesian(ylim = c(-7,7))+
+  facet_wrap(~x2)
+```
+
+
+```{r, solution_04d_c, eval=TRUE}
+post_pred_summary_viz_03_very_strong %>% 
+  left_join(viz_grid %>% tibble::rowid_to_column("pred_id"),
+            by = 'pred_id') %>%
+  ggplot(mapping = aes(x = x1))+
+  geom_ribbon(mapping = aes(ymin = y_lwr, ymax = y_upr), fill = 'orange')+
+  geom_ribbon(mapping = aes(ymin = mu_lwr, ymax = mu_upr), fill = 'grey')+
+  geom_line(mapping = aes(y = mu_avg))+
+  coord_cartesian(ylim = c(-7,7))+
+  facet_wrap(~x2)
+```
+
+
+### 4e)
+
+In order to make posterior predictions for the model 6 formulation you must create a test design matrix consistent with the training set basis. The code chunk below creates a helper function which extracts the knots of a natural spline associated with the training set for you. The first argument, `J`, is the degrees-of-freedom of the spline, the second argument, `train_data`, is the training data set. The third argument `xname` is the name of the variable you are applying the spline to. The `xname` argument **must** be provided as a character string.  
+
+```{r, make_knots_get_function}
+make_splines_training_knots <- function(J, train_data, xname)
+{
+  x <- train_data %>% select(all_of(xname)) %>% pull()
+  
+  train_basis <- splines::ns(x, df = J)
+  
+  as.vector(attributes(train_basis)$knots)
+}
+```
+
+
+**Create the test design matrix based on the visualization grid, `viz_grid`, using the model 6 formulation. Assign the result to the `X06_test` object. Use the `make_splines_training_knots()` to get the necessary knots associated with the training set for the `x1` variable to create the test design matrix.**  
+
+**Call the `summarize_lm_pred_from_laplace()` function to summarize the posterior predictions from the model 6 formulation for the weak, strong, and very strong prior specifications. Use 5000 posterior samples for each case. Assign the results from the weak prior to `post_pred_summary_viz_06_weak`, the results from the strong prior to `post_pred_summary_viz_06_strong`, and the results from the very strong prior to `post_pred_summary_viz_06_very_strong`.**  
+
+#### SOLUTION
+
+```{r, solution_04e}
+### add as many code chunks as you'd like
+knots <- make_splines_training_knots(12, df, 'x1')
+X06_test <- model.matrix( ~ splines::ns(x1, knots = knots) * (x2 + I(x2 ^2) + I(x2^3) + I(x2^4)), data = viz_grid)
+
+post_pred_summary_viz_06_weak <- summarize_lm_pred_from_laplace(laplace_06_weak, X06_test, 5000)
+
+post_pred_summary_viz_06_strong <-
+  summarize_lm_pred_from_laplace(laplace_06_strong, X06_test, 5000)
+
+post_pred_summary_viz_06_very_strong <- summarize_lm_pred_from_laplace(laplace_06_very_strong, X06_test, 5000)
+```
+
+
+### 4f)
+
+You will now visualize the posterior predictions from the model 6 Bayesian models associated with the weak, strong, and very strong priors. The `viz_grid` object is joined to the prediction dataframes assuming you have used the correct variable names!  
+
+**Visualize the predicted means, confidence intervals, and prediction intervals in the style of those that you created in Problem 02. The confidence interval bounds are `mu_lwr` and `mu_upr` columns and the prediction interval bounds are the `y_lwr` and `y_upr` columns, respectively. The posterior predicted mean of the mean is `mu_avg`.**  
+
+**Pipe the result of the joined dataframe into `ggplot()` and make appropriate aesthetics and layers to visualize the predictions with the `x1` variable mapped to the `x` aesthetic and the `x2` variable used as a facet variable.**  
+
+#### SOLUTION
+
+```{r, solution_04f_a, eval=TRUE}
+post_pred_summary_viz_06_weak %>% 
+  left_join(viz_grid %>% tibble::rowid_to_column("pred_id"),
+            by = 'pred_id') %>%
+  ggplot(mapping = aes(x = x1))+
+  geom_ribbon(mapping = aes(ymin = y_lwr, ymax = y_upr), fill = 'orange')+
+  geom_ribbon(mapping = aes(ymin = mu_lwr, ymax = mu_upr), fill = 'grey')+
+  geom_line(mapping = aes(y = mu_avg))+
+  coord_cartesian(ylim = c(-7,7))+
+  facet_wrap(~x2)
+```
+
+
+```{r, solution_04f_b, eval=TRUE}
+post_pred_summary_viz_06_strong %>% 
+  left_join(viz_grid %>% tibble::rowid_to_column("pred_id"),
+            by = 'pred_id') %>%
+  ggplot(mapping = aes(x = x1))+
+  geom_ribbon(mapping = aes(ymin = y_lwr, ymax = y_upr), fill = 'orange')+
+  geom_ribbon(mapping = aes(ymin = mu_lwr, ymax = mu_upr), fill = 'grey')+
+  geom_line(mapping = aes(y = mu_avg))+
+  coord_cartesian(ylim = c(-7,7))+
+  facet_wrap(~x2)
+```
+
+
+```{r, solution_04f_c, eval=TRUE}
+post_pred_summary_viz_06_very_strong %>% 
+  left_join(viz_grid %>% tibble::rowid_to_column("pred_id"),
+            by = 'pred_id') %>%
+  ggplot(mapping = aes(x = x1))+
+  geom_ribbon(mapping = aes(ymin = y_lwr, ymax = y_upr), fill = 'orange')+
+  geom_ribbon(mapping = aes(ymin = mu_lwr, ymax = mu_upr), fill = 'grey')+
+  geom_line(mapping = aes(y = mu_avg))+
+  coord_cartesian(ylim = c(-7,7))+
+  facet_wrap(~x2)
+```
+
+
+### 4g)
+
+**Describe the behavior of the predictions as the prior standard deviation decreased. Are the posterior predictions consistent with the behavior of the posterior coefficients?**  
+
+#### SOLUTION
+
+What do you think?  
+
+Yes, they are the same. Posterior is a compromise between prior and likelihood. With a very strong prior standard deviation, the output were also restricted between a very narrow space(center on prior mean.) Hence, we can see the interval is shrinking.
+
+## Problem 05
+
+Now that you have worked with Bayesian models with the prior *regularizing* the coefficients, you will consider non-Bayesian regularization methods. You will work with the `glmnet` package in this problem which takes care of all fitting and visualization for you.  
+
+The code chunk below loads in `glmnet` and so you must have `glmnet` installed before running this code chunk. **IMPORANT**: the `eval` flag is set to FALSE below. Once you download `glmnet` set `eval=TRUE`.  
+
+```{r, load_glmnet, eval=TRUE}
+library(glmnet)
+```
+
+
+### 5a)
+
+`glmnet` does not work with the formula interface. And so you must create the training design matrix. However, `glmnet` prefers the the intercept column of ones to **not** be included in the design matrix. To support that you must define new design matrices. These matrices will use the same formulation but you must remove the intercept column. This is easy to do with the formula interface and the `model.matrix()` function. Include `- 1` in the formula and `model.matrix()` will not include the intercept. The code chunk below demonstrates removing the intercept column for a model with linear additive features.  
+
+```{r, show_removing_intercept_col}
+model.matrix( y ~ x1 + x2 - 1, data = df) %>% head()
+```
+
+
+**Create the design matrices for `glmnet` for the model 3 and model 6 formulations. Remove the intercept column for both and assign the results to `X03_glmnet` and `X06_glmnet`.**  
+
+#### SOLUTION
+
+```{r, solution_05a, eval=TRUE}
+### add more code chunks if you prefer
+X03_glmnet <- model.matrix(y ~ (x1 + I(x1 ^2)) *(x2 + I(x2^2)) -1, data = df)
+colnames(X03_glmnet)
+
+X06_glmnet <- model.matrix(y ~ splines::ns(x1, 12) * (x2 + I(x2^2) + I(x2^3) + I(x2^4)) -1, data =df)
+colnames(X06_glmnet)
+```
+
+
+### 5b)
+
+By default `glmnet` uses the **lasso** penalty. Fit a Lasso model by calling `glmnet()`. The first argument to `glmnet()` is the design matrix and the second argument is a regular vector for the response.  
+
+**Train a Lasso model for the model 3 and model 6 formulations, assign the results to `lasso_03` and `lasso_06`, respectively.**  
+
+#### SOLUTION
+
+```{r, solution_05b}
+### add more code chunks if you like
+lasso_03 <- glmnet(X03_glmnet, df$y)
+lasso_06 <- glmnet(X06_glmnet, df$y)
+```
+
+
+### 5c)
+
+**Plot the coefficient path for each Lasso model by calling the `plot()` function on the `glmnet` model object. Specify the `xvar` argument to be `'lambda'` in the `plot()` call.**  
+
+#### SOLUTION
+
+```{r, solution_05c, eval=TRUE}
+plot(lasso_03, xvar = 'lambda', label = TRUE)
+plot(lasso_06, xvar = 'lambda', label = TRUE)
+```
+
+
+### 5d)
+
+Now that you have visualized the coefficient path, it's time to identify the best `'lambda'` value to use! The `cv.glmnet()` function will by default use 10-fold cross-validation to tune `'lambda'`. The first argument to `cv.glmnet()` is the design matrix and the second argument is the regular vector for the response.  
+
+**Tune the Lasso regularization strength with cross-validation using the `cv.glmnet()` function for each model formulation. Assign the model 3 result to `lasso_03_cv_tune` and assign the model 6 result to `lasso_06_cv_tune`. Also specify the `alpha` argument to be 1 to make sure the Lasso penalty is applied in the `cv.glmnet()` call.**  
+
+#### SOLUTION
+
+```{r, solution_05d}
+### add more code chunks if you like
+lasso_03_cv_tune <- cv.glmnet(X03_glmnet, df$y, alpha = 1)
+lasso_06_cv_tune <- cv.glmnet(X06_glmnet, df$y, alpha = 1)
+```
+
+
+### 5e)
+
+**Plot the cross-validation results using the default plot method for each cross-validation result. How many coefficients are remaining after tuning?**  
+
+#### SOLUTION
+
+The dotted line mark out those model within one standard error away from the model with minimum error. Since we can't really differentiate them in practical, the one-standard error principle asks us to pick the simplest model. For mod03 it would be the one with only one feature, which means 7 features were turned off. For mod06 it is the one with only one feature as well, which means 63 features were turned off.
+
+```{r, solution_05e, eval=TRUE}
+### add more code chunks if you like
+plot(lasso_03_cv_tune)
+plot(lasso_06_cv_tune)
+```
+
+
+### 5f)
+
+**Which features have NOT been "turned off" by the Lasso penalty? Use the `coef()` function to display the lasso model cross-validation results to show the tuned penalized regression coefficients for each model.**  
+**Are the final tuned models different from each other?**  
+
+#### SOLUTION
+
+The final tuned models are same for both models. As we can see below, the only left feature is x2 square for both model. 
+
+```{r, solution_05f_01, eval=TRUE}
+### For mod03
+coef(lasso_03_cv_tune)
+```
+```{r, solution_05f_02, eval=TRUE}
+coef(lasso_06_cv_tune)
+```
+
+

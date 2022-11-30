@@ -1,0 +1,2 @@
+"0","set.seed(87123)"
+"0","post_samples_01 <- generate_lm_post_samples(laplace_01, ncol(info_01$design_matrix), 2500)"

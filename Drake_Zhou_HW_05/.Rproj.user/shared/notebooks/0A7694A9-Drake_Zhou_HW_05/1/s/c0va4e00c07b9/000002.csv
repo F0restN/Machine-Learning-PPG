@@ -1,0 +1,5 @@
+"0",""
+"0","trials_req = function(t0, tN, sig) {"
+"0","  return ( sig^2 * (t0^2 - tN^2) / (tN^2 * t0^2) )"
+"0","}"
+"0",""

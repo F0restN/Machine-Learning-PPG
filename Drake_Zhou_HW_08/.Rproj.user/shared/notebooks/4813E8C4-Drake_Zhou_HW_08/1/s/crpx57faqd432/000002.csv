@@ -1,0 +1,8 @@
+"0","make_splines_training_knots <- function(J, train_data, xname)"
+"0","{"
+"0","  x <- train_data %>% select(all_of(xname)) %>% pull()"
+"0","  "
+"0","  train_basis <- splines::ns(x, df = J)"
+"0","  "
+"0","  as.vector(attributes(train_basis)$knots)"
+"0","}"

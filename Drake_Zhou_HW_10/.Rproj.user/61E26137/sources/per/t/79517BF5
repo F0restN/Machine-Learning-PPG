@@ -1,0 +1,28 @@
+{
+    "id": "79517BF5",
+    "path": null,
+    "project_path": null,
+    "type": "object_explorer",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1649900907179.0,
+    "source_on_save": false,
+    "relative_order": 7,
+    "properties": {
+        "id": "cdbd73262d8847d38f1e74444dab2ab9",
+        "name": "nnet_default",
+        "title": "nnet_default",
+        "language": "R",
+        "source_window_id": "",
+        "Source": "Source"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 7957705966486450025,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1649900907179,
+    "read_only": false,
+    "read_only_alternatives": []
+}

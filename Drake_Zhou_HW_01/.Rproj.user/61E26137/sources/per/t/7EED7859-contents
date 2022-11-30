@@ -1,0 +1,432 @@
+---
+title: "INFSCI 2595 Spring 2022 Homework: 01"
+subtitle: "Assigned January 12, 2022; Due: January 19, 2022"
+author: "Drake Zhou (Yuxuan Zhou)"
+date: "Submission time: January 19, 2022 at 11:00PM EST"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Collaobrators
+
+Include the names of your collaborators here.  
+ h
+## Overview
+
+This assignment steps through programming syntax with `ggplot2` and introduces the formula interface with the `lm()` function. The grammar of graphics can help create meaningful visualizations which communicate Exploratory Data Analysis (EDA) findings. Visualizations will provide context to the model results, which might be opaque and difficult to interpret. In this assignment you will demonstrate basic syntax, go through a detailed EDA of a common data set, and then begin to work through the syntax of fitting a model.    
+
+If you need help with understanding the R syntax please see the [R4DS book](https://r4ds.had.co.nz/) and/or the R tutorial videos and demos available on the [Canvas site](https://canvas.pitt.edu/courses/147381/pages/introduction-to-r-tutorials).  
+
+**IMPORTANT**: code chunks are created for you. Each code chunk has `eval=FALSE` set in the chunk options. You **MUST** change it to be `eval=TRUE` in order for the code chunks to be evaluated when rendering the document.  
+
+## Load packages
+
+The `tidyverse` is loaded in for you in the code chunk below. The visualization package, `ggplot2`, and the data manipulation package, `dplyr`, are part of the "larger" `tidyverse`.  
+
+```{r, load_packages}
+library(tidyverse)
+```
+
+## Problem 01
+
+This problem introduces key syntax of the grammar of graphics in `ggplot2` with the `iris` data set. The `simple_r_intro.html` available on Canvas demonstrates visualizations in `ggplot2` with the `iris`. Going through that document will help with this problem.  
+
+### 1a)
+
+**Create a histogram for `Sepal.Length` from `iris` with 6 bins.**  
+
+#### SOLUTION
+
+```{r, solution_01a}
+### your code here
+iris %>% 
+  ggplot(mapping = aes(x = Sepal.Length)) +
+  geom_histogram(bins = 6)
+```
+
+### 1b)
+
+By default, a `ggplot2` histogram does not show the lines associated with each bin (as in a bar graph). The histogram effectively looks like a discretized distribution. To adjust this, we need to override the default `fill` and `color` arguments to the `geom_histogram()` function. Note that within `ggplot2`, color is applied to line-like objects and points while fill is applied to whole areas of the graph (think "fill in an area"). Thus, you can have substantial control over how color is used to visually present information within a graphic.  
+
+Even though an aesthetic can be linked to a variable, some aesthetics can be modified "manually" and not associated with any variables within the dataset. We use the same type of argument, but we set that argument outside of the `aes()` function.  
+
+**To see how this works, type `color = "black"` within the `geom_histogram()` call. Be careful about your commas!**  
+
+#### SOLUTION
+
+```{r, solution_01b}
+### your code here
+iris %>% 
+  ggplot(mapping = aes(x = Sepal.Length)) +
+  geom_histogram(bins = 6, color = "black")
+```
+
+### 1c)
+
+`ggplot2` has many "named" colors available for use. If you really want to fine tune your colors you are free to use the hex color codes! In this course, we will typically stick with common colors when we manually pick a color and/or fill.  
+
+**To make the difference between color and fill explicit within the histogram, change the color to `color = "navyblue"` and modify the histogram's fill by setting `fill = "gold"`.**  
+
+#### SOLUTION
+
+```{r, solution_01c}
+### your code here
+iris %>%
+  ggplot(mapping = aes(x = Sepal.Length))+
+  geom_histogram(color = "navyblue", fill = "gold")
+
+```
+
+### 1d)
+
+We can alter the size or thickness of the lines around each bin with the `size` argument.  
+
+**Set `size = 1.55` within the `geom_histogram()` call (using the same color scheme from Problem 1c)).**  
+
+#### SOLUTION
+
+```{r, solution_01d}
+### your code here
+iris %>%
+  ggplot(mapping = aes(x = Sepal.Length))+
+  geom_histogram(color = "navyblue", fill = "gold", size = 1.55)
+```
+
+### 1e)
+
+Lastly, the transparency of geometric objects can be altered with the `alpha` argument.  
+
+**Set the transparency to `alpha = 0.5` within the `geom_histogram()` call.**  
+
+#### SOLUTION
+
+```{r, solution_01e}
+### your code here
+iris %>%
+  ggplot(mapping = aes(x = Sepal.Length))+
+  geom_histogram(color = "navyblue", fill = "gold", alpha = 0.5)
+```
+
+## Problem 02
+
+In this problem, we will introduce another very important geom, the boxplot, which provides a quick visual display of useful summary statistics for continuous variables (`"numeric"`s). Compared with the histogram which focuses on displaying the *shape* of the distribution, the boxplot allows us to visually relate the median with the 25th and 75th quantiles, as well as outliers. We get an idea about the central tendency of the variable, as well as a rough guide for the "meaningful" range.  
+
+To demonstrate the usefulness of the boxplot, we will use the `diamonds` dataset from `ggplot2`.  
+
+### 2a)
+
+**Pipe `diamonds` into the `glimpse()` function to display the dimensions and datatypes associated with the variables within the dataset.**  
+
+#### SOLUTION
+
+```{r, solution_02a}
+### your code here
+diamonds %>%
+  glimpse()
+```
+
+### 2b)
+
+The variable `price` gives the cost of a diamond in US dollars, while the other variables provide attributes associated with a diamond. A natural question to ask then is: *What variables influence the price?* If you have purchased a diamond before, you may have heard about the "4 C's": cut, color, clarity, and carat. We will explore the behavior of `price` with respect to these 4 variables.  
+
+The first three of these are all factors (the `"ord"` data type is a special ordered factor which as the name states has a natural ordering of the categorical levels) within the `diamonds` dataset, while `carat` is a `"numeric"` variable. With a boxplot, we group a continuous variable based on a categorical variable, and display summary statistics associated with the continuous variable for each categorical level. Therefore, the boxplot geom is another geometric object which performs multiple operations behind the scenes. If you have not worked boxplots before, I recommend Chapter 7 of the [R for Data Science](https://r4ds.had.co.nz/) book.  
+
+Let's start by visualizing the relationship between `price` and `color`.  
+
+**Pipe `diamonds` into `ggplot()` and set the `x` and `y` aesthetics to `color` and `price`, respectively. Then, call `geom_boxplot()`. What conclusion would you draw based on the resulting figure?**  
+
+#### SOLUTION
+
+```{r, solution_02b}
+### your code here
+diamonds %>%
+  ggplot() +
+  geom_boxplot(mapping = aes(x=color, y=price))
+```
+
+Discuss your conclusions here. 
+1. From the median perspective: based on the plot above, color J has the highest median while the color E gets the lowest median.
+2. The interquartile range reflect the level of fluctuation, hence color E is more stable while G is unsteady.
+3. E has most outliers while I has minimum.
+4. All the colors are very likely to be right skewed.
+
+### 2c)
+
+Next, we will include the influence of the `cut` variable breaking up the graphic into separate subplots based on the levels of `cut`.  
+
+**Add the `facet_wrap()` call to the code from Problem 2b), and set the facetting variable to be `cut`.**  
+
+#### SOLUTION
+
+```{r, solution_02c}
+### your code here
+diamonds %>%
+  ggplot(mapping = aes(x=color, y=price))+
+  geom_boxplot()+
+  facet_wrap(~cut)
+```
+
+### 2d)
+
+In addition to the `facet_wrap()` function, we can create subplots with the `facet_grid()` function. As the name suggests, `facet_grid()` creates a 2D grid layout where each subplot corresponds to a combination of two facetting variables. As with `facet_wrap()`, the syntax uses the formula interface: `facet_grid(<vertical variable> ~ <horizontal variable>)`. The variable provided to the left of the `~` varies top-to-bottom (vertically), while the variable to the right of the `~` changes left-to-right (horizontally).  
+
+**To see how this works, use `facet_grid()` instead of `facet_wrap()` and set the facetting variables to be `clarity` and `cut` for the vertical and horizontal directions, respectively.**  
+
+#### SOLUTION
+
+```{r, solution_02d}
+### your code here
+diamonds %>%
+  ggplot(mapping = aes(x=color, y=price))+
+  geom_boxplot()+
+  facet_grid(clarity ~ cut)
+```
+
+### 2e)
+
+The resulting figure in Problem 2d) includes 3 out of the 4 C's. The remaining variable, `carat`, is not categorical. To include `carat` in our figure, let's discretize it and compare two boxplots side-by-side at each `color` level within each `clarity` and `cut` subplot combination. For now, we will keep things simple and break up `carat` based on if an observation has a value greater than the median `carat` value.  
+
+**Within the `geom_boxplot()` function, set the `fill` aesthetic to be a conditional test: `carat > median(carat)`. As shown in the supplemental reading material, use the `theme()` function to move the legend position to the top of the graphic.**  
+
+*Note*: It might be difficult to see everything within the graphic window dispalyed in the result after the code chunk, when working within the .Rmd file in the RStudio IDE. You can zoom in by clicking on the "Show in New Window" icon which is displayed as the small "arrow over paper" icon to the right hand size of the output portion. Alternatively, the figure dimensions can be modified by the code chunk parameters `fig.width` and `fig.height`. **For this assignment, it is ok to use the default figure dimensions.**  
+
+#### SOLUTION
+
+```{r, solution_02e}
+### your code here
+diamonds %>%
+  ggplot( mapping = aes(x=color, y=price) ) + 
+  geom_boxplot(mapping = aes(x=color, y=price, fill = carat>median(carat)))+
+  theme(legend.position = "top")
+```
+
+### 2f)
+
+Due to the large number of subplots, the individual facets are quite small with the default figure size. Let's focus on the case with `cut == "Ideal"` and `clarity == "IF"` by calling `filter()` before piping the dataset into the `ggplot()`.  
+
+**Pipe `diamonds` into `filter()` and perform the necessary operation. Pipe the resulting dataset into the same `ggplot2` function calls used in Problem 2e), except for one important change. The `filter()` call will reduce the dataset, and thus our conditional test will be comparing `carat` to the median value associated with the smaller dataset. To force the conditional test to still be applied to the median based on the complete dataset use `median(diamonds$carat)` within the conditional test instead of `median(carat)`.**  
+
+#### SOLUTION
+
+```{r, solution_02f}
+### your code here
+
+diamonds %>%
+filter(cut=="Ideal", clarity=="IF") %>%
+  ggplot( mapping = aes(x=color, y=price) ) + 
+  geom_boxplot(mapping = aes(x=color, y=price, fill = carat>median(diamonds$carat)))+
+  theme(legend.position = "top")
+```
+
+### 2g)
+
+**Discuss the differences between the trends shown in the resulting figure in Problem 2f) with the trends shown in the figure in Problem 2b).**  
+
+#### SOLUTION
+
+Type your discussion here.  
+
+Compare to other 3Cs(clarity, cut, color), carat definitely has the major influence on the price of diamonds. As its shown in the figure, The joining of carat condition greatly change the figure and the price trends. All the diamonds which carat lower than median their price is great lower than those carat above median. If focus on the above-median-carat diamonds: D may be the best color since its price fluctuation is more stable and even its lowest price is much higher than the others. J has a huge range of price.  
+
+## Problem 03
+
+Let's now start to introduce model fitting. Within the `R` ecosystem the workhorse of any modeling exercise is the `lm()` function. We will learn what goes on behind the scenes of `lm()` later in the semester. For now, let's just get some practice using `lm()`. It's always helpful to visualize model behavior and so we will first introduce `lm()` through the `ggplot2` `geom_smooth()` geom. `geom_smooth()` is a way to add a "smoothing" trend to a visualization. Chapter 3 of the [R4DS book](https://r4ds.had.co.nz/) provides an excellent overview of `geom_smooth()`. Reading that chapter will help you with this problem.  
+
+However, Ch. 3 in R4DS focused on the default approach of `geom_smooth()` which applies a non-linear smoothing function. We will instead force `geom_smooth()` to display a linear trend by setting the `method` argument in `geom_smooth()` to be `lm`. You do not have to put quotes around `lm`. You are telling `geom_smooth()` to use the `lm()` function. It is **very** important to note, you should **NOT** type `lm()` with parentheses when you set `method = lm`. We will discuss why that is later in the semester.  
+
+### 3a)
+
+You will use the `mpg` data set just like in Ch. 3 of R4DS. You will first visualize a scatter plot between the `hwy` and `displ` variables.  
+
+**Create a scatter plot with `displ` on the x-axis and `hwy` on the y-axis. Scatter plots in `ggplot2` are created with the `geom_point()` geom.**  
+
+#### SOLUTION
+
+```{r, solution_03a}
+### your code here
+ggplot(data = mpg)+
+  geom_point(mapping = aes(x = displ, y=hwy))
+
+```
+
+### 3b)
+
+As already stated, `geom_smooth()` allows a trend to be added as a layer to the graphic.  
+
+**Add `geom_smooth()` to your scatter plot from Problem 3a). You do not need to specify any arguments to `geom_smooth()` in this problem.**  
+
+*NOTE*: You may seem some warning messages appear. That's ok for now.  
+
+#### SOLUTION
+
+```{r, solution_03b}
+### your code here
+ggplot(data = mpg)+
+  geom_point(mapping = aes(x=displ, y=hwy))+
+  geom_smooth(mapping = aes(x=displ, y=hwy))
+```
+
+### 3c)
+
+Let's now visualize a linear trend instead of the default non-linear smoother.  
+
+**Specify the `method` argument within `geom_smooth()` to be equal to `lm`.**  
+
+#### SOLUTION
+
+```{r, solution_03c}
+### your code here
+ggplot(data = mpg)+
+  geom_point(mapping = aes(x=displ, y=hwy))+
+  geom_smooth(mapping = aes(x=displ, y=hwy), method = lm)
+```
+
+### 3d)
+
+By default, `geom_smooth()` assumes that the input is the variable mapped to the `x` aesthetic and the response is the variable mapped to the `y` aesthetic. You can specify an alternative formula to be used by the smoother through the `formula` argument to `geom_smooth()`. For now, go ahead and use type in the linear relationship formula, `y ~ x`, for the `formula` argument.  
+
+`R`'s formula interface reads as the variable to the left of the `~` is the response and all variables to the right of the `~` are the inputs/predictors/features. So by setting the formula to be `y ~ x` you are telling `R` that "y is a function of x".  
+
+It's important to note that when specifying the `formula` argument to `geom_smooth()` you can use `x` and `y` because they are "local" to `geom_smooth()`. You do not have to specify the original variable names because of the aesthetic mappings.  
+
+**Explicitly set the `formula` argument to be "y is a function of x". Keep the `method` argument set to `lm`.**  
+
+#### SOLUTION
+
+```{r, solution_03d}
+### your code here
+ggplot(data = mpg)+
+  geom_point(mapping = aes(x=displ, y=hwy))+
+  geom_smooth(mapping = aes(x=displ, y=hwy), method = lm, formula = y ~ x)
+```
+
+### 3e)
+
+`geom_smooth()` has many of the same aesthetics as other geoms like `geom_point()`. You can tell `geom_smooth()` to fit separate trend lines to different groups several ways. First, you can map a discrete variable to the `color` aesthetic to produce separate trend lines with different colors.  
+
+**Use the same code setup that you used to answer Problem 3d). This time set the `color` aesthetic within `geom_smooth()` to be equal to `drv`.**  
+
+#### SOLUTION
+
+```{r, solution_03e}
+### your code here
+ggplot(data = mpg)+
+  geom_point(mapping = aes(x=displ, y=hwy))+
+  geom_smooth(mapping = aes(x=displ, y=hwy, color=drv), method = lm, formula = y ~ x)
+```
+
+### 3f)
+
+When you map a discrete variable in `geom_smooth()`, `ggplot2` first groups the data associated with the unique values (or levels in `R` terminology) together. Then separate trend lines are fit and displayed for the separate groups. We can force the grouping operation to occur without assigning specific colors to the groups with the `group` aesthetic.  
+
+**Use the same code setup that you used to answer Problem 3e). This time, set the `group` aesthetic within `geom_smooth()` to be equal to `drv`. Do not map any variable to the `color` aesthetic.**  
+
+#### SOLUTION
+
+```{r, solution_03f}
+### your code here
+ggplot(data = mpg)+
+  geom_point(mapping = aes(x=displ, y=hwy))+
+  geom_smooth(mapping = aes(x=displ, y=hwy, group=drv), method = lm, formula = y ~ x)
+```
+
+## Problem 04
+
+As useful as it is to include trend lines on figures, we do not have access to such models outside of `ggplot2`. In other words, we can't study their behavior, or make predictions with the models on new data. To do so, we need to fit a model ourselves outside `ggplot2`. In this problem you will use `lm()` directly to fit simple models to the `mpg` data.  
+
+### 4a)
+
+**Fit a linear relationship between `hwy` and `displ` using `R`'s formula interface. Assign the model to the variable `mod1` below.**  
+
+#### SOLUTION
+
+```{r, solution_04a, eval=TRUE}
+mod1 <- lm(hwy ~ displ, data = mpg)
+mod1
+#summary(mod1)
+```
+
+### 4b)
+
+We could use the `summary()` function to inspect the results, but instead I want you to visualize the coefficients estimates and confidence intervals. To do so, you will use the `coefplot()` function from the `coefplot` package. If you have not downloaded and installed `coefplot` please do so now.  
+
+**Use `coefplot::coefplot()` to visualize the coefficients for `mod1`. Based on your visualization, is the `displ` variable "significant"?**  
+
+#### SOLUTION
+
+```{r, solution_04b}
+### your code here
+
+coefplot::coefplot(mod1)
+#Discussion: Yes, it is significant
+```
+
+### 4c)
+
+Let's now fit a slightly more complex model which accounts for the influence of the `drv` variable. You will use an additive relationship and so in your formula you only need to separate the two input variables with the `+` operator.  
+
+**Fit a linear relationship between the `hwy` and the inputs `displ` and `drv`. Treat the inputs as additive. Assign the result to the variable `mod2`.**  
+
+#### SOLUTION
+
+```{r, solution_04c, eval=TRUE}
+mod2 <- lm(hwy ~ displ + drv, data = mpg)
+mod2
+```
+
+### 4d)
+
+**Use the `coefplot::coefplot()` function again to visualize the coefficients associated with `mod2`. Are the variables all "significant"? How many coefficients are displayed?**  
+
+#### SOLUTION
+
+```{r, solution_04d}
+### your code here
+coefplot::coefplot(mod2)
+```
+
+## Problem 05
+
+
+This question gives you practice working with LaTeX to write math expressions and equations. The sub-parts have mathematical expressions described in words or written in text. You will need to "code up" those expressions in LaTeX within the provided equation blocks.  
+
+### 5a)
+
+We will denote vectors as bold face font lower case letters and matrix with bold face font upper case letters. Thus, the vector $\mathbf{z}$ is written as `$\mathbf{z}$` to create an in-line LaTeX expression.  
+
+**The equation block is started for you below. Write a system of linear equations in matrix form such that the matrix A multiplied by the vector x equals the vector b. The equation should read as Ax=b, but must be written in bold face font below.**  
+
+#### SOLUTION
+
+$$ 
+\mathbf{A}\mathbf{x}=\mathbf{b}
+$$
+
+### 5b)
+
+Parentheses can be created several ways in LaTeX. Using the "basic" `( )` characters will create parentheses around an expression. However, the parentheses are fixed size and do not "grow" as the size of the expression grows. Dynamic parentheses are created by using `\left( \right)` instead of `( )`.  
+
+Throughout the semester we will frequently need to use subscripts and superscripts. Subscripts are "attached" with the underscore `_` and superscripts are "attached" with the `^`. For example, `$7_{3}$` would set 3 as the subscript to 7. Using the curly braces `{ }` next to the underscore is a formal way of denoting that everything contained within the curly braces will be used as the subscript.  
+
+**The equation block is created for you below. Place within dynamically sized parentheses the variable capital X with a subscript of 1 and a superscript of capital Z. The Z superscript itself must have a superscript of capital Y.**  
+
+#### SOLUTION
+
+$$ 
+\left(X_{1}^{Z^{Y}}\right)
+$$
+
+### 5c)
+
+Throughout the semester I will use $\log$ to represent the natural log. In LaTeX placing the `\` character in front of `log` displays the word "log" in non-italic font, `\log`. I like to use parentheses around the expression that the natural log is applied to.  
+
+**You must write the expression for the "natural log of x squared". Place dynamically sized parentheses around the "x squared" term.**  
+
+#### SOLUTION
+
+$$ 
+\log_{e}\left(x^{2}\right)
+$$

@@ -1,0 +1,6 @@
+"0","summary_post_df_focus_from_vague <- post_df_focus_from_vague %>%"
+"0","  mutate(post_avg = anew / (anew + bnew),"
+"0","         post_q05 = qbeta(0.05, anew, bnew),"
+"0","         post_q95 = qbeta(0.95, anew, bnew))"
+"0",""
+"0","summary_post_df_focus_from_vague"

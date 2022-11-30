@@ -1,0 +1,767 @@
+---
+title: 'INFSCI 2595 Spring 2022: Homework 11'
+author: "Drake Zhou"
+date: 'Submission time: April 21, 2022 at 11:00PM EST'
+output:
+  html_document: default
+  pdf_document: default
+subtitle: 'Assigned April 14, 2022; Due: April 21, 2022'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+```
+
+#### Collaborators
+
+Include the names of your collaborators here.  
+
+## Overview
+
+This is an applied assignment focused on training binary classifiers. You will try out several models discussed in lecture this semester including: logistic regression, elastic net, neural network, random forest, and gradient boosted trees. You will tune the models using `caret` and then make predictions to study the trends.  
+
+**IMPORTANT**: code chunks are created for you. Each code chunk has `eval=FALSE` set in the chunk options. You **MUST** change it to be `eval=TRUE` in order for the code chunks to be evaluated when rendering the document.  
+
+You are allowed to add as many code chunks as you see fit to answer the questions.  
+
+## Load packages
+
+This assignment will use packages from the `tidyverse` suite and `caret`. The models that you will train require their own set of packages. The `caret::train()` function will prompt you to download the necessary packages. Thus, when you run those code portions please look at the R Console for the prompt that you must respond to. The assignment also requires the `mlbench`, `corrplot`, and `yardstick`  packages.  
+
+The `tidyverse` and `caret` packages are loaded for you below. If you do not have `caret` please download and install now.  
+
+```{r, load_packages}
+library(tidyverse)
+
+library(caret)
+```
+
+## Read in data
+
+You will work with the `Sonar` data set in this assignment. The Sonar data set has become a classic data set for training binary classifiers. The data are available in the `mlbench` package. If you do not have `mlbench` please download and install it before proceeding.  
+
+The code chunk below reads in the `Sonar` data for you and displays the number of rows and columns to screen.  
+
+```{r, read_data}
+data("Sonar", package = 'mlbench')
+
+Sonar %>% dim()
+```
+
+As you can see above this a fairly high dimensional problem, especially relative to the number of observations. The input features of the Sonar data set correspond to features extracted from sonar signals (hence the data name). Your task is to classify the binary outcome, `Class`, as either `"M"` for metal or `"R"` for rock.  
+
+## Problem 01
+
+We will perform a short exploration of the features in this data set. First, let's look at summary statistics for each of the input variables. The code chunk below creates a long-format dataset for you by gathering the input features into a single column via the `pivot_longer()` function. The input variable ID is extracted for you and assigned to the `input_id` column.  
+
+```{r, make_lf_data, eval=TRUE}
+lf_sonar <- Sonar %>% 
+  tibble::rowid_to_column("obs_id") %>% 
+  pivot_longer(!c("obs_id", "Class")) %>% 
+  mutate(input_id = as.numeric(stringr::str_extract(name, "\\d+")))
+
+lf_sonar %>% glimpse()
+```
+
+The above long-format data set will help with a few of the visualizations we will use to explore the data.  
+
+### 1a)
+
+You will start out by visualizing the summary statistics for each input feature via boxplots.  
+
+**Pipe the `lf_sonar` object into `ggplot()`. Map the `x` aesthetic to `input_id` and map the `y` aesthetic to `value`. Include a `geom_boxplot()` geom where the `group` aesthetic is mapped to `input_id`.**  
+
+**Describe the bounds on the input features. Do the inputs have very different scales?**  
+
+#### SOLUTION
+
+```{r, solution_01a, eval=TRUE}
+###
+lf_sonar %>%
+  ggplot(mapping = aes(x = input_id, y = value, group = input_id))+
+  geom_boxplot()
+```
+
+What do you think?  
+
+It looks like inputs have huge variance, but the value of figure is between 0 and 1, which is relative small. Except from those outliers, they looks like similar scales
+
+### 1b)
+
+Boxplots are useful for visualizing summary statistics. However, we are unable to visualize the shape of the distributions with boxplots. In this problem, you will use frequency polygons (a type of histogram) to visualize the distributional shapes for each input.  
+
+**Pipe the `lf_sonar` object into `ggplot()` and map the `x` aesthetic to `value`. Include a `geom_freqpoly()` geom with the `group` aesthetic mapped to `input_id`. Set the number bins equal to 21 by setting `bins=21` in the `geom_freqpoly()` call. Break up your visualizations by groups of 5 inputs by including `facet_wrap()` where the facet variable is:**  
+
+`cut(input_id, breaks=seq(1, 60, length.out = 12), include.lowest = TRUE)`  
+
+**Set the `scales` argument in `facet_wrap()` to be `scales='free_y'` so it's easier to see the shapes for each group of inputs.**  
+
+**NOTE**: If your facet variable is created correctly, the facet strips will show you the input IDs associated with each facet. For example, the first facet will display `[1,6.36]` and the last facet will be display `(54.6,60]`. Although decimal values are shown, `input_id` contains whole number integers. The decimals are fine for now. It's just a simple way to break up the variables.  
+
+#### SOLUTION
+
+```{r, solution_01b}
+lf_sonar %>%
+  ggplot(mapping = aes(x = value))+
+  geom_freqpoly(mapping = aes(group = input_id), bins = 21)+
+  facet_wrap(vars(cut(input_id, breaks=seq(1, 60, length.out = 12), include.lowest = TRUE)), 
+             scales = 'free_y')
+```
+
+
+### 1c)
+
+**Based on your visualizations, do you think the input features should be pre-processed? If so, what processing technique should be considered?**  
+
+#### SOLUTION
+
+What do you think?  
+
+Yes, according to the figure, some of values are extreme. We should apply some pre-processing process. For example, z-score normalization.
+
+### 1d)
+
+Let's now consider the correlation structure of the inputs. Use the `corrplot::corrplot()` function to create the correlation plot matrix associated with all 60 input features. However, rather than using the default ordering, instruct `corrplot()` to reorder inputs such that all highly correlated inputs are grouped together. `corrplot()` will use a hierarchical clustering method and group all inputs for you.  
+
+**Pipe the original wide-format `Sonar` data into the `dplyr::select()` function and select all except the `Class` variable. Pipe the result into `cor()` and pipe the result into `corrplot::corrplot()`. Set the `method` argument equal to `"square"`, the `order` argument equal to `"hclust"`, and the 'hclust.method` equal to `'ward.D2'`.**  
+
+**Is there a correlation structure between the inputs?** 
+
+
+#### SOLUTION
+
+Is there a correlation structure between the inputs?
+
+Yes, there are a lot of correlated features
+
+```{r, solution_01d}
+Sonar %>%
+  dplyr::select(-Class) %>%
+  cor() %>%
+  corrplot::corrplot(method = "square", order = "hclust", hclust.method = 'ward.D2')
+```
+
+### 1e)
+
+The last visualization you will make as part of a quick exploratry data analysis (EDA) is to count the number of observations per level of the binary outcome `Class`. This is important to do before training any binary classification model, in order to check if there is a severe imbalance between either of the two classes.  
+
+**Pipe the `Sonar` data set into `ggplot()` and set the `x` aesthetic equal to `Class`. Use the `goem_bar()` function to show a bar chart giving the number of observations per level of `Class`.**  
+
+**Do you think we should be concerned about an imbalance between the `"M"` and `"R"` levels?**  
+
+#### SOLUTION
+
+```{r, solution_01e}
+Sonar %>%
+  ggplot(mapping = aes(x = Class))+
+  geom_bar()
+```
+
+
+What do you think?  
+
+No we shouldn't concerned about that, they are not exactly 50 to 50 but still balanced.
+
+## Problem 02
+
+You will train several models to predict the binary outcome `Class`. You will try logistic regression, logistic regression with the elastic net penalty, and more complex non-linear methods. As stated at the beginning of the assignment, you will use `caret` for the training, tuning, and model selection process.  
+
+### 2a)
+
+You must start, by specifying the resampling scheme and the primary performance metric. You will use 5-fold cross-validation, and you will compare models by maximizing the Area Under the ROC Curve (ROC AUC). You must specify the metric to be `"ROC"` in order to tell `caret` to maximize the AUC (the naming convention is a little confusing). The code chunk below is started for you, and provides some arguments to the `trainControl()` function which are required in order to use `"ROC"` as the primary performance metric.  
+
+**Complete the code chunk below. Finish the `trainControl()` call such that you will use 5-fold cross-validation. Assign `"ROC"` to the `metric_sonar` variable.**  
+
+#### SOLUTION
+
+```{r, solution_02a, eval=TRUE}
+ctrl_k05_roc <- trainControl(method = 'cv',
+                             number = 5,
+                             summaryFunction = twoClassSummary,
+                             classProbs = TRUE,
+                             savePredictions = TRUE)
+
+metric_sonar <- "ROC"
+```
+
+
+### 2b)
+
+You will start with a logistic regression model using linear additive terms for all input features. Remember that the short cut operator `.` denotes using "everything in the data set". So you do not have to type out all 60 input variable names in the formula interface. The formula requires the name of the response variable, and so remember that the outcome is the `Class` variable, not `y` as in other assignments and lecture examples.  
+
+You will use the `train()` function to train the logistic regression model. You must specify the formula interface, and specify the `data` to be `Sonar`. To use the base `R` logistic regression method in `glm()`, you must set the `method` argument equal to `"glm"`. You must also specify the `metric` argument to be the `metric_sonar` variable you assigned Problem 2a) in order for `caret` to identify the best model by maximizing the area under the ROC curve. You must also specify the `trControl` argument to be the `ctrl_k05_roc`.  
+
+You must set the `preProcess` argument based on your answer to Problem 1c). If you do not feel you need to pre-process the inputs then you do not need to include the `preProcess` argument. If you feel you should, then you should set the `preProcess` argument to your desired pre-processing operation.  
+
+**Specify the arguments to the `train()` function in order to train a logistic regression model for the `Sonar` data set with 5-fold cross-validation and calculate the area under the ROC curve.**  
+
+**The area under the ROC curve is referred to by `caret` as `"ROC"`. The cross-validation averaged performance merics are printed to the screen for you. What is the area under the ROC curve for your logistic regression model?**  
+
+*HINT*: You can ignore warnings displayed during the training of the logistic regression model.  
+
+#### SOLUTION
+
+```{r, solution_02b, eval=TRUE}
+set.seed(4321)
+fit_glm_sonar <- train(Class ~ (.),
+                       data = Sonar,
+                       method = "glm",
+                       metric = metric_sonar,
+                       preProcess = c("center", "scale"),
+                       trControl = ctrl_k05_roc)
+
+fit_glm_sonar
+
+```
+
+What is the area under the ROC curve for your logistic regression model?
+
+As we can see through the data, the area under ROC curve is 0.7690207
+
+### 2c)
+
+Since there are relatively few observations based on the number of inputs in `Sonar`, let's apply regularization to the linear additive features. Because you are using linear additive terms you may use the shortcut operator `.` in the formula. The `glmnet` package will fit a logistic regression model with the elastic net penalty term. You need to set `method` to `"glmnet"`. The remaining arguments should be consistent to your arguments used in Problem 2b).  
+
+**Train an elastic net model and tune the hyperparameters with 5-fold cross-validation to maximize the area under the ROC curve. You can use the default tuning grid from `caret` and so you do NOT need to set the `tuneGrid` argument.**  
+
+**Should you consider applying preprocessing with the regularized model?**  
+
+**Based on the training results, does the elastic net model favor LASSO or RIDGE more?**  
+
+#### SOLUTION
+
+```{r, solution_02c, eval=TRUE}
+set.seed(4321)
+fit_glmnet_sonar <- train(Class ~ .,
+                       data = Sonar,
+                       method = "glmnet",
+                       metric = metric_sonar,
+                       preProcess = c("center", "scale"),
+                       trControl = ctrl_k05_roc)
+fit_glmnet_sonar
+```
+
+Should you consider applying preprocessing with the regularized model? Based on the training results, does the elastic net model favor LASSO or RIDGE more?
+
+Yes, we should. If alpha = 1, the elastic net will equvalent to LASSO, since the final value of alpha for the model is 0.1, we can we the elastic net is more favor of RIDGE.
+
+### 2d)
+
+Let's now try a neural network model with the `nnet` package. You must specify the `method` argument equal to `"nnet"`. Non-linear models will attempt to find non-linear relationships between the inputs and the response even if the simple formula `Class ~ .` is provided. Thus, you do not need to type in all input names to the formula object. The `.` shortcut of "everything else" is instructing the formula to use "everything else" as an input. You can use the default tuning grid, and so you do not need to specify the `tuneGrid` argument to `train()`.  
+
+**Train a neural network binary classifier using the `"nnet"` package with `caret`. Does the neural network model achieve a higher area under the ROC curve compared to the elastic net model?**  
+
+**Should you preprocess the inputs before training the neural network?**  
+
+**NOTE**: The `trace` argument is set to `FALSE` for you already. Otherwise the iteration results are printed. We are focused on the model performance results in this assignment, and so we do not need the iteration results printed to the screen.  
+
+#### SOLUTION
+
+```{r, solution_02d, eval=TRUE}
+set.seed(4321)
+fit_nnet_sonar <- train(Class ~ .,
+                        data = Sonar,
+                        method = 'nnet',
+                        metric = metric_sonar,
+                        preProcess = c("center", "scale"),
+                        trControl = ctrl_k05_roc,
+                        trace = FALSE)
+
+fit_nnet_sonar
+```
+
+Does the neural network model achieve a higher area under the ROC curve compared to the elastic net model?
+
+Yes, according to the data, the value of ROC column is bigger than before, which represent the area under ROC curve is bigger.
+
+Should you preprocess the inputs before training the neural network?
+
+Yes, in order to standardize the inputs to avoid some problem like exploding gradients.
+
+### 2e)
+
+Neural networks are challenging to interpret. Several methods have been devised to try and provide interpretibility by providing ways to rank the input variable importance using the weights associated with all hidden units and the output layer.  
+**You may use the default `caret` provided method for ranking variable importance for the neural network. Plot the variable importances using the default plot method. Then plot the variable importances a second time but set the `top` argument equal to 20 in the `plot()` method call. This will limit to the plot to just the top 20 ranked inputs.**  
+
+**What are the top 4 ranked input features as viewed by the neural network?**  
+
+#### SOLUTION
+
+Plot all variable importances.  
+
+```{r, solution_02e}
+###
+plot(varImp(fit_nnet_sonar))
+```
+
+Plot just the top 20 variable importances.  
+
+```{r, solution_02e_b}
+###
+plot(varImp(fit_nnet_sonar), top = 20)
+```
+
+What do you think?  
+
+V50, V57, V31 and V22
+
+### 2f)
+
+You will use predictions to help gain further understanding of the influence of the top ranked input features. Two functions are provided for you below which you will use to construct an input grid to make predictions. The first function, `make_test_input_list()` is defined in the code chunk below. The first argument to `make_test_input_list()` is a variable name. The second input argument, `top_4_inputs`, is a character vector. The second input argument will hold the names associated with the top 4 ranked input features. The last input argument, `all_data`, is a tibble or data.frame. The last input argument is intended to hold the training data set.  
+
+The `make_test_input_list()` function therefore creates a grid of 25 evenly spaced points between the training set min and max bounds for the top 2 ranked inputs. The third and fourth ranked inputs are given 5 unique values, based on specific quantiles of the training set. All other inputs are set to constant values equal to their training set medians.  
+
+```{r, make_function_to_make_list}
+make_test_input_list <- function(var_name, top_4_inputs, all_data)
+{
+  xvar <- all_data %>% select(var_name) %>% pull()
+  
+  if (var_name %in% top_4_inputs[1:2]){
+    # use 25 unique values between the min/max values
+    xgrid <- seq(min(xvar), max(xvar), length.out = 25)
+  } else if (var_name %in% top_4_inputs[3:4]){
+    # specify quantiles to use
+    xgrid <- quantile(xvar, probs = c(0.05, 0.25, 0.5, 0.75, 0.95), na.rm = TRUE)
+    xgrid <- as.vector(xgrid)
+  } else {
+    # set to their median values
+    xgrid <- median(xvar, na.rm = TRUE)
+  }
+  
+  return(xgrid)
+}
+```
+
+The second function, `make_test_input_grid()`, is a wrapper function. It iteratively applies the `make_test_input_list()` function to all inputs and then uses the `expand.grid()` function to create full factorial grid based on the list of unique input values.  
+
+```{r, make_function_to_make_grid}
+make_test_input_grid <- function(all_input_names, top_4_inputs, all_data)
+{
+  test_list <- purrr::map(all_input_names, 
+                          make_test_input_list,
+                          top_4_inputs = top_4_inputs,
+                          all_data = all_data)
+  
+  expand.grid(test_list, 
+              KEEP.OUT.ATTRS = FALSE,
+              stringsAsFactors = FALSE) %>% 
+    purrr::set_names(all_input_names)
+}
+```
+
+**You will use the `make_test_input_grid()` function to create a grid of input values based on the top 4 ranked inputs, as viewed by your tuned neural network model.**  
+
+**Complete the code chunk below by creating two vectors. The first, `my_input_names`, is a regular vector for the names of the input variables in the `Sonar` data set. The second, `my_top_ranked_inputs`, is a regular vector for the names of the top 4 ranked inputs based on your neural network model.**  
+
+**Call the `make_test_input_grid()` function and assign the result to `viz_input_grid`. Display the number of rows and columns in `viz_input_grid` to the screen.**  
+
+#### SOLUTION
+
+Add as many code chunk as you feel necessary to complete this problem.  
+
+```{r, solution_02f, eval=TRUE}
+### Initialize parameters
+my_input_name <- colnames(Sonar)[-61]
+my_top_ranked_inputs <- c("V50","V57","V31","V22")
+
+### Excecute function
+viz_input_grid <- make_test_input_grid(my_input_name, my_top_ranked_inputs, Sonar)
+
+### Display result
+dim(viz_input_grid)
+```
+
+## Problem 03
+
+We now have everything necessary to make predictions and study behavior. We have a test or visualization grid and we have several models that we can use to consider the influence between the inputs and the response. Since we are working with a binary classification problem, we can view the response two ways. First, we can consider the classification. Second, we can visualize the predicted event probability.  
+
+### 3a)
+
+We will first classify using the neural network model, and then visualize those classifications as a surface plot. Predictions are made with the `predict()` function. The first argument is the model object and the second argument is the data set we wish to make predictions with.  
+
+When we are working with binary classification models, the default result of the `predict()` function is the class assuming a 50% threshold value.  
+
+**Make classifications on the test visualization grid using the neural network model and assign the result to the `pred_class_nnet` object. Check the data type of `pred_class_nnet` and look at the first few classifications with the `head()` function.**  
+
+#### SOLUTION
+
+```{r, solution_03a, eval=TRUE}
+pred_class_nnet <- predict(fit_nnet_sonar, viz_input_grid)
+typeof(pred_class_nnet)
+head(pred_class_nnet)
+```
+
+
+### 3b)
+
+You will now visualize the classification surface based on your neural network model, over your defined test grid.  
+
+**Pipe `viz_input_grid` into a `mutate()` call and assign the `pred_class` variable equal to `pred_class_nnet`. Pipe the result into `ggplot()` where the `x` aesthetic is your top ranked input and the `y` aesthetic is your second ranked input. Use a `geom_raster()` geom to visualize the surface by mapping the `fill` aesthetic to `pred_class`. Include `facet_grid()` to break up the prediction surfaces based on the third and fourth ranked inputs by assigning the vertical facets to the 4th ranked input and the horizontal facets to the 3rd ranked input. Specify the fill by including the `scale_fill_brewer()` with the `palette` argument equal to `'Set1'`.**  
+
+#### SOLUTION
+
+```{r, solution_03b, eval=TRUE}
+###
+viz_input_grid %>%
+  mutate(pred_class = pred_class_nnet) %>%
+  ggplot(mapping = aes(x = V50, y = V57))+
+  geom_raster(mapping = aes(fill = pred_class))+
+  facet_grid(cols = vars(V22), rows = vars(V31))+
+  scale_fill_brewer(palette = 'Set1')
+```
+
+
+### 3c)
+
+You will now make classifications with the elastic net model on the test input grid.  
+
+**Predict the classifications with the elastic net model and assign the result to the `pred_class_enet` object.**  
+
+#### SOLUTION
+
+```{r, solution_03c}
+###
+pred_class_enet <- predict(fit_glmnet_sonar, viz_input_grid)
+```
+
+### 3d)
+
+Visualize the classification surface based on the elastic net model. Follow the same steps you used to make the surface with the neural network classifications.  
+
+**How do the visualizations of the classification surface compare with the neural network?** 
+
+#### SOLUTION
+
+Classification of elastic net model gives more M result compare to neural network, which means elastic net model is more sensitive, at least for these two parameters.
+
+```{r, solution_03d}
+viz_input_grid %>%
+  mutate(pred_class = pred_class_enet) %>%
+  ggplot(mapping = aes(x = V50, y = V57))+
+  geom_raster(mapping = aes(fill = pred_class))+
+  facet_grid(cols = vars(V22), rows = vars(V31))+
+  scale_fill_brewer(palette = 'Set1')
+```
+
+### 3e)
+
+In addition to visualizing the classifications, we can also predict the class probabilities. This allows us to test out our classification threshold, if we would like. It also helps us understand if the predictions are near the threshold boundary.  
+
+Class probability predictions are also made with the `predict()` function. The first argument is still the model object, and the second argument is still the data set we wish to predict. We must include a third argument, `type`, which instructs the model the "type" of prediction to make. Setting the `type` argument equal to `'prob'` will return the class probabilities, instead of the classification label.  
+
+**Predict the class probabilities with the neural network model. Assign the result to the `pred_prob_nnet` object. Display the data type of `pred_prob_nnet` to the screen, as well as the result of the `head()` function applied to `pred_prob_nnet`. How do you know how to access the probability of the `'M'` class?**  
+
+#### SOLUTION
+
+How do you know how to access the probability of the `'M'` class?
+
+By pred_prob_nnet$M
+
+```{r, solution_03e}
+pred_prob_nnet <- predict(fit_nnet_sonar, viz_input_grid, type = 'prob')
+typeof(pred_prob_nnet)
+head(pred_prob_nnet)
+```
+
+### 3f)
+
+You will now visualize the predicted probability surface for the `M` class.  
+
+**Bind the columns of `viz_input_grid` to the columns in `pred_prob_nnet` using `bind_cols()`. Pipe the result into `ggplot()`. Map the `x` aesthetic to the top ranked input and the `y` aesthetic to the second ranked input. Use a `geom_raster()` geom to visualize the predicted `M` class surface by mapping the `fill` aesthetic to `M`. Include `facet_grid()` to break up the prediction surfaces based on the third and fourth ranked inputs by assigning the vertical facets to the 4th ranked input and the horizontal facets to the 3rd ranked input.**  
+
+**Specify the fill to be a diverging fill scale by including `scale_fill_gradient2()`. Set the `limits` argument to `c(0,1)`. Set the `low` argument to `'blue'`, the `high` argument to `'red'`, and the `mid` argument to `'white'`. Set the `midpoint` equal to `0.5`. These choices will give you high predicted probabilities that are bright red, with low predicted probabilities as bright blue and 50% probabilities as white. You will therefore be able to clearly see the 50% threshold decision boundary!**  
+
+#### SOLUTION
+
+```{r, solution_03f}
+viz_input_grid %>%
+  bind_cols(pred_prob_nnet) %>%
+  ggplot(mapping = aes(x = V50, y = V57))+
+  geom_raster(mapping = aes(fill = M))+
+  facet_grid(rows = vars(V31), cols = vars(V22))+
+  scale_fill_gradient2(limits = c(0,1), 
+                       low = 'blue', 
+                       high = 'red', 
+                       mid = 'white', 
+                       midpoint = 0.5)
+```
+
+
+## Problem 04
+
+Let's now try out tree-based methods and compare their performance with the elastic net and neural network models.
+
+### 4a)
+
+We could start with a standard decision tree with CART, but instead we will jump straight to the random forest. To train a random forest model, you must specify `method` equal to `"rf"`.  
+You can use the default tuning grid to the `mtry` tuning parameter.  
+
+**Do you need to consider preprocessing the inputs for a random forest?**  
+
+**Train a random forest binary classifier by setting the `method` argument equal to `"rf"`. The code chunk below includes the `importance=TRUE` argument for you.**  
+
+**What value of `mtry` was selected as the best, based on the cross-validation results? Why do you think that value was selected?**
+
+#### SOLUTION
+
+Do you need to consider preprocessing the inputs for a random forest?
+
+No. Because tree based model has nothing to do with preprocessing.
+
+What value of `mtry` was selected as the best, based on the cross-validation results? Why do you think that value was selected?
+
+2 which lead to the highest score of ROC, Sens and Spec.
+
+```{r, solution_04a, eval=TRUE}
+set.seed(4321)
+fit_rf_sonar <- train(Class ~ ., 
+                      data = Sonar,
+                      method = "rf",
+                      metric = metric_sonar,
+                      trControl = ctrl_k05_roc,
+                      importance = TRUE)
+
+fit_rf_sonar
+```
+
+
+### 4b)
+
+Now try training a boosted tree model with `xgboost`. You must set the `method` argument to `xgbTree` in order to tell `caret` to use the XGBoost implementation of the boosted tree algorithm. By default, many different tuning parameters are considered, so instead of printing out the results, the best tuning parameters are printed out for you. Then, the performance results are plotted for you.  
+
+**Train the XGBoost model with 5-fold cross-validation to maximize the area under the ROC curve.**  
+
+*NOTE*: The following code may take a few minutes to complete.  
+
+#### SOLUTION
+
+Train the model.  
+
+```{r, solution_04b, eval=TRUE, warning=FALSE}
+set.seed(4321)
+fit_xgb_sonar <- train(Class ~.,
+                       data = Sonar,
+                       method = "xgbTree",
+                       metric = metric_sonar,
+                       trControl = ctrl_k05_roc)
+```
+
+
+Print out the best tuning parameters.  
+
+```{r, solution_04b_b, eval=TRUE}
+fit_xgb_sonar$bestTune
+```
+
+
+Plot the cross-validation results.  
+
+```{r, solution_04f_c, eval=TRUE}
+plot(fit_xgb_sonar)
+```
+
+### 4c)
+
+**Use the `caret` variable importance method and plot the top 20 variable importances for the random forest model and the XGBoost model.**  
+
+**Are the top 4 ranked inputs the same as those identified by the neural network?**  
+
+#### SOLUTION
+
+Plot the top 20 ranked inputs based on the random forest.  
+
+```{r, solution_04c_c}
+###
+plot(varImp(fit_rf_sonar), top = 20)
+```
+
+Plot the top 20 ranked inputs based on XGBoost.  
+
+```{r, solution_04c_b}
+###
+plot(varImp(fit_xgb_sonar), top = 20)
+```
+
+Are the top 4 ranked inputs the same as those identified by the neural network?
+
+No, according to figures above, they are not the same.
+
+### 4d)
+
+**Create an input test grid based on the top ranked inputs from the random forest model.**  
+
+**Assign the result to the `viz_input_grid_rf` object.**  
+
+#### SOLUTION
+
+```{r, solution_04d, eval=TRUE}
+viz_input_grid_rf <- make_test_input_grid(colnames(Sonar)[-61],
+                                          c("V11","V12","V9","V10"),
+                                          Sonar)
+dim(viz_input_grid_rf)
+```
+
+### 4e)
+
+**Predict the class probabilities with the random forest model for the original neural network based input grid and the new random forest ranked input grid.**  
+
+**Assign the predicted probabilities based on the neural network input grid to `pred_prob_rf_on_nnet_grid`. Assign the predicted probabilities based on the random forest input grid to `pred_prob_rf_on_rf_grid`.**  
+
+#### SOLUTION
+
+Random forest predictions on the neural network based input grid.  
+
+```{r, solution_04e}
+###
+pred_prob_rf_on_nnet_grid <- predict(fit_rf_sonar, viz_input_grid, type = 'prob')
+```
+
+Random forest predictions on the random forest based input grid.  
+
+```{r, solution_04e_b}
+###
+pred_prob_rf_on_rf_grid <- predict(fit_rf_sonar, viz_input_grid_rf, type = 'prob')
+```
+
+### 4f)
+
+**Visualize the predicted probability surfaces for the `M` class using the same visualization approach used in Problem 3f).**  
+
+#### SOLUTION
+
+Visualize the predicted probability surface based on the neural network grid.  
+
+```{r, solution_04f_a}
+###
+viz_input_grid %>%
+  bind_cols(pred_prob_rf_on_nnet_grid) %>%
+  ggplot(mapping = aes(x = V50, y = V57))+
+  geom_raster(mapping = aes(fill = M))+
+  facet_grid(rows = vars(V31), cols = vars(V22))+
+  scale_fill_gradient2(limits = c(0,1), 
+                       low = 'blue', 
+                       high = 'red', 
+                       mid = 'white', 
+                       midpoint = 0.5) 
+```
+
+Visualize the predicted probability surface based on the random forest grid.  
+
+```{r, solution_04f_b}
+###
+viz_input_grid %>%
+  bind_cols(pred_prob_rf_on_rf_grid) %>%
+  ggplot(mapping = aes(x = V50, y = V57))+
+  geom_raster(mapping = aes(fill = M))+
+  facet_grid(rows = vars(V31), cols = vars(V22))+
+  scale_fill_gradient2(limits = c(0,1), 
+                       low = 'blue', 
+                       high = 'red', 
+                       mid = 'white', 
+                       midpoint = 0.5)
+```
+
+
+## Problem 05
+
+Now that you have trained and tuned multiple models of varying complexity, it's time to identify the best performing model.  
+
+### 5a)
+
+The resampling results are compiled together using the `resamples()` function. You must complete the first code chunk below by assigning the model object to the corresponding name in the list. For example, you must set the `fit_glm_sonar` object to the `GLM` variable in the list.  
+
+**Complete the first code chunk below, by assigning the `caret` trained model objects to their appropriate variables in the list.**  
+
+**The results are then plotted for you using `dotplot()` which model is the best?**  
+
+#### SOLUTION
+
+According to the figure, RF is the best model.
+
+```{r, solution_05a, eval=TRUE}
+sonar_roc_compare <- resamples(list(GLM = fit_glm_sonar,
+                                    GLMNET = fit_glmnet_sonar,
+                                    NNET = fit_nnet_sonar,
+                                    RF = fit_rf_sonar,
+                                    XGB = fit_xgb_sonar))
+
+dotplot(sonar_roc_compare)
+```
+
+
+### 5b)
+
+The code chunk below is completed for you. It extracts the hold-out set predictions associated with the best tuning parameter values for 4 of the models you trained, the logistic regression model, the elastic net, the neural network, and the random forest.  
+
+```{r, extract_holdout_preds, eval=TRUE}
+model_pred_results <- fit_rf_sonar$pred %>% tibble::as_tibble() %>% 
+  filter(mtry == fit_rf_sonar$bestTune$mtry) %>% 
+  select(pred, obs, M, R, rowIndex, Resample) %>% 
+  mutate(model_name = "RF") %>% 
+  bind_rows(fit_glm_sonar$pred %>% tibble::as_tibble() %>% 
+  select(pred, obs, M, R, rowIndex, Resample) %>% 
+  mutate(model_name = "GLM")) %>% 
+  bind_rows(fit_glmnet_sonar$pred %>% tibble::as_tibble() %>% 
+              filter(alpha == fit_glmnet_sonar$bestTune$alpha,
+                     lambda == fit_glmnet_sonar$bestTune$lambda) %>% 
+              select(pred, obs, M, R, rowIndex, Resample) %>% 
+              mutate(model_name = "GLMNET")) %>% 
+  bind_rows(fit_nnet_sonar$pred %>% tibble::as_tibble() %>% 
+              filter(size == fit_nnet_sonar$bestTune$size,
+                     decay == fit_nnet_sonar$bestTune$decay) %>% 
+              select(pred, obs, M, R, rowIndex, Resample) %>% 
+              mutate(model_name = "NNET"))
+```
+
+
+The first few rows of the `model_pred_results` object are displayed for you in the code chunk below.  
+
+```{r, view_extract_holdout_preds, eval=TRUE}
+model_pred_results %>% head()
+```
+
+
+You must use the `model_pred_results` to plot the ROC curves associated with the best tuning parameter results. You will use the `roc_curve()` function from the `yardstick` package to create the ROC curve, just as you did in an earlier assignment. You should have `yardstick` installed already. If you do not please download and install `yardstick` before running the code chunk below.  
+
+```{r, load_yardstick_package, eval=TRUE}
+library(yardstick)
+```
+
+
+**Create the cross-validation averaged ROC curve for each of the models you trained. To do so, pipe the `model_pred_results` objects into `group_by()` and specify the grouping variable as `model_name`. Pipe the result to `roc_curve()` function with `obs` as the first argument and `M` as the second argument. Pipe the result to the `autoplot()` function.**  
+
+**Are your generated ROC curves in aggreement with your cross-validation summary stats displayed before?**  
+
+#### SOLUTION
+
+What do you think?  
+
+Yes, they correspond to each other, RF is still the best model.
+
+```{r, solution_05b}
+model_pred_results %>%
+  group_by(model_name) %>%
+  roc_curve(obs, M) %>%
+  autoplot()
+```
+
+
+### 5c)
+
+It can be useful to get a sense of the variability in the ROC curve, based on the variation in performance across resample folds. You will use the `roc_curve()` function again, but this time you cannot use `autoplot()` to create the ROC curve. You will need to use the `geom_path()` function from ggplot2, to create the figure manually.  
+
+**Pipe the `model_pred_results` object to `group_by()` and specify the grouping variables to be `model_name` and `Resample`. Pipe the result to `roc_curve()` with the first argument assigned as `obs` and the second argument assigned as `M`. Pipe the result to `ggplot()` where you map the `x` aesthetic to `1 - specificity` and the `y` aesthetic to `sensitivity`. Add in the `geom_path()` layer where you map the group `color` aesthetic to `Resample`. Use the `facet_wrap()` function to create separate facets for the models that you trained. However, before your `facet_wrap()` function include `geom_abline()` with `slope = 1` and `intercept = 0` and `linetype = 'dotted'`. Also include the `coord_equa()` function. The line and equal coordinates will help make the ROC curve graphic easier to read.**  
+
+#### SOLUTION
+
+```{r, solution_05c}
+model_pred_results %>%
+  group_by(model_name,Resample) %>%
+  roc_curve(obs, M) %>%
+  ggplot(aes(x = 1 - specificity, y = sensitivity))+
+  geom_path(aes(color = Resample)) + 
+  geom_abline(slope = 1, intercept = 0, linetype = 'dotted') + 
+  coord_equal() +
+  facet_wrap( ~ model_name)
+```
+

@@ -1,0 +1,470 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\title{Drake\_Zhou\_Part\_01}
+\author{Drake Zhou}
+\date{4/21/2022}
+
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Drake\_Zhou\_Part\_01},
+  pdfauthor={Drake Zhou},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\hypertarget{overview-preparation}{%
+\section{Overview \& Preparation}\label{overview-preparation}}
+
+The purpose of this part is to visualize all the data and assess them to
+help me prepare for model fitting, which is also responsible for the 1st
+part of final project requirements.
+
+\hypertarget{package-import}{%
+\subsection{Package import}\label{package-import}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tidyverse)}
+\FunctionTok{library}\NormalTok{(visdat)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{data-import}{%
+\subsection{Data Import}\label{data-import}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_all }\OtherTok{\textless{}{-}}\NormalTok{ readr}\SpecialCharTok{::}\FunctionTok{read\_csv}\NormalTok{(}\StringTok{"final\_project\_train.csv"}\NormalTok{, }\AttributeTok{col\_names =} \ConstantTok{TRUE}\NormalTok{)}
+
+\NormalTok{df\_all }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{glimpse}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Rows: 677
+## Columns: 38
+## $ rowid    <dbl> 1, 3, 4, 5, 8, 9, 11, 14, 15, 16, 17, 18, 19, 22, 24, 25, 27,~
+## $ region   <chr> "XX", "XX", "XX", "XX", "XX", "XX", "XX", "XX", "XX", "XX", "~
+## $ customer <chr> "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "~
+## $ xb_01    <dbl> 4.000000, 1.000000, 2.000000, 2.520000, 2.548387, 3.071429, 3~
+## $ xb_02    <dbl> 4, 1, 2, 11, 6, 6, 10, 12, 9, 10, 8, 10, 10, 8, 6, 10, 13, 10~
+## $ xb_03    <dbl> 4, 1, 2, -6, -1, 1, -4, -4, -2, -4, -2, -2, -2, -4, 1, -4, -3~
+## $ xn_01    <dbl> 3.0000000, 2.0000000, 2.0000000, 1.5333333, 0.8387097, 1.8571~
+## $ xn_02    <dbl> 3, 2, 4, 9, 3, 8, 6, 10, 10, 4, 6, 8, 9, 5, 7, 12, 12, 6, 6, ~
+## $ xn_03    <dbl> 3, 2, 0, -3, -4, -2, -5, -6, -3, -5, -3, -6, -4, -3, 0, -5, -~
+## $ xa_01    <dbl> 12.000000, 3.000000, 9.000000, 7.080000, 6.451613, 6.857143, ~
+## $ xa_02    <dbl> 12, 3, 9, 29, 17, 18, 24, 27, 20, 19, 15, 24, 24, 15, 14, 26,~
+## $ xa_03    <dbl> 12, 3, 9, -7, -2, 2, -9, -5, -3, -3, -1, 1, -2, -3, 3, -4, -5~
+## $ xb_04    <dbl> 1.3333333, 1.0000000, 1.0000000, 0.8950476, 1.2247312, 1.1857~
+## $ xb_05    <dbl> 1.3333333, 1.0000000, 1.0000000, -2.0000000, -0.5000000, 0.00~
+## $ xb_06    <dbl> 1.333333, 1.000000, 1.000000, 4.000000, 4.000000, 3.000000, 6~
+## $ xb_07    <dbl> 4.000000, 1.000000, 2.000000, 1.933333, 1.967742, 1.714286, 1~
+## $ xb_08    <dbl> -1.00000000, 1.00000000, 0.00000000, -0.08000000, 0.35483871,~
+## $ xn_04    <dbl> 1.0000000, 2.0000000, 1.0000000, 0.5268889, 0.4688172, 0.5607~
+## $ xn_05    <dbl> 1.0000000, 2.0000000, 0.0000000, -1.0000000, -1.3333333, -1.0~
+## $ xn_06    <dbl> 1.0, 2.0, 2.0, 2.5, 3.0, 2.0, 4.0, 4.0, 3.0, 2.0, 2.0, 2.5, 2~
+## $ xn_07    <dbl> 3.000000, 2.000000, 2.500000, 1.493333, 1.225806, 1.642857, 1~
+## $ xn_08    <dbl> -1.0000000, 2.0000000, -1.0000000, -0.4400000, -0.4516129, -0~
+## $ xa_04    <dbl> 6.000000, 3.000000, 6.750000, 2.425333, 3.023656, 2.685714, 2~
+## $ xa_05    <dbl> 6.0000000, 3.0000000, 4.5000000, -3.5000000, -0.6666667, 0.40~
+## $ xa_06    <dbl> 6.000000, 3.000000, 9.000000, 9.000000, 13.000000, 6.000000, ~
+## $ xa_07    <dbl> 9.000000, 3.000000, 7.500000, 4.466667, 4.612903, 4.071429, 4~
+## $ xa_08    <dbl> 3.0000000, 3.0000000, 6.0000000, 0.7066667, 1.3225806, 1.3571~
+## $ xw_01    <dbl> 23.00000, 17.00000, 52.50000, 64.52564, 54.75758, 58.33333, 6~
+## $ xw_02    <dbl> 23, 17, 48, 0, 12, 15, 0, 0, 0, 7, 14, 0, 0, 0, 8, 8, 0, 4, 2~
+## $ xw_03    <dbl> 23, 17, 57, 106, 105, 101, 107, 109, 109, 104, 109, 99, 103, ~
+## $ xs_01    <dbl> 0.262073307, 0.330804757, 0.239795763, 0.142106837, 0.2442957~
+## $ xs_02    <dbl> 0.26207331, 0.33080476, 0.19049123, -0.73321509, -0.12204299,~
+## $ xs_03    <dbl> 0.2620733, 0.3308048, 0.2891003, 0.5500723, 1.3134719, 0.6540~
+## $ xs_04    <dbl> 0.5375576, 0.4286607, 0.3676937, 0.2865445, 0.2375470, 0.2594~
+## $ xs_05    <dbl> 0.5375575604, 0.4286607050, 0.2485001680, 0.0000000000, 0.043~
+## $ xs_06    <dbl> 0.5375576, 0.4286607, 0.4868872, 0.6357541, 0.4327004, 0.8672~
+## $ response <dbl> 2.617991, 1.184632, 2.216626, 2.726715, 1.483323, 2.039279, 1~
+## $ outcome  <chr> "non_event", "non_event", "event", "non_event", "non_event", ~
+\end{verbatim}
+
+\hypertarget{exploratory-data-analysis-eda}{%
+\section{Exploratory Data Analysis
+(EDA)}\label{exploratory-data-analysis-eda}}
+
+\hypertarget{general-inspection}{%
+\subsection{General Inspection}\label{general-inspection}}
+
+No missing data
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{visdat}\SpecialCharTok{::}\FunctionTok{vis\_miss}\NormalTok{(df\_all)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_Part_01_files/figure-latex/unnamed-chunk-2-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_all }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ purrr}\SpecialCharTok{::}\FunctionTok{map\_dbl}\NormalTok{(n\_distinct)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    rowid   region customer    xb_01    xb_02    xb_03    xn_01    xn_02 
+##      677        3        9      229       19       21      225       18 
+##    xn_03    xa_01    xa_02    xa_03    xb_04    xb_05    xb_06    xb_07 
+##       18      257       38       35      364       59       51      181 
+##    xb_08    xn_04    xn_05    xn_06    xn_07    xn_08    xa_04    xa_05 
+##      187      360       51       47      174      174      411       87 
+##    xa_06    xa_07    xa_08    xw_01    xw_02    xw_03    xs_01    xs_02 
+##       87      213      212      396      102      103      676      644 
+##    xs_03    xs_04    xs_05    xs_06 response  outcome 
+##      672      676      663      676      677        2
+\end{verbatim}
+
+\hypertarget{distributions-of-variables.}{%
+\subsection{Distributions of
+variables.}\label{distributions-of-variables.}}
+
+\hypertarget{categorical-variables}{%
+\subsubsection{Categorical variables}\label{categorical-variables}}
+
+Q: Counts for categorical variables.
+
+A: From the figure, it looks like very imbalanced.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_all }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{count}\NormalTok{(outcome) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ outcome, }\AttributeTok{y =}\NormalTok{ n))}\SpecialCharTok{+}
+  \FunctionTok{geom\_col}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_Part_01_files/figure-latex/solution_01_01-1.pdf}
+
+\hypertarget{continuous-variables}{%
+\subsubsection{Continuous variables}\label{continuous-variables}}
+
+Q: Distributions for continuous variables. Are the distributions
+Gaussian like?
+
+A: Most of them looks Gaussian like
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_con\_all }\OtherTok{\textless{}{-}} \FunctionTok{select}\NormalTok{(df\_all, }\FunctionTok{starts\_with}\NormalTok{(}\StringTok{"x"}\NormalTok{))}
+
+\NormalTok{df\_con\_all }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{select}\NormalTok{(}\FunctionTok{all\_of}\NormalTok{(}\FunctionTok{colnames}\NormalTok{(df\_con\_all))) }\SpecialCharTok{\%\textgreater{}\%} 
+\NormalTok{  tibble}\SpecialCharTok{::}\FunctionTok{rowid\_to\_column}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{pivot\_longer}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{c}\NormalTok{(}\StringTok{"rowid"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{()}\SpecialCharTok{+}
+  \FunctionTok{geom\_density}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ value), }\AttributeTok{adjust =} \FloatTok{1.35}\NormalTok{, }\AttributeTok{size =} \FloatTok{0.5}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{name, }\AttributeTok{scales =} \StringTok{"free"}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{theme\_bw}\NormalTok{()}\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.y =} \FunctionTok{element\_blank}\NormalTok{(), }\AttributeTok{axis.text.x.bottom =} \FunctionTok{element\_blank}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_Part_01_files/figure-latex/solution_01_02-1.pdf}
+
+\hypertarget{log-response}{%
+\subsubsection{Log-response}\label{log-response}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_all }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \FunctionTok{log}\NormalTok{(response)))}\SpecialCharTok{+}
+  \FunctionTok{geom\_histogram}\NormalTok{(}\AttributeTok{bins =} \DecValTok{35}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{geom\_rug}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.2}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_bw}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_Part_01_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+\hypertarget{affection-of-variables}{%
+\subsection{Affection of variables}\label{affection-of-variables}}
+
+Q: Are there differences in continuous variable distributions and
+continuous variable summary statistics based on region or customer?
+
+A: Yes, if we zoom in, we do observe some differences, but not very
+significant.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_trans\_02 }\OtherTok{\textless{}{-}}\NormalTok{ df\_all }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{subset}\NormalTok{(}\AttributeTok{select =} \SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(rowid, outcome, response)) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{pivot\_longer}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{c}\NormalTok{(}\StringTok{"region"}\NormalTok{, }\StringTok{"customer"}\NormalTok{))}
+  
+\NormalTok{df\_trans\_02 }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ name, }\AttributeTok{color =} \FunctionTok{as.factor}\NormalTok{(region)))}\SpecialCharTok{+}
+  \FunctionTok{geom\_density}\NormalTok{()}\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{( }\SpecialCharTok{\textasciitilde{}}\NormalTok{ name, }\AttributeTok{scales =} \StringTok{"free\_y"}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{theme\_bw}\NormalTok{()}\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.y =} \FunctionTok{element\_blank}\NormalTok{(), }\AttributeTok{axis.text.x.bottom =} \FunctionTok{element\_blank}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_Part_01_files/figure-latex/solution_02_01-1.pdf}
+
+Again, through this figure, we can see the different median of
+continuous variables between different region.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_trans\_02 }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{y =} \FunctionTok{as.factor}\NormalTok{(name), }\AttributeTok{x =}\NormalTok{ value))}\SpecialCharTok{+}
+  \FunctionTok{geom\_boxplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{fill =} \FunctionTok{as.factor}\NormalTok{(region), }\AttributeTok{color =} \FunctionTok{as.factor}\NormalTok{(region)),}
+               \AttributeTok{alpha =} \FloatTok{0.35}\NormalTok{, }\AttributeTok{size =} \FloatTok{0.1}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{ name, }\AttributeTok{scales =} \StringTok{"free"}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_viridis\_d}\NormalTok{(}\StringTok{"Region"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_color\_viridis\_d}\NormalTok{(}\StringTok{"Region"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_bw}\NormalTok{()}\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.y =} \FunctionTok{element\_blank}\NormalTok{(), }\AttributeTok{axis.text.x.bottom =} \FunctionTok{element\_blank}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_Part_01_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+Q: Are there differences in continuous variable distributions and
+continuous variable summary statistics based on the binary outcome?
+
+A: Yes, if we zoom in, the differences are relative obviously
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_trans\_02 }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ name, }\AttributeTok{color =}\NormalTok{ customer))}\SpecialCharTok{+}
+  \FunctionTok{geom\_density}\NormalTok{()}\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{( }\SpecialCharTok{\textasciitilde{}}\NormalTok{ name, }\AttributeTok{scales =} \StringTok{"free\_y"}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{theme\_bw}\NormalTok{()}\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.y =} \FunctionTok{element\_blank}\NormalTok{(), }\AttributeTok{axis.text.x.bottom =} \FunctionTok{element\_blank}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_Part_01_files/figure-latex/solution_02_02-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_trans\_02 }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \FunctionTok{as.factor}\NormalTok{(name), }\AttributeTok{y =}\NormalTok{ value))}\SpecialCharTok{+}
+  \FunctionTok{geom\_boxplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{fill =} \FunctionTok{as.factor}\NormalTok{(customer), }\AttributeTok{color =} \FunctionTok{as.factor}\NormalTok{(customer)),}
+               \AttributeTok{alpha =} \FloatTok{0.35}\NormalTok{, }\AttributeTok{outlier.size =} \FloatTok{0.1}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{ name, }\AttributeTok{scales =} \StringTok{"free"}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{theme\_bw}\NormalTok{()}\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.y =} \FunctionTok{element\_blank}\NormalTok{(), }\AttributeTok{axis.text.x.bottom =} \FunctionTok{element\_blank}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_Part_01_files/figure-latex/unnamed-chunk-6-1.pdf}
+
+\hypertarget{correlation-and-relationshio-diagnosis}{%
+\section{Correlation and Relationshio
+diagnosis}\label{correlation-and-relationshio-diagnosis}}
+
+\hypertarget{continuous-inputs-inputs}{%
+\subsection{Continuous Inputs \&
+Inputs}\label{continuous-inputs-inputs}}
+
+Q: Visualize the relationships between the continuous inputs, are they
+correlated?
+
+A: Some of inputs are highly correlated to each other
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_con\_all }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{cor}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  corrplot}\SpecialCharTok{::}\FunctionTok{corrplot}\NormalTok{(}\AttributeTok{type =} \StringTok{"upper"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_Part_01_files/figure-latex/solution_03-1.pdf}
+
+\hypertarget{continuous-inputs-log-response}{%
+\subsection{Continuous Inputs \&
+Log-response}\label{continuous-inputs-log-response}}
+
+Q: Visualize the relationships between the continuous outputs (response
+and the log-transformed response) with respect to the continuous inputs.
+Can you identify any clear trends? Do the trends depend on the
+categorical inputs?
+
+A: The input increase as the some of output parameters increase, like
+xa\_01, xa\_02 and xa\_03. But some of them are not, and as we can see,
+the categorical input does have impact on the output prediction.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_trans\_04 }\OtherTok{\textless{}{-}}\NormalTok{ df\_all }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{log\_response =} \FunctionTok{log}\NormalTok{(response)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}\FunctionTok{starts\_with}\NormalTok{(}\StringTok{\textquotesingle{}x\textquotesingle{}}\NormalTok{), log\_response, response, customer, region) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{c}\NormalTok{(log\_response, response, customer, region))}
+
+\NormalTok{df\_trans\_04 }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{count}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 1 x 1
+##       n
+##   <int>
+## 1 22341
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_trans\_04 }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ value, }\AttributeTok{y =}\NormalTok{ log\_response, }\AttributeTok{color =}\NormalTok{ region))}\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{method =} \StringTok{\textquotesingle{}loess\textquotesingle{}}\NormalTok{, }\AttributeTok{formula =}\NormalTok{ y }\SpecialCharTok{\textasciitilde{}}\NormalTok{ x, }\AttributeTok{size =} \FloatTok{0.4}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{name, }\AttributeTok{scales =} \StringTok{"free"}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{theme\_bw}\NormalTok{()}\SpecialCharTok{+}
+  \FunctionTok{scale\_color\_viridis\_d}\NormalTok{(}\AttributeTok{option =} \StringTok{\textquotesingle{}plasma\textquotesingle{}}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.y =} \FunctionTok{element\_blank}\NormalTok{(), }\AttributeTok{axis.text.x.bottom =} \FunctionTok{element\_blank}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_Part_01_files/figure-latex/solution_04_01-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_trans\_04 }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ value, }\AttributeTok{y =}\NormalTok{ log\_response, }\AttributeTok{color =}\NormalTok{ customer))}\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{method =} \StringTok{\textquotesingle{}loess\textquotesingle{}}\NormalTok{, }\AttributeTok{formula =}\NormalTok{ y }\SpecialCharTok{\textasciitilde{}}\NormalTok{ x, }\AttributeTok{size =} \FloatTok{0.4}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{name, }\AttributeTok{scales =} \StringTok{"free"}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{theme\_bw}\NormalTok{()}\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.y =} \FunctionTok{element\_blank}\NormalTok{(), }\AttributeTok{axis.text.x.bottom =} \FunctionTok{element\_blank}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_Part_01_files/figure-latex/solution_04_02-1.pdf}
+
+\hypertarget{continuous-inputs-binary-outcome}{%
+\subsection{Continuous Inputs \& Binary
+outcome}\label{continuous-inputs-binary-outcome}}
+
+Q:How can you visualize the behavior of the binary outcome with respect
+to the continuous inputs?
+
+A: As shown below, we can't just draw a vertical line to divide them.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_all }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{log\_response =} \FunctionTok{log}\NormalTok{(response)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}\FunctionTok{starts\_with}\NormalTok{(}\StringTok{\textquotesingle{}x\textquotesingle{}}\NormalTok{), outcome) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{c}\NormalTok{(outcome)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ value, }\AttributeTok{y =}\NormalTok{ outcome))}\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{mapping =} \FunctionTok{aes}\NormalTok{(}\AttributeTok{color =}\NormalTok{ outcome),}\AttributeTok{size =} \FloatTok{0.1}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{name, }\AttributeTok{scales =} \StringTok{"free"}\NormalTok{)}\SpecialCharTok{+}
+  \FunctionTok{theme\_bw}\NormalTok{()}\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.y =} \FunctionTok{element\_blank}\NormalTok{(), }\AttributeTok{axis.text.x.bottom =} \FunctionTok{element\_blank}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Drake_Zhou_Part_01_files/figure-latex/solution_05-1.pdf}
+
+\end{document}

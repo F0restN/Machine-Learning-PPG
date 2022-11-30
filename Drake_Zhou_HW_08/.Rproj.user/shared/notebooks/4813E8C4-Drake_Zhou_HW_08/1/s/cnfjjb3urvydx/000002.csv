@@ -1,0 +1,4 @@
+"0","model.matrix( y ~ x1 + x2 - 1, data = df) %>% head()"
+"2","Error in model.matrix(y ~ x1 + x2 - 1, data = df) %>% head() : 
+  could not find function ""%>%""
+"

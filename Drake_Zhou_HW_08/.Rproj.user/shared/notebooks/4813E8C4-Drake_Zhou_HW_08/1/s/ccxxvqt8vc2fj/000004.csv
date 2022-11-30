@@ -1,0 +1,5 @@
+"0",""
+"0","### mod06_strong"
+"0","post_means <- laplace_06_very_strong$mode[1:ncol(X06)]"
+"0","post_sd <- sqrt(diag(laplace_06_very_strong$var_matrix)[1:ncol(X06)])"
+"0","viz_post_coefs(post_means, post_sd, colnames(X06))"

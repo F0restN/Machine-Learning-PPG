@@ -1,0 +1,5 @@
+"0","set.seed(412412)"
+"0","optim_fit_12_a = train_1layer_nnet_sse(12, tanh, Xmat_03, prob_03_df$y)"
+"0",""
+"0","set.seed(214214)"
+"0","optim_fit_12_b = train_1layer_nnet_sse(12, tanh, Xmat_03, prob_03_df$y)"

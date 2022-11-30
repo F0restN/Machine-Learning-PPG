@@ -1,0 +1,4 @@
+"0","### mod03_strong"
+"0","post_means <- laplace_03_very_strong$mode[1:ncol(X03)]"
+"0","post_sd <- sqrt(diag(laplace_03_very_strong$var_matrix)[1:ncol(X03)])"
+"0","viz_post_coefs(post_means, post_sd, colnames(X03))"
